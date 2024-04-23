@@ -1,0 +1,555 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="site.css">
+    </head
+    <body>
+        <main>
+        <h1>Functional Semantics <span class="nowrap">in Imperative Clothing</span></h1>
+        <aside class="timestamp"><time datetime="2023-04-21">April 23, 2024</time></aside>
+        <hr>
+        <p>There's an old joke about programming with pure functions:</p>
+        <blockquote>“Eventually you have to do some effects. Otherwise you're just <span class="nowrap">heating up the CPU.”</span></blockquote>
+        <p>
+            I've always wanted the purely functional
+            <a href="https://www.roc-lang.org/">Roc programming language</a> to
+            be delightful for I/O-heavy use cases, including shell scripting.
+            But when I recently sat down to port a shell script from
+            Bash to Roc, I wasn't happy with how the code ended up feeling.
+        </p>
+        <p>
+            Fortunately, as it turned out, all it took to achieve a delightful
+            experience for purely functional I/O was a bit of syntax sugar!
+        </p>
+        <h2>Before and After</h2>
+        <p>
+            The shell script in question assembles some static assets for the
+            <a href="http://roc-lang.org">roc-lang.org</a> website. Here's part
+            of the Bash version of the script:
+        </p>
+        <pre><samp>cp -r public/ build/
+
+<span class="comment"><span class="comment">#</span> If this is set, assume we're on a build server</span>
+<span class="kw">if</span> <span class="bracket">[</span> -v GITHUB_TOKEN <span class="bracket">]</span><span class="kw">;</span> <span class="kw">then</span>
+    <span class="pl-c1">echo</span> <span class="string"><span class="pl-pds">'</span>Fetching latest roc nightly...<span class="pl-pds">'</span></span>
+    <span class="comment"><span class="comment">#</span> get roc release archive</span>
+    curl -fOL https://github.com…
+    <span class="comment"><span class="comment">#</span> extract archive</span>
+    ls <span class="kw">|</span> grep <span class="string">"roc_nightly"</span> <span class="kw">|</span> xargs tar -xzvf
+    <span class="comment"><span class="comment">#</span> delete archive</span>
+    ls <span class="kw">|</span> grep <span class="string">"roc_nightly.*tar.gz"</span> <span class="kw">|</span> xargs rm
+    roc<span class="kw">=</span><span class="string"><span class="pl-pds">'</span>./roc_nightly/roc<span class="pl-pds">'</span></span>
+<span class="kw">else</span>
+    <span class="comment"><span class="comment">#</span> build the `roc` CLI from source</span>
+    cargo build --release
+    roc<span class="kw">=</span>target/release/roc
+<span class="kw">fi</span>
+
+<span class="stringmi">$roc</span> --version
+
+<span class="pl-c1">echo</span> <span class="string"><span class="pl-pds">'</span>Building site markdown content<span class="pl-pds">'</span></span>
+
+<span class="stringmi">$roc</span> run www/main.roc www/content/ www/build/</samp></pre>
+        <p>
+            Here's how this code can now look in Roc, thanks to the new syntax
+            sugar that our awesome contributor
+            <a href="https://github.com/lukewilliamboswell/">Luke Boswell</a>
+            recently implemented: the <code>!</code> suffix.
+        </p>
+        <pre><samp><span class="pl-c1">Dir</span><span class="kw">.</span><span class="pl-c1">copyAll</span><span class="kw">!</span> <span class="string">"public/"</span> <span class="string">"build/"</span>
+
+<span class="pl-en">pathToRoc</span> =
+    <span class="comment"># If this is set, assume we're on a build server</span>
+    <span class="kw">if </span><span class="pl-c1">Result</span><span class="kw">.</span><span class="pl-c1">isOk</span> (<span class="pl-c1">Env</span><span class="kw">.</span><span class="pl-c1">var</span><span class="kw">!</span> <span class="string">"GITHUB_TOKEN"</span>) <span class="kw">then</span>
+        <span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span><span class="kw">!</span> <span class="string">"Fetching latest roc nightly..."</span>
+
+        <span class="comment"># get roc release archive</span>
+        filename <span class="kw">=</span> <span class="string">"nightly.tar.gz"</span>
+        <span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">download</span><span class="kw">!</span> <span class="string">"https://github.com…"</span> filename
+        <span class="pl-c1">Cmd</span><span class="kw">.</span><span class="pl-c1">exec</span><span class="kw">!</span> <span class="string">"tar"</span> <span class="bracket">[</span><span class="string">"-xzvf"</span>, filename<span class="bracket">]</span>
+        <span class="comment"># delete archive</span>
+        <span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">removeIfExists</span><span class="kw">!</span> filename
+
+        <span class="string">"./roc_nightly/roc"</span>
+    <span class="kw">else</span>
+        <span class="comment"># build the `roc` CLI from source</span>
+        <span class="pl-c1">Cmd</span><span class="kw">.</span><span class="pl-c1">exec</span><span class="kw">!</span> <span class="string">"cargo"</span> <span class="bracket">[</span><span class="string">"build"</span>, <span class="string">"--release"</span><span class="bracket">]</span>
+
+        <span class="string">"target/release/roc"</span>
+
+<span class="pl-en">roc</span> <span class="kw">=</span> <span class="kw">\</span>args <span class="kw">-&gt;</span> <span class="pl-c1">Cmd</span><span class="kw">.</span><span class="pl-c1">exec</span><span class="kw">!</span> pathToRoc args
+
+<span class="pl-en">roc</span><span class="kw">!</span> <span class="bracket">[</span><span class="string">"--version"</span><span class="bracket">]</span>
+
+<span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span><span class="kw">!</span> <span class="string">"Building site markdown content"</span>
+
+<span class="pl-en">roc</span><span class="kw">!</span> <span class="bracket">[</span><span class="string">"www/main.roc"</span>, <span class="string">"www/content/"</span>, <span class="string">"www/build/"</span><span class="bracket">]</span></samp></pre>
+        <p>
+            I really like how this reads! It looks totally imperative, which is
+            a nice fit for a script that's doing a bunch of I/O and not much
+            else.
+        </p>
+        <p>
+            In fact, it's so visually similar to the Bash version, you might not
+            even guess that the Roc version desugars to a big pile of 100%
+            statically type-checked pure functions.
+        </p>
+        <p>It's functional semantics in imperative clothing!</p>
+
+        <h2>Desugaring the Sugar</h2>
+        <a
+            id="desugaring-the-sugar"
+            class="anchor"
+            aria-label="Permalink: Desugaring the Sugar"
+            href="#desugaring-the-sugar"
+            ><span aria-hidden="true" class="octicon octicon-link"></span
+        ></a>
+        <p>
+            To explain how this imperative-looking code can actually be
+            compiling down to nothing but pure functions, I need to start by
+            explaining how the <code>!</code> suffix works.
+        </p>
+        <p>
+            It's very similar to the <code>await</code> keyword in other
+            languages. For example, this line…
+        </p>
+        <pre><samp><span class="kw">if </span><span class="pl-c1">Result</span><span class="kw">.</span><span class="pl-c1">isOk</span> (<span class="pl-c1">Env</span><span class="kw">.</span><span class="pl-c1">var</span><span class="kw">!</span> <span class="string">"GITHUB_TOKEN"</span>) <span class="kw">then</span></samp></pre>
+        <p>…might look like this in JavaScript:</p>
+        <pre><samp><span class="kw">if</span> <span class="pl-kos">(</span><span class="stringmi">Result</span><span class="pl-kos">.</span><span class="pl-en">isOk</span><span class="pl-kos">(</span><span class="kw">await</span> <span class="stringmi">Env</span><span class="pl-kos">.</span><span class="pl-en">var</span><span class="pl-kos">(</span><span class="string">"GITHUB_TOKEN"</span><span class="pl-kos">)</span><span class="pl-kos">)</span><span class="pl-kos">)</span> <span class="pl-kos">{</span><span class="pl-kos"></span></samp></pre>
+        <p>
+            Before we had the <code>!</code> suffix, code like this didn't look
+            nearly as nice. The closest we had was
+            <a
+                href="https://web.archive.org/web/20240329162732/https://www.roc-lang.org/tutorial%23backpassing"
+                >backpassing</a
+            >, which was unhelpful in nested expressions; this one line would
+            probably have been two lines instead:
+        </p>
+        <pre><samp><span class="pl-en">result</span> <span class="kw">&lt;-</span> <span class="pl-c1">Env</span><span class="kw">.</span><span class="pl-c1">var</span> <span class="string">"GITHUB_TOKEN"</span> <span class="kw">|&gt;</span> <span class="pl-c1">Task</span><span class="kw">.</span><span class="pl-c1">await</span>
+
+<span class="kw">if </span><span class="pl-c1">Result</span><span class="kw">.</span><span class="pl-c1">isOk</span> result <span class="kw">then</span></samp></pre>
+        <p>
+            Even when conditionals weren't involved, seeing
+            <code>&lt;-</code> for some assignments and <code>=</code> for
+            others, plus lots of <code>|&gt; Task.await</code>, wasn't nearly as
+            nice as the style we have now. It might look like a minor difference
+            when comparing one small line to another, but multplied across the
+            whole program, the <code>!</code> version of the script felt much
+            less ceremonious.
+        </p>
+        <p>
+            So what does the <code>!</code> suffix actually do? It basically
+            desugars into two things:
+        </p>
+        <ol>
+            <li>A call to <code>Task.await</code></li>
+            <li>
+                An anonymous function which gets passed to that
+                <code>Task.await</code> call
+            </li>
+        </ol>
+        <p>Let's walk through an example.</p>
+        <pre><samp><span class="pl-en">html</span> <span class="kw">=</span> <span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">getUtf8</span><span class="kw">!</span> url
+<span class="pl-en">path</span> <span class="kw">=</span> <span class="pl-c1">Path</span><span class="kw">.</span><span class="pl-c1">fromStr</span> filename
+<span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span><span class="kw">!</span> path html
+<span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span><span class="kw">!</span> <span class="string">"Wrote HTML to: <span class="string1"><span class="kw">$(</span>filename<span class="kw">)</span></span>"</span></samp></pre>
+        <p>This desugars to the following Roc code.</p>
+        <pre><samp><span class="pl-c1">Task</span><span class="kw">.</span><span class="pl-c1">await</span> (<span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">getUtf8</span> url) <span class="kw">\</span>html <span class="kw">-&gt;</span>
+    path <span class="kw">=</span> <span class="pl-c1">Path</span><span class="kw">.</span><span class="pl-c1">fromStr</span> filename
+    <span class="pl-c1">Task</span><span class="kw">.</span><span class="pl-c1">await</span> (<span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span> path html) <span class="kw">\</span><span class="kw">_</span> <span class="kw">-&gt;</span>
+    <span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span> <span class="string">"Wrote HTML to: <span class="string1"><span class="kw">$(</span>filename<span class="kw">)</span></span>"</span></samp></pre>
+        <p>
+            If you wanted to, you could have written the code this way and it
+            would have compiled to exactly the same program<span class="kw">!</span> Going line by line:
+        </p>
+        <pre><samp><span class="pl-en">html</span> <span class="kw">=</span> <span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">getUtf8</span><span class="kw">!</span> url</samp></pre>
+        <p>…becomes:</p>
+        <pre><samp><span class="pl-c1">Task</span><span class="kw">.</span><span class="pl-c1">await</span> (<span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">getUtf8</span> url) <span class="kw">\</span>html <span class="kw">-&gt;</span></samp></pre>
+        <p>
+            The <code>Task.await</code> function plays a similar role as the
+            <code>await</code> keyword in other languages: it says "wait until
+            this <code>Task</code> successfully completes, then pass its output
+            to a function." (A <code>Task</code> in Roc is a value that
+            represents an asynchronous effect; the
+            <code>Http.getUtf8</code> function returns a <code>Task</code>.)
+        </p>
+        <p>
+            Tasks can be chained together using the
+            <code>Task.await</code> function, similarly to how JavaScript
+            Promises can be chained together using a Promise's
+            <a
+                href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then"
+                ><code>then()</code> method</a
+            >. (You might also know functions in other languages similar to
+            <code>Task.await</code> which go by names like <code>andThen</code>,
+            <code>flatMap</code>, or <code>bind</code>.)
+        </p>
+        <p>
+            The next line in our example was
+            <code>path = Path.fromStr filename</code>, but that line was
+            unchanged since it didn't use <code>!</code> at all. The next
+            <code>!</code> was in this line:
+        </p>
+        <pre><samp><span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span><span class="kw">!</span> path html</samp></pre>
+        <p>It desugars to:</p>
+        <pre><samp><span class="pl-c1">Task</span><span class="kw">.</span><span class="pl-c1">await</span> (<span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span> path html) <span class="kw">\</span><span class="kw">_</span> <span class="kw">-&gt;</span></samp></pre>
+        <p>
+            Notice that here, since we didn't have <code>html =</code> at the
+            start (because we don't care about the output of a file write), we
+            also didn't have the named argument <code><span class="kw">\</span>html <span class="kw">-&gt;</span></code> in the
+            function being passed to <code>Task.await</code>. Instead we had
+            <code><span class="kw">\</span>_ <span class="kw">-&gt;</span></code>, which is how in Roc we write a function that
+            ignores its argument.
+        </p>
+        <p>
+            It's worth noting that both <code>Http.getUtf8</code> and
+            <code>File.writeUtf8</code> are operations that can fail. If they
+            do, the whole chain of tasks will short-circuit to some
+            error-handling code. That's part of what <code>Task.await</code> has
+            always done, and the <code>!</code> sugar doesn't affect error
+            handling at all.
+        </p>
+        <p>Finally, we had:</p>
+        <pre><samp><span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span><span class="kw">!</span> <span class="string">"Wrote HTML to: <span class="string1"><span class="kw">$(</span>filename<span class="kw">)</span></span>"</span></samp></pre>
+        <p>This desugars to:</p>
+        <pre><samp><span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span> <span class="string">"Wrote HTML to: <span class="string1"><span class="kw">$(</span>filename<span class="kw">)</span></span>"</span></samp></pre>
+        <p>
+            Since this is the last task in a chain, the <span class="kw">!</span> doesn't do anything
+            and isn't necessary…so we just drop it during desugaring instead of
+            giving a compiler error or generating an unnecessary Task.await.
+            This allows for a more consistent visual style, where async I/O
+            operations always end in the <code>!</code> suffix, but doesn't have
+            any runtime cost.
+        </p>
+
+        <h2>I/O From Pure Functions</h2>
+        <a
+            id="io-from-pure-functions"
+            class="anchor"
+            aria-label="Permalink: I/O From Pure Functions"
+            href="#io-from-pure-functions"
+            ><span aria-hidden="true" class="octicon octicon-link"></span
+        ></a>
+        <p>
+            Earlier I said that this style of Roc code "desugars to a big pile
+            of 100% statically type-checked pure functions."
+        </p>
+        <p>
+            The 100% statically type-checked part is easy to explain: Roc has
+            full type inference, so your types always get checked, but you never
+            need to write type annotations. You can optionally add annotations
+            anywhere you think they'll be helpful, but for this shell script I
+            didn't think they'd be worth including. (For Roc programs that
+            aren't shell scripts, the common practice is to annotate all
+            top-level functions and that's usually about it.)
+        </p>
+        <p>
+            What about the "all pure functions" part? By definition, pure
+            functions don't have side effects, right? (A
+            <a
+                href="https://en.wikipedia.org/wiki/Side_effect_(computer_science)"
+                >side effect</a
+            >
+            is when a function changes some state outside the function itself,
+            like a global variable or the file system.) So…how can these
+            functions be pure if all this I/O is happening?
+        </p>
+        <p>It's surprisingly simple:</p>
+        <ol>
+            <li>
+                Each function returns a value describing what I/O it wants done.
+            </li>
+            <li>
+                The compiled program has a runtime which looks at those values
+                and actually performs the I/O they describe.
+            </li>
+        </ol>
+        <p>
+            There are practical benefits to separating things this way (more on
+            those later), but to illustrate what's happening behind the scenes
+            here, let's go back to that example from earlier:
+        </p>
+        <pre><samp><span class="pl-en">html</span> = <span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">getUtf8</span><span class="kw">!</span> url
+<span class="pl-en">path</span> = <span class="pl-c1">Path</span><span class="kw">.</span><span class="pl-c1">fromStr</span> filename
+<span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span><span class="kw">!</span> path html
+<span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span><span class="kw">!</span> <span class="string">"Wrote HTML to: <span class="string1"><span class="kw">$(</span>filename<span class="kw">)</span></span>"</span></samp></pre>
+        <p>We already went through how that code desugars to this code:</p>
+        <pre><samp><span class="pl-c1">Task</span><span class="kw">.</span><span class="pl-c1">await</span> (<span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">getUtf8</span> url) <span class="kw">\</span>html <span class="kw">-&gt;</span>
+<span class="pl-en">path</span> = <span class="pl-c1">Path</span><span class="kw">.</span><span class="pl-c1">fromStr</span> filename
+<span class="pl-c1">Task</span><span class="kw">.</span><span class="pl-c1">await</span> (<span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span> path html) <span class="kw">\</span><span class="kw">_</span> <span class="kw">-&gt;</span>
+<span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span> <span class="string">"Wrote HTML to: <span class="string1"><span class="kw">$(</span>filename<span class="kw">)</span></span>"</span></samp></pre>
+        <p>
+            This code in turn compiles down to something which looks similar to
+            the following at runtime. (I'm using JavaScript syntax here rather
+            than Roc, which will be convenient in the next example.)
+        </p>
+        <pre><samp><span class="pl-kos">{</span>
+  <span class="pl-c1">operation</span>: <span class="string">"Http.getUtf8"</span><span class="pl-kos">,</span>
+  <span class="pl-c1">args</span>: <span class="bracket">[</span><span class="string1">url</span><span class="bracket">]</span><span class="pl-kos">,</span>
+  <span class="pl-en">afterwards</span>: <span class="pl-kos">(</span><span class="string1">html</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+  <span class="kw">const</span> <span class="string1">path</span> <span class="pl-c1">=</span> <span class="stringmi">Path</span><span class="pl-kos">.</span><span class="pl-en">fromStr</span><span class="pl-kos">(</span><span class="string1">filename</span><span class="pl-kos">)</span>
+
+    <span class="kw">return</span> <span class="pl-kos">{</span>
+      <span class="pl-c1">operation</span>: <span class="string">"File.writeUtf8"</span><span class="pl-kos">,</span>
+      <span class="pl-c1">args</span>: <span class="bracket">[</span><span class="string1">path</span><span class="pl-kos">,</span> <span class="string1">html</span><span class="bracket">]</span><span class="pl-kos">,</span>
+      <span class="pl-en">afterwards</span>: <span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+        <span class="pl-c1">operation</span>: <span class="string">"Stdout.line"</span><span class="pl-kos">,</span>
+        <span class="pl-c1">args</span>: <span class="bracket">[</span><span class="string">`Wrote HTML to <span class="string1"><span class="pl-kos">${</span><span class="string1">filename</span><span class="pl-kos">}</span></span>`</span><span class="bracket">]</span><span class="pl-kos">,</span>
+        <span class="pl-en">afterwards</span>: <span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span> <span class="pl-c1">operation</span>: <span class="string">"done"</span> <span class="pl-kos">}</span>
+      <span class="pl-kos">}</span>
+    <span class="pl-kos">}</span>
+  <span class="pl-kos">}</span>
+<span class="pl-kos">}</span></samp></pre>
+        <p>
+            Nothing but nested object literals where one field is a function
+            that returns another object literal. No side effects anywhere<span class="kw">!</span> (This
+            structure isn't exactly how Roc represents <code>Task</code> values
+            in memory—the operation isn't a string, for example—but let's go
+            with it for simplicity's sake.)
+        </p>
+
+        <h2>Example Runtime Implementation</h2>
+        <a
+            id="example-runtime-implementation"
+            class="anchor"
+            aria-label="Permalink: Example Runtime Implementation"
+            href="#example-runtime-implementation"
+            ><span aria-hidden="true" class="octicon octicon-link"></span
+        ></a>
+        <p>
+            Now let's look at how a runtime can translate those nested object
+            literals into I/O.
+        </p>
+        <p>
+            In <a href="https://nodejs.org">Node.js</a> I could do this by
+            writing a loop which:
+        </p>
+        <ul>
+            <li>Starts with one of these "Task" values to run</li>
+            <li>
+                Looks at the task's operation field and performs the requested
+                I/O operation
+            </li>
+            <li>
+                Calls the function in the task's afterwards field, passing the
+                output of that I/O operation. (This function will return another
+                Task value.)
+            </li>
+            <li>
+                Loops back to the start to repeat this process until we
+                encounter a Task whose operation field is "done", which tells us
+                we're done.
+            </li>
+        </ul>
+        <p>Here's how that would look in code:</p>
+        <pre><samp><span class="kw">while</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">operation</span> <span class="pl-c1">!=</span> <span class="string">"done"</span> <span class="pl-kos">{</span>
+  <span class="kw">if</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">operation</span> <span class="pl-c1">==</span> <span class="string">"Http.getUtf8"</span> <span class="pl-kos">{</span>
+  <span class="kw">const</span> <span class="bracket">[</span><span class="string1">url</span><span class="bracket">]</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">args</span>
+  <span class="kw">const</span> <span class="string1">response</span> <span class="pl-c1">=</span> <span class="pl-en">httpRequest</span><span class="pl-kos">(</span><span class="string1">url</span><span class="pl-kos">)</span>
+
+  <span class="string1">task</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-en">afterwards</span><span class="pl-kos">(</span><span class="string1">response</span><span class="pl-kos">.</span><span class="pl-en">text</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">)</span>
+  <span class="pl-kos">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">operation</span> <span class="pl-c1">==</span> <span class="string">"File.writeUtf8"</span> <span class="pl-kos">{</span>
+  <span class="kw">const</span> <span class="bracket">[</span><span class="string1">path</span><span class="pl-kos">,</span> <span class="string1">content</span><span class="bracket">]</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">args</span>
+  <span class="string1">fs</span><span class="pl-kos">.</span><span class="pl-en">writeFileSync</span><span class="pl-kos">(</span><span class="string1">path</span><span class="pl-kos">,</span> <span class="string1">content</span><span class="pl-kos">)</span>
+
+  <span class="string1">task</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-en">afterwards</span><span class="pl-kos">(</span><span class="pl-kos">)</span>
+  <span class="pl-kos">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">operation</span> <span class="pl-c1">==</span> <span class="string">"Stdout.line"</span> <span class="pl-kos">{</span>
+  <span class="kw">const</span> <span class="bracket">[</span><span class="string1">line</span><span class="bracket">]</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">args</span>
+  <span class="stringmi">console</span><span class="pl-kos">.</span><span class="pl-en">log</span><span class="pl-kos">(</span><span class="string1">line</span><span class="pl-kos">)</span>
+
+  <span class="string1">task</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-en">afterwards</span><span class="pl-kos">(</span><span class="pl-kos">)</span>
+  <span class="pl-kos">}</span>
+<span class="pl-kos">}</span></samp></pre>
+        <p>
+            Although this would work, Node encourages doing asynchronous I/O
+            instead of synchronous like we've done here.
+        </p>
+        <p>
+            Fortunately, one of the benefits of representing effects as values
+            that hold "afterwards"
+            <a href="https://en.wikipedia.org/wiki/Continuation"
+                >continuation</a
+            >
+            functions like this is that the Task value can also be translated
+            into async I/O. Here's the same Node code done in an asynchronous
+            callback style instead—and using recursion instead of a while loop.
+        </p>
+        <pre><samp><span class="kw">const</span> <span class="string1">interpretTask</span> <span class="pl-c1">=</span> <span class="pl-kos">(</span><span class="string1">task</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+  <span class="kw">if</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">operation</span> <span class="pl-c1">==</span> <span class="string">"Http.getUtf8"</span> <span class="pl-kos">{</span>
+  <span class="kw">const</span> <span class="bracket">[</span><span class="string1">url</span><span class="bracket">]</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">args</span>
+
+  <span class="pl-en">fetch</span><span class="pl-kos">(</span><span class="string1">url</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="string1">response</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+  <span class="kw">const</span> <span class="string1">text</span> <span class="pl-c1">=</span> <span class="string1">response</span><span class="pl-kos">.</span><span class="pl-en">text</span><span class="pl-kos">(</span><span class="pl-kos">)</span>
+
+  <span class="kw">const</span> <span class="string1">nextTask</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-en">afterwards</span><span class="pl-kos">(</span><span class="string1">text</span><span class="pl-kos">)</span>
+  <span class="kw">return</span> <span class="pl-en">interpretTask</span><span class="pl-kos">(</span><span class="string1">nextTask</span><span class="pl-kos">)</span>
+    <span class="pl-kos">}</span><span class="pl-kos">)</span>
+  <span class="pl-kos">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">operation</span> <span class="pl-c1">==</span> <span class="string">"File.writeUtf8"</span><span class="pl-kos"></span> <span class="pl-kos">{</span>
+  <span class="kw">const</span> <span class="bracket">[</span><span class="string1">path</span><span class="pl-kos">,</span> <span class="string1">content</span><span class="bracket">]</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">args</span>
+
+  <span class="string1">fs</span><span class="pl-kos">.</span><span class="pl-en">writeFile</span><span class="pl-kos">(</span><span class="string1">path</span><span class="pl-kos">,</span> <span class="string1">content</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+  <span class="kw">const</span> <span class="string1">nextTask</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-en">afterwards</span><span class="pl-kos">(</span><span class="pl-kos">)</span>
+  <span class="kw">return</span> <span class="pl-en">interpretTask</span><span class="pl-kos">(</span><span class="string1">nextTask</span><span class="pl-kos">)</span>
+    <span class="pl-kos">}</span><span class="pl-kos">)</span>
+  <span class="pl-kos">}</span> <span class="string1">else</span> <span class="string1">if</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">operation</span> <span class="pl-c1">==</span> <span class="string">"Stdout.line"</span> <span class="pl-kos">{</span>
+  <span class="kw">const</span> <span class="bracket">[</span><span class="string1">line</span><span class="bracket">]</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">args</span>
+  <span class="stringmi">console</span><span class="pl-kos">.</span><span class="pl-en">log</span><span class="pl-kos">(</span><span class="string1">line</span><span class="pl-kos">)</span>
+
+  <span class="kw">const</span> <span class="string1">nextTask</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-en">afterwards</span><span class="pl-kos">(</span><span class="pl-kos">)</span>
+  <span class="kw">return</span> <span class="pl-en">interpretTask</span><span class="pl-kos">(</span><span class="string1">nextTask</span><span class="pl-kos">)</span>
+
+  <span class="pl-kos">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">operation</span> <span class="pl-c1">==</span> <span class="string">"done"</span><span class="pl-kos"></span> <span class="pl-kos">{</span>
+    <span class="comment">// Don't recurse. We're done!</span>
+  <span class="pl-kos">}</span>
+<span class="pl-kos">}</span></samp></pre>
+        <p>
+            The actual I/O can be implemented in any number of styles. Promises,
+            for example. Or async/await. Outside of JavaScript, it could be done
+            with high-performance low-level async I/O operating system
+            primitives like
+            <a href="https://en.wikipedia.org/wiki/Io_uring">io_uring</a> in C,
+            Zig, or Rust—including inside async runtimes like
+            <a href="https://tokio.rs/">Tokio</a>.
+        </p>
+        <p>
+            Separating these I/O descriptions from the runtime that performs the
+            actual I/O lets you drop in whatever async I/O runtime system you
+            want, without having to change your application code at all!
+        </p>
+        <p>
+            In fact, one of the main motivations for representing effects as
+            values like this is so that future
+            <a href="https://www.roc-lang.org/platforms">Roc platforms</a> can
+            do all this "traversing the data structure" work behind the scenes
+            to quietly give you excellent async I/O performance that's
+            potentially even tailored to a particular domain (e.g. web servers,
+            CLIs, games), while your application code gets to look as
+            straightforward as it would in any imperative language:
+        </p>
+        <pre><samp><span class="pl-en">html</span> = <span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">getUtf8</span><span class="kw">!</span> url
+<span class="pl-en">path</span> = <span class="pl-c1">Path</span><span class="kw">.</span><span class="pl-c1">fromStr</span> filename
+<span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span><span class="kw">!</span> path html
+<span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span><span class="kw">!</span> <span class="string">"Wrote HTML to: <span class="string1"><span class="kw">$(</span>filename<span class="kw">)</span></span>"</span></samp></pre>
+        <p>
+            Platform authors can also use this representation to offer features
+            like "dry-run mode" in which all the requests for disk I/O are
+            performed on a fake in-memory filesystem (perhaps using the current
+            state of the real filesystem for its initial structure) so that
+            scripts can be tried out without their "I/O operations" affecting
+            the actual disk. Or automatic logging of all I/O operations, with
+            the application code specifying the logging system to use. The list
+            goes on!
+        </p>
+        <p>
+            Besides platforms being able to apply different I/O runtimes to the
+            same application, the functional semantics underneath the sugar have
+            benefits for application authors too. For example, they unlock nicer
+            testability.
+        </p>
+
+        <h2>Testability</h2>
+        <a
+            id="testability"
+            class="anchor"
+            aria-label="Permalink: Testability"
+            href="#testability"
+            ><span aria-hidden="true" class="octicon octicon-link"></span
+        ></a>
+        <p>
+            We've seen how individual functions can be pure while resulting in
+            an overall program that does I/O. But at the end of the day, if the
+            code is just resulting in the I/O being performed anyway, what could
+            possibly make it easier to test?
+        </p>
+        <p>
+            The key is that we can run a test on the value being returned,
+            instead of handing it off to the runtime. That means no actual I/O
+            gets performed, and the test is completely deterministic—yet all of
+            the actual logic around the I/O can be tested!
+        </p>
+        <p>For example, here's a test I can write using only Task values:</p>
+        <pre><samp><span class="kw">expect </span>task<span class="kw">.</span><span class="pl-en">operation</span> <span class="kw">==</span> <span class="string">"Http.getUtf8"</span>
+<span class="kw">expect </span>task<span class="kw">.</span><span class="pl-en">args</span> <span class="kw">==</span> <span class="bracket">[</span><span class="string">"example.com/something"</span><span class="bracket">]</span>
+
+<span class="pl-en">fakeResponse</span> = <span class="string">"&lt;html&gt;&lt;body&gt;testing!&lt;/body&gt;&lt;/html&gt;"</span>
+<span class="pl-en">next</span> = task<span class="kw">.</span><span class="pl-en">afterwards</span> <span class="bracket">[</span>fakeResponse<span class="bracket">]</span>
+
+<span class="kw">expect </span>next<span class="kw">.</span><span class="pl-en">operation</span> <span class="kw">==</span> <span class="string">"writeUtf8"</span>
+<span class="kw">expect </span>answer<span class="kw">.</span><span class="pl-en">args</span> <span class="kw">==</span> <span class="bracket">[</span>filename, fakeResponse<span class="bracket">]</span></samp></pre>
+        <p>
+            This test will run extremely quickly, and it will never flake. All
+            it does is look at values!
+        </p>
+        <p>
+            I could also write a property test to randomly run this a bunch of
+            times with random inputs and verify that (for example) no matter
+            what lines are in the files, the output has commas there instead. I
+            could simulate that a third-party server I have no control over is
+            timing out, or returning 500 errors, and verify that my application
+            is handling that correctly…all without actually contacting that
+            server!
+        </p>
+        <p>
+            (By the way, you can already write tests in Roc using the built-in
+            expect keyword and the roc test CLI command, although writing
+            simulation-style tests of Tasks relies on a language feature that
+            hasn't been fully implemented yet. I plan to write about that after
+            it ships!)
+        </p>
+        <p>
+            Of course, many programming languages have ways to test logic
+            without actually running I/O, such as
+            <a href="https://en.wikipedia.org/wiki/Monkey_patch"
+                >monkey patching</a
+            >, mocking, and so on. What I like about this "simulation" style is
+            that I don't have to guess which APIs need to be monkey patched, I
+            don't have to make my implementation more generic than I want it to
+            be (just so I can swap in
+            <a href="https://en.wikipedia.org/wiki/Test_double">doubles</a> for
+            testing), and the simulation works just fine even if third-party
+            packages are involved in assembling the Task values.
+        </p>
+        <p>
+            To be fair, any language can benefit from representing effects as
+            values without going as far as to make all functions in the language
+            pure, but there are
+            <a href="https://youtu.be/3n17wHe5wEw"
+                >separate practical benefits to having all functions be pure</a
+            >. Some of the other benefits take longer to explain than
+            testability, so I'll stick to just that one example in this
+            article…but I'd like to write more about some of the others in the
+            future!
+        </p>
+
+        <h2>Trying Out Roc</h2>
+        <a
+            id="trying-out-roc"
+            class="anchor"
+            aria-label="Permalink: Trying Out Roc"
+            href="#trying-out-roc"
+            ><span aria-hidden="true" class="octicon octicon-link"></span
+        ></a>
+        <p>
+            If you're intrigued by this "functional semantics in imperative
+            clothing" idea and want to give
+            <a href="https://www.roc-lang.org/">Roc</a> a try for yourself, the
+            <a href="https://www.roc-lang.org/tutorial">tutorial</a> is the
+            easiest way to get up and running. It takes you from no Roc
+            experience whatsoever to building your first program, while
+            explaining language concepts along the way.
+        </p>
+        <p>
+            I also highly recommend dropping in to say hi on
+            <a href="https://roc.zulipchat.com/">Roc Zulip Chat</a>. There are
+            lots of friendly people on there, and we love to help beginners get
+            started with the language!
+        </p>
+        <p>
+            Finally, if you'd like to meet up with a bunch of Roc enthusiasts in
+            person, there will be 3 different Roc talks at
+            <a href="https://sycl.it/">Software You Can Love 2024</a> in Milan
+            this May, and we expect it to be the largest in-person gathering of
+            Roc programmers to date. It's going to be amazing!
+        </p>
+        </main>
+    </body>
+</html>
