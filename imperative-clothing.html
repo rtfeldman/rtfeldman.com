@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <link rel="stylesheet" href="site.css">
@@ -31,15 +32,15 @@
 <span class="comment"><span class="comment">#</span> If this is set, assume we're on a build server</span>
 <span class="kw">if</span> <span class="bracket">[</span> -v GITHUB_TOKEN <span class="bracket">]</span><span class="kw">;</span> <span class="kw">then</span>
     <span class="pl-c1">echo</span> <span class="string"><span class="pl-pds">'</span>Fetching latest roc nightly...<span class="pl-pds">'</span></span>
-    <span class="comment"><span class="comment">#</span> get roc release archive</span>
+    <span class="comment"># Get roc release archive</span>
     curl -fOL https://github.com…
-    <span class="comment"><span class="comment">#</span> extract archive</span>
+    <span class="comment"># Extract archive</span>
     ls <span class="kw">|</span> grep <span class="string">"roc_nightly"</span> <span class="kw">|</span> xargs tar -xzvf
-    <span class="comment"><span class="comment">#</span> delete archive</span>
+    <span class="comment"># Delete archive</span>
     ls <span class="kw">|</span> grep <span class="string">"roc_nightly.*tar.gz"</span> <span class="kw">|</span> xargs rm
     roc<span class="kw">=</span><span class="string"><span class="pl-pds">'</span>./roc_nightly/roc<span class="pl-pds">'</span></span>
 <span class="kw">else</span>
-    <span class="comment"><span class="comment">#</span> build the `roc` CLI from source</span>
+    <span class="comment"># Build the `roc` CLI from source</span>
     cargo build --release
     roc<span class="kw">=</span>target/release/roc
 <span class="kw">fi</span>
@@ -62,16 +63,16 @@
     <span class="kw">if </span><span class="pl-c1">Result</span><span class="kw">.</span><span class="pl-c1">isOk</span> (<span class="pl-c1">Env</span><span class="kw">.</span><span class="pl-c1">var</span><span class="kw">!</span> <span class="string">"GITHUB_TOKEN"</span>) <span class="kw">then</span>
         <span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span><span class="kw">!</span> <span class="string">"Fetching latest roc nightly..."</span>
 
-        <span class="comment"># get roc release archive</span>
+        <span class="comment"># Get Roc release archive</span>
         filename <span class="kw">=</span> <span class="string">"nightly.tar.gz"</span>
         <span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">download</span><span class="kw">!</span> <span class="string">"https://github.com…"</span> filename
         <span class="pl-c1">Cmd</span><span class="kw">.</span><span class="pl-c1">exec</span><span class="kw">!</span> <span class="string">"tar"</span> <span class="bracket">[</span><span class="string">"-xzvf"</span>, filename<span class="bracket">]</span>
-        <span class="comment"># delete archive</span>
+        <span class="comment"># Delete archive</span>
         <span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">removeIfExists</span><span class="kw">!</span> filename
 
         <span class="string">"./roc_nightly/roc"</span>
     <span class="kw">else</span>
-        <span class="comment"># build the `roc` CLI from source</span>
+        <span class="comment"># Build the `roc` CLI from source</span>
         <span class="pl-c1">Cmd</span><span class="kw">.</span><span class="pl-c1">exec</span><span class="kw">!</span> <span class="string">"cargo"</span> <span class="bracket">[</span><span class="string">"build"</span>, <span class="string">"--release"</span><span class="bracket">]</span>
 
         <span class="string">"target/release/roc"</span>
@@ -85,7 +86,7 @@
 <span class="pl-en">roc</span><span class="kw">!</span> <span class="bracket">[</span><span class="string">"www/main.roc"</span>, <span class="string">"www/content/"</span>, <span class="string">"www/build/"</span><span class="bracket">]</span></samp></pre>
         <p>
             I really like how this reads! It looks totally imperative, which is
-            a nice fit for a script that's doing a bunch of I/O and not much
+            a nice fit for a script that's doing lots of I/O and not much
             else.
         </p>
         <p>
@@ -101,8 +102,7 @@
             class="anchor"
             aria-label="Permalink: Desugaring the Sugar"
             href="#desugaring-the-sugar"
-            ><span aria-hidden="true" class="octicon octicon-link"></span
-        ></a>
+            ></a>
         <p>
             To explain how this imperative-looking code can actually be
             compiling down to nothing but pure functions, I need to start by
@@ -114,7 +114,7 @@
         </p>
         <pre><samp><span class="kw">if </span><span class="pl-c1">Result</span><span class="kw">.</span><span class="pl-c1">isOk</span> (<span class="pl-c1">Env</span><span class="kw">.</span><span class="pl-c1">var</span><span class="kw">!</span> <span class="string">"GITHUB_TOKEN"</span>) <span class="kw">then</span></samp></pre>
         <p>…might look like this in JavaScript:</p>
-        <pre><samp><span class="kw">if</span> <span class="pl-kos">(</span><span class="stringmi">Result</span><span class="pl-kos">.</span><span class="pl-en">isOk</span><span class="pl-kos">(</span><span class="kw">await</span> <span class="stringmi">Env</span><span class="pl-kos">.</span><span class="pl-en">var</span><span class="pl-kos">(</span><span class="string">"GITHUB_TOKEN"</span><span class="pl-kos">)</span><span class="pl-kos">)</span><span class="pl-kos">)</span> <span class="pl-kos">{</span><span class="pl-kos"></span></samp></pre>
+        <pre><samp><span class="kw">if</span> <span class="bracket">(</span><span class="stringmi">Result</span><span class="bracket">.</span><span class="pl-en">isOk</span><span class="bracket">(</span><span class="kw">await</span> <span class="stringmi">Env</span><span class="bracket">.</span><span class="pl-en">var</span><span class="bracket">(</span><span class="string">"GITHUB_TOKEN"</span><span class="bracket">)</span><span class="bracket">)</span><span class="bracket">)</span> <span class="bracket">{</span><span class="bracket"></span></samp></pre>
         <p>
             Before we had the <code>!</code> suffix, code like this didn't look
             nearly as nice. The closest we had was
@@ -131,7 +131,9 @@
             Even when conditionals weren't involved, seeing
             <code>&lt;-</code> for some assignments and <code>=</code> for
             others, plus lots of <code>|&gt; Task.await</code>, wasn't nearly as
-            nice as the style we have now. It might look like a minor difference
+            nice as the style we have now.</p>
+
+        <p>It might look like a minor difference
             when comparing one small line to another, but multplied across the
             whole program, the <code>!</code> version of the script felt much
             less ceremonious.
@@ -141,22 +143,22 @@
             desugars into two things:
         </p>
         <ol>
-            <li>A call to <code>Task.await</code></li>
+            <li>A call to <code>Task<span class="kw">.</span>await</code></li>
             <li>
                 An anonymous function which gets passed to that
-                <code>Task.await</code> call
+                <code>Task<span class="kw">.</span>await</code> call
             </li>
         </ol>
         <p>Let's walk through an example.</p>
         <pre><samp><span class="pl-en">html</span> <span class="kw">=</span> <span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">getUtf8</span><span class="kw">!</span> url
 <span class="pl-en">path</span> <span class="kw">=</span> <span class="pl-c1">Path</span><span class="kw">.</span><span class="pl-c1">fromStr</span> filename
 <span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span><span class="kw">!</span> path html
-<span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span><span class="kw">!</span> <span class="string">"Wrote HTML to: <span class="string1"><span class="kw">$(</span>filename<span class="kw">)</span></span>"</span></samp></pre>
+<span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span><span class="kw">!</span> <span class="string">"Wrote HTML to: </span><span class="kw">$(</span>filename<span class="kw">)</span><span class="string">"</span></samp></pre>
         <p>This desugars to the following Roc code.</p>
         <pre><samp><span class="pl-c1">Task</span><span class="kw">.</span><span class="pl-c1">await</span> (<span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">getUtf8</span> url) <span class="kw">\</span>html <span class="kw">-&gt;</span>
     path <span class="kw">=</span> <span class="pl-c1">Path</span><span class="kw">.</span><span class="pl-c1">fromStr</span> filename
-    <span class="pl-c1">Task</span><span class="kw">.</span><span class="pl-c1">await</span> (<span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span> path html) <span class="kw">\</span><span class="kw">_</span> <span class="kw">-&gt;</span>
-    <span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span> <span class="string">"Wrote HTML to: <span class="string1"><span class="kw">$(</span>filename<span class="kw">)</span></span>"</span></samp></pre>
+    <span class="pl-c1">Task</span><span class="kw">.</span><span class="pl-c1">await</span> (<span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span> path html) <span class="kw">\</span>_ <span class="kw">-&gt;</span>
+    <span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span> <span class="string">"Wrote HTML to: </span><span class="kw">$(</span>filename<span class="kw">)</span><span class="string">"</span></samp></pre>
         <p>
             If you wanted to, you could have written the code this way and it
             would have compiled to exactly the same program<span class="kw">!</span> Going line by line:
@@ -165,53 +167,53 @@
         <p>…becomes:</p>
         <pre><samp><span class="pl-c1">Task</span><span class="kw">.</span><span class="pl-c1">await</span> (<span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">getUtf8</span> url) <span class="kw">\</span>html <span class="kw">-&gt;</span></samp></pre>
         <p>
-            The <code>Task.await</code> function plays a similar role as the
+            The <code>Task<span class="kw">.</span>await</code> function plays a similar role as the
             <code>await</code> keyword in other languages: it says "wait until
             this <code>Task</code> successfully completes, then pass its output
             to a function." (A <code>Task</code> in Roc is a value that
             represents an asynchronous effect; the
-            <code>Http.getUtf8</code> function returns a <code>Task</code>.)
+            <code>Http<span class="kw">.</span>getUtf8</code> function returns a <code>Task</code>.)
         </p>
         <p>
             Tasks can be chained together using the
-            <code>Task.await</code> function, similarly to how JavaScript
+            <code>Task<span class="kw">.</span>await</code> function, similarly to how JavaScript
             Promises can be chained together using a Promise's
             <a
                 href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then"
                 ><code>then()</code> method</a
             >. (You might also know functions in other languages similar to
-            <code>Task.await</code> which go by names like <code>andThen</code>,
+            <code>Task<span class="kw">.</span>await</code> which go by names like <code>andThen</code>,
             <code>flatMap</code>, or <code>bind</code>.)
         </p>
         <p>
             The next line in our example was
-            <code>path = Path.fromStr filename</code>, but that line was
+            <code>path <span class="kw">=</span> Path<span class="kw">.</span>fromStr filename</code>, but that line was
             unchanged since it didn't use <code>!</code> at all. The next
             <code>!</code> was in this line:
         </p>
         <pre><samp><span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span><span class="kw">!</span> path html</samp></pre>
         <p>It desugars to:</p>
-        <pre><samp><span class="pl-c1">Task</span><span class="kw">.</span><span class="pl-c1">await</span> (<span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span> path html) <span class="kw">\</span><span class="kw">_</span> <span class="kw">-&gt;</span></samp></pre>
+        <pre><samp><span class="pl-c1">Task</span><span class="kw">.</span><span class="pl-c1">await</span> (<span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span> path html) <span class="kw">\</span>_ <span class="kw">-&gt;</span></samp></pre>
         <p>
-            Notice that here, since we didn't have <code>html =</code> at the
+            Notice that here, since we didn't have <code>html <span class="kw">=</span></code> at the
             start (because we don't care about the output of a file write), we
             also didn't have the named argument <code><span class="kw">\</span>html <span class="kw">-&gt;</span></code> in the
-            function being passed to <code>Task.await</code>. Instead we had
+            function being passed to <code>Task<span class="kw">.</span>await</code>. Instead we had
             <code><span class="kw">\</span>_ <span class="kw">-&gt;</span></code>, which is how in Roc we write a function that
             ignores its argument.
         </p>
         <p>
-            It's worth noting that both <code>Http.getUtf8</code> and
-            <code>File.writeUtf8</code> are operations that can fail. If they
+            It's worth noting that both <code>Http<span class="kw">.</span>getUtf8</code> and
+            <code>File<span class="kw">.</span>writeUtf8</code> are operations that can fail. If they
             do, the whole chain of tasks will short-circuit to some
-            error-handling code. That's part of what <code>Task.await</code> has
+            error-handling code. That's part of what <code>Task<span class="kw">.</span>await</code> has
             always done, and the <code>!</code> sugar doesn't affect error
             handling at all.
         </p>
         <p>Finally, we had:</p>
-        <pre><samp><span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span><span class="kw">!</span> <span class="string">"Wrote HTML to: <span class="string1"><span class="kw">$(</span>filename<span class="kw">)</span></span>"</span></samp></pre>
+        <pre><samp><span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span><span class="kw">!</span> <span class="string">"Wrote HTML to: </span><span class="kw">$(</span>filename<span class="kw">)</span><span class="string">"</span></samp></pre>
         <p>This desugars to:</p>
-        <pre><samp><span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span> <span class="string">"Wrote HTML to: <span class="string1"><span class="kw">$(</span>filename<span class="kw">)</span></span>"</span></samp></pre>
+        <pre><samp><span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span> <span class="string">"Wrote HTML to: </span><span class="kw">$(</span>filename<span class="kw">)</span><span class="string">"</span></samp></pre>
         <p>
             Since this is the last task in a chain, the <span class="kw">!</span> doesn't do anything
             and isn't necessary…so we just drop it during desugaring instead of
@@ -227,8 +229,7 @@
             class="anchor"
             aria-label="Permalink: I/O From Pure Functions"
             href="#io-from-pure-functions"
-            ><span aria-hidden="true" class="octicon octicon-link"></span
-        ></a>
+            ></a>
         <p>
             Earlier I said that this style of Roc code "desugars to a big pile
             of 100% statically type-checked pure functions."
@@ -268,37 +269,37 @@
             those later), but to illustrate what's happening behind the scenes
             here, let's go back to that example from earlier:
         </p>
-        <pre><samp><span class="pl-en">html</span> = <span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">getUtf8</span><span class="kw">!</span> url
-<span class="pl-en">path</span> = <span class="pl-c1">Path</span><span class="kw">.</span><span class="pl-c1">fromStr</span> filename
+        <pre><samp><span class="pl-en">html</span> <span class="kw">=</span> <span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">getUtf8</span><span class="kw">!</span> url
+<span class="pl-en">path</span> <span class="kw">=</span> <span class="pl-c1">Path</span><span class="kw">.</span><span class="pl-c1">fromStr</span> filename
 <span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span><span class="kw">!</span> path html
-<span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span><span class="kw">!</span> <span class="string">"Wrote HTML to: <span class="string1"><span class="kw">$(</span>filename<span class="kw">)</span></span>"</span></samp></pre>
+<span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span><span class="kw">!</span> <span class="string">"Wrote HTML to: </span><span class="kw">$(</span>filename<span class="kw">)</span><span class="string">"</span></samp></pre>
         <p>We already went through how that code desugars to this code:</p>
         <pre><samp><span class="pl-c1">Task</span><span class="kw">.</span><span class="pl-c1">await</span> (<span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">getUtf8</span> url) <span class="kw">\</span>html <span class="kw">-&gt;</span>
-<span class="pl-en">path</span> = <span class="pl-c1">Path</span><span class="kw">.</span><span class="pl-c1">fromStr</span> filename
-<span class="pl-c1">Task</span><span class="kw">.</span><span class="pl-c1">await</span> (<span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span> path html) <span class="kw">\</span><span class="kw">_</span> <span class="kw">-&gt;</span>
-<span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span> <span class="string">"Wrote HTML to: <span class="string1"><span class="kw">$(</span>filename<span class="kw">)</span></span>"</span></samp></pre>
+<span class="pl-en">path</span> <span class="kw">=</span> <span class="pl-c1">Path</span><span class="kw">.</span><span class="pl-c1">fromStr</span> filename
+<span class="pl-c1">Task</span><span class="kw">.</span><span class="pl-c1">await</span> (<span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span> path html) <span class="kw">\</span>_ <span class="kw">-&gt;</span>
+<span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span> <span class="string">"Wrote HTML to: </span><span class="kw">$(</span>filename<span class="kw">)</span><span class="string">"</span></samp></pre>
         <p>
             This code in turn compiles down to something which looks similar to
             the following at runtime. (I'm using JavaScript syntax here rather
             than Roc, which will be convenient in the next example.)
         </p>
-        <pre><samp><span class="pl-kos">{</span>
-  <span class="pl-c1">operation</span>: <span class="string">"Http.getUtf8"</span><span class="pl-kos">,</span>
-  <span class="pl-c1">args</span>: <span class="bracket">[</span><span class="string1">url</span><span class="bracket">]</span><span class="pl-kos">,</span>
-  <span class="pl-en">afterwards</span>: <span class="pl-kos">(</span><span class="string1">html</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
-  <span class="kw">const</span> <span class="string1">path</span> <span class="pl-c1">=</span> <span class="stringmi">Path</span><span class="pl-kos">.</span><span class="pl-en">fromStr</span><span class="pl-kos">(</span><span class="string1">filename</span><span class="pl-kos">)</span>
+        <pre><samp><span class="bracket">{</span>
+  <span class="pl-c1">operation</span>: <span class="string">"Http.getUtf8"</span><span class="bracket">,</span>
+  <span class="pl-c1">args</span>: <span class="bracket">[</span><span class="string1">url</span><span class="bracket">]</span><span class="bracket">,</span>
+  <span class="pl-en">afterwards</span>: <span class="bracket">(</span><span class="string1">html</span><span class="bracket">)</span> <span class="kw">=&gt;</span> <span class="bracket">{</span>
+  <span class="kw">const</span> <span class="string1">path</span> <span class="kw">=</span> <span class="stringmi">Path</span><span class="bracket">.</span><span class="pl-en">fromStr</span><span class="bracket">(</span><span class="string1">filename</span><span class="bracket">)</span>
 
-    <span class="kw">return</span> <span class="pl-kos">{</span>
-      <span class="pl-c1">operation</span>: <span class="string">"File.writeUtf8"</span><span class="pl-kos">,</span>
-      <span class="pl-c1">args</span>: <span class="bracket">[</span><span class="string1">path</span><span class="pl-kos">,</span> <span class="string1">html</span><span class="bracket">]</span><span class="pl-kos">,</span>
-      <span class="pl-en">afterwards</span>: <span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
-        <span class="pl-c1">operation</span>: <span class="string">"Stdout.line"</span><span class="pl-kos">,</span>
-        <span class="pl-c1">args</span>: <span class="bracket">[</span><span class="string">`Wrote HTML to <span class="string1"><span class="pl-kos">${</span><span class="string1">filename</span><span class="pl-kos">}</span></span>`</span><span class="bracket">]</span><span class="pl-kos">,</span>
-        <span class="pl-en">afterwards</span>: <span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span> <span class="pl-c1">operation</span>: <span class="string">"done"</span> <span class="pl-kos">}</span>
-      <span class="pl-kos">}</span>
-    <span class="pl-kos">}</span>
-  <span class="pl-kos">}</span>
-<span class="pl-kos">}</span></samp></pre>
+    <span class="kw">return</span> <span class="bracket">{</span>
+      <span class="pl-c1">operation</span>: <span class="string">"File.writeUtf8"</span><span class="bracket">,</span>
+      <span class="pl-c1">args</span>: <span class="bracket">[</span><span class="string1">path</span><span class="bracket">,</span> <span class="string1">html</span><span class="bracket">]</span><span class="bracket">,</span>
+      <span class="pl-en">afterwards</span>: <span class="bracket">(</span><span class="bracket">)</span> <span class="kw">=&gt;</span> <span class="bracket">{</span>
+        <span class="pl-c1">operation</span>: <span class="string">"Stdout.line"</span><span class="bracket">,</span>
+        <span class="pl-c1">args</span>: <span class="bracket">[</span><span class="string">`Wrote HTML to </span><span class="bracket">${</span>filename<span class="bracket">}</span><span class="string">`</span></span><span class="bracket">]</span><span class="bracket">,</span>
+        <span class="pl-en">afterwards</span>: <span class="bracket">(</span><span class="bracket">)</span> <span class="kw">=&gt;</span> <span class="bracket">{</span> <span class="pl-c1">operation</span>: <span class="string">"done"</span> <span class="bracket">}</span>
+      <span class="bracket">}</span>
+    <span class="bracket">}</span>
+  <span class="bracket">}</span>
+<span class="bracket">}</span></samp></pre>
         <p>
             Nothing but nested object literals where one field is a function
             that returns another object literal. No side effects anywhere<span class="kw">!</span> (This
@@ -307,14 +308,13 @@
             with it for simplicity's sake.)
         </p>
 
-        <h2>Example Runtime Implementation</h2>
+        <h2>Implementing a Runtime</h2>
         <a
-            id="example-runtime-implementation"
+            id="implementing-a-runtime"
             class="anchor"
-            aria-label="Permalink: Example Runtime Implementation"
-            href="#example-runtime-implementation"
-            ><span aria-hidden="true" class="octicon octicon-link"></span
-        ></a>
+            aria-label="Permalink: Implementing a Runtime"
+            href="#implementing-a-runtime"
+            ></a>
         <p>
             Now let's look at how a runtime can translate those nested object
             literals into I/O.
@@ -341,24 +341,24 @@
             </li>
         </ul>
         <p>Here's how that would look in code:</p>
-        <pre><samp><span class="kw">while</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">operation</span> <span class="pl-c1">!=</span> <span class="string">"done"</span> <span class="pl-kos">{</span>
-  <span class="kw">if</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">operation</span> <span class="pl-c1">==</span> <span class="string">"Http.getUtf8"</span> <span class="pl-kos">{</span>
-  <span class="kw">const</span> <span class="bracket">[</span><span class="string1">url</span><span class="bracket">]</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">args</span>
-  <span class="kw">const</span> <span class="string1">response</span> <span class="pl-c1">=</span> <span class="pl-en">httpRequest</span><span class="pl-kos">(</span><span class="string1">url</span><span class="pl-kos">)</span>
+        <pre><samp><span class="kw">while</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-c1">operation</span> <span class="pl-c1">!=</span> <span class="string">"done"</span> <span class="bracket">{</span>
+  <span class="kw">if</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-c1">operation</span> <span class="kw">==</span> <span class="string">"Http.getUtf8"</span> <span class="bracket">{</span>
+    <span class="kw">const</span> <span class="bracket">[</span><span class="string1">url</span><span class="bracket">]</span> <span class="kw">=</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-c1">args</span>
+    <span class="kw">const</span> <span class="string1">response</span> <span class="kw">=</span> <span class="pl-en">httpRequest</span><span class="bracket">(</span><span class="string1">url</span><span class="bracket">)</span>
 
-  <span class="string1">task</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-en">afterwards</span><span class="pl-kos">(</span><span class="string1">response</span><span class="pl-kos">.</span><span class="pl-en">text</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">)</span>
-  <span class="pl-kos">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">operation</span> <span class="pl-c1">==</span> <span class="string">"File.writeUtf8"</span> <span class="pl-kos">{</span>
-  <span class="kw">const</span> <span class="bracket">[</span><span class="string1">path</span><span class="pl-kos">,</span> <span class="string1">content</span><span class="bracket">]</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">args</span>
-  <span class="string1">fs</span><span class="pl-kos">.</span><span class="pl-en">writeFileSync</span><span class="pl-kos">(</span><span class="string1">path</span><span class="pl-kos">,</span> <span class="string1">content</span><span class="pl-kos">)</span>
+    <span class="string1">task</span> <span class="kw">=</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-en">afterwards</span><span class="bracket">(</span><span class="string1">response</span><span class="bracket">.</span><span class="pl-en">text</span><span class="bracket">(</span><span class="bracket">)</span><span class="bracket">)</span>
+  <span class="bracket">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-c1">operation</span> <span class="kw">==</span> <span class="string">"File.writeUtf8"</span> <span class="bracket">{</span>
+    <span class="kw">const</span> <span class="bracket">[</span><span class="string1">path</span><span class="bracket">,</span> <span class="string1">content</span><span class="bracket">]</span> <span class="kw">=</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-c1">args</span>
+    <span class="string1">fs</span><span class="bracket">.</span><span class="pl-en">writeFileSync</span><span class="bracket">(</span><span class="string1">path</span><span class="bracket">,</span> <span class="string1">content</span><span class="bracket">)</span>
 
-  <span class="string1">task</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-en">afterwards</span><span class="pl-kos">(</span><span class="pl-kos">)</span>
-  <span class="pl-kos">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">operation</span> <span class="pl-c1">==</span> <span class="string">"Stdout.line"</span> <span class="pl-kos">{</span>
-  <span class="kw">const</span> <span class="bracket">[</span><span class="string1">line</span><span class="bracket">]</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">args</span>
-  <span class="stringmi">console</span><span class="pl-kos">.</span><span class="pl-en">log</span><span class="pl-kos">(</span><span class="string1">line</span><span class="pl-kos">)</span>
+    <span class="string1">task</span> <span class="kw">=</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-en">afterwards</span><span class="bracket">(</span><span class="bracket">)</span>
+  <span class="bracket">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-c1">operation</span> <span class="kw">==</span> <span class="string">"Stdout.line"</span> <span class="bracket">{</span>
+    <span class="kw">const</span> <span class="bracket">[</span><span class="string1">line</span><span class="bracket">]</span> <span class="kw">=</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-c1">args</span>
+    <span class="stringmi">console</span><span class="bracket">.</span><span class="pl-en">log</span><span class="bracket">(</span><span class="string1">line</span><span class="bracket">)</span>
 
-  <span class="string1">task</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-en">afterwards</span><span class="pl-kos">(</span><span class="pl-kos">)</span>
-  <span class="pl-kos">}</span>
-<span class="pl-kos">}</span></samp></pre>
+    <span class="string1">task</span> <span class="kw">=</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-en">afterwards</span><span class="bracket">(</span><span class="bracket">)</span>
+  <span class="bracket">}</span>
+<span class="bracket">}</span></samp></pre>
         <p>
             Although this would work, Node encourages doing asynchronous I/O
             instead of synchronous like we've done here.
@@ -373,34 +373,34 @@
             into async I/O. Here's the same Node code done in an asynchronous
             callback style instead—and using recursion instead of a while loop.
         </p>
-        <pre><samp><span class="kw">const</span> <span class="string1">interpretTask</span> <span class="pl-c1">=</span> <span class="pl-kos">(</span><span class="string1">task</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
-  <span class="kw">if</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">operation</span> <span class="pl-c1">==</span> <span class="string">"Http.getUtf8"</span> <span class="pl-kos">{</span>
-  <span class="kw">const</span> <span class="bracket">[</span><span class="string1">url</span><span class="bracket">]</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">args</span>
+        <pre><samp><span class="kw">const</span> <span class="string1">interpretTask</span> <span class="kw">=</span> <span class="bracket">(</span><span class="string1">task</span><span class="bracket">)</span> <span class="kw">=&gt;</span> <span class="bracket">{</span>
+  <span class="kw">if</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-c1">operation</span> <span class="kw">==</span> <span class="string">"Http.getUtf8"</span> <span class="bracket">{</span>
+    <span class="kw">const</span> <span class="bracket">[</span><span class="string1">url</span><span class="bracket">]</span> <span class="kw">=</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-c1">args</span>
 
-  <span class="pl-en">fetch</span><span class="pl-kos">(</span><span class="string1">url</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="string1">response</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
-  <span class="kw">const</span> <span class="string1">text</span> <span class="pl-c1">=</span> <span class="string1">response</span><span class="pl-kos">.</span><span class="pl-en">text</span><span class="pl-kos">(</span><span class="pl-kos">)</span>
+    <span class="pl-en">fetch</span><span class="bracket">(</span><span class="string1">url</span><span class="bracket">,</span> <span class="bracket">(</span><span class="string1">response</span><span class="bracket">)</span> <span class="kw">=&gt;</span> <span class="bracket">{</span>
+      <span class="kw">const</span> <span class="string1">text</span> <span class="kw">=</span> <span class="string1">response</span><span class="bracket">.</span><span class="pl-en">text</span><span class="bracket">(</span><span class="bracket">)</span>
 
-  <span class="kw">const</span> <span class="string1">nextTask</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-en">afterwards</span><span class="pl-kos">(</span><span class="string1">text</span><span class="pl-kos">)</span>
-  <span class="kw">return</span> <span class="pl-en">interpretTask</span><span class="pl-kos">(</span><span class="string1">nextTask</span><span class="pl-kos">)</span>
-    <span class="pl-kos">}</span><span class="pl-kos">)</span>
-  <span class="pl-kos">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">operation</span> <span class="pl-c1">==</span> <span class="string">"File.writeUtf8"</span><span class="pl-kos"></span> <span class="pl-kos">{</span>
-  <span class="kw">const</span> <span class="bracket">[</span><span class="string1">path</span><span class="pl-kos">,</span> <span class="string1">content</span><span class="bracket">]</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">args</span>
+      <span class="kw">const</span> <span class="string1">nextTask</span> <span class="kw">=</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-en">afterwards</span><span class="bracket">(</span><span class="string1">text</span><span class="bracket">)</span>
+      <span class="kw">return</span> <span class="pl-en">interpretTask</span><span class="bracket">(</span><span class="string1">nextTask</span><span class="bracket">)</span>
+    <span class="bracket">}</span><span class="bracket">)</span>
+  <span class="bracket">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-c1">operation</span> <span class="kw">==</span> <span class="string">"File.writeUtf8"</span><span class="bracket"></span> <span class="bracket">{</span>
+    <span class="kw">const</span> <span class="bracket">[</span><span class="string1">path</span><span class="bracket">,</span> <span class="string1">content</span><span class="bracket">]</span> <span class="kw">=</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-c1">args</span>
 
-  <span class="string1">fs</span><span class="pl-kos">.</span><span class="pl-en">writeFile</span><span class="pl-kos">(</span><span class="string1">path</span><span class="pl-kos">,</span> <span class="string1">content</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
-  <span class="kw">const</span> <span class="string1">nextTask</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-en">afterwards</span><span class="pl-kos">(</span><span class="pl-kos">)</span>
-  <span class="kw">return</span> <span class="pl-en">interpretTask</span><span class="pl-kos">(</span><span class="string1">nextTask</span><span class="pl-kos">)</span>
-    <span class="pl-kos">}</span><span class="pl-kos">)</span>
-  <span class="pl-kos">}</span> <span class="string1">else</span> <span class="string1">if</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">operation</span> <span class="pl-c1">==</span> <span class="string">"Stdout.line"</span> <span class="pl-kos">{</span>
-  <span class="kw">const</span> <span class="bracket">[</span><span class="string1">line</span><span class="bracket">]</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">args</span>
-  <span class="stringmi">console</span><span class="pl-kos">.</span><span class="pl-en">log</span><span class="pl-kos">(</span><span class="string1">line</span><span class="pl-kos">)</span>
+    <span class="string1">fs</span><span class="bracket">.</span><span class="pl-en">writeFile</span><span class="bracket">(</span><span class="string1">path</span><span class="bracket">,</span> <span class="string1">content</span><span class="bracket">,</span> <span class="bracket">(</span><span class="bracket">)</span> <span class="kw">=&gt;</span> <span class="bracket">{</span>
+      <span class="kw">const</span> <span class="string1">nextTask</span> <span class="kw">=</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-en">afterwards</span><span class="bracket">(</span><span class="bracket">)</span>
+      <span class="kw">return</span> <span class="pl-en">interpretTask</span><span class="bracket">(</span><span class="string1">nextTask</span><span class="bracket">)</span>
+    <span class="bracket">}</span><span class="bracket">)</span>
+  <span class="bracket">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-c1">operation</span> <span class="kw">==</span> <span class="string">"Stdout.line"</span> <span class="bracket">{</span>
+    <span class="kw">const</span> <span class="bracket">[</span><span class="string1">line</span><span class="bracket">]</span> <span class="kw">=</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-c1">args</span>
+    <span class="stringmi">console</span><span class="bracket">.</span><span class="pl-en">log</span><span class="bracket">(</span><span class="string1">line</span><span class="bracket">)</span>
 
-  <span class="kw">const</span> <span class="string1">nextTask</span> <span class="pl-c1">=</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-en">afterwards</span><span class="pl-kos">(</span><span class="pl-kos">)</span>
-  <span class="kw">return</span> <span class="pl-en">interpretTask</span><span class="pl-kos">(</span><span class="string1">nextTask</span><span class="pl-kos">)</span>
+    <span class="kw">const</span> <span class="string1">nextTask</span> <span class="kw">=</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-en">afterwards</span><span class="bracket">(</span><span class="bracket">)</span>
+    <span class="kw">return</span> <span class="pl-en">interpretTask</span><span class="bracket">(</span><span class="string1">nextTask</span><span class="bracket">)</span>
 
-  <span class="pl-kos">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="string1">task</span><span class="pl-kos">.</span><span class="pl-c1">operation</span> <span class="pl-c1">==</span> <span class="string">"done"</span><span class="pl-kos"></span> <span class="pl-kos">{</span>
-    <span class="comment">// Don't recurse. We're done!</span>
-  <span class="pl-kos">}</span>
-<span class="pl-kos">}</span></samp></pre>
+    <span class="bracket">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="string1">task</span><span class="bracket">.</span><span class="pl-c1">operation</span> <span class="kw">==</span> <span class="string">"done"</span><span class="bracket"></span> <span class="bracket">{</span>
+      <span class="comment">// Don't recurse. We're done!</span>
+   <span class="bracket">}</span>
+  <span class="bracket">}</span></samp></pre>
         <p>
             The actual I/O can be implemented in any number of styles. Promises,
             for example. Or async/await. Outside of JavaScript, it could be done
@@ -425,10 +425,10 @@
             CLIs, games), while your application code gets to look as
             straightforward as it would in any imperative language:
         </p>
-        <pre><samp><span class="pl-en">html</span> = <span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">getUtf8</span><span class="kw">!</span> url
-<span class="pl-en">path</span> = <span class="pl-c1">Path</span><span class="kw">.</span><span class="pl-c1">fromStr</span> filename
+        <pre><samp><span class="pl-en">html</span> <span class="kw">=</span> <span class="pl-c1">Http</span><span class="kw">.</span><span class="pl-c1">getUtf8</span><span class="kw">!</span> url
+<span class="pl-en">path</span> <span class="kw">=</span> <span class="pl-c1">Path</span><span class="kw">.</span><span class="pl-c1">fromStr</span> filename
 <span class="pl-c1">File</span><span class="kw">.</span><span class="pl-c1">writeUtf8</span><span class="kw">!</span> path html
-<span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span><span class="kw">!</span> <span class="string">"Wrote HTML to: <span class="string1"><span class="kw">$(</span>filename<span class="kw">)</span></span>"</span></samp></pre>
+<span class="pl-c1">Stdout</span><span class="kw">.</span><span class="pl-c1">line</span><span class="kw">!</span> <span class="string">"Wrote HTML to: </span><span class="kw">$(</span>filename<span class="kw">)</span><span class="string">"</span></samp></pre>
         <p>
             Platform authors can also use this representation to offer features
             like "dry-run mode" in which all the requests for disk I/O are
@@ -452,8 +452,7 @@
             class="anchor"
             aria-label="Permalink: Testability"
             href="#testability"
-            ><span aria-hidden="true" class="octicon octicon-link"></span
-        ></a>
+            ></a>
         <p>
             We've seen how individual functions can be pure while resulting in
             an overall program that does I/O. But at the end of the day, if the
@@ -470,8 +469,8 @@
         <pre><samp><span class="kw">expect </span>task<span class="kw">.</span><span class="pl-en">operation</span> <span class="kw">==</span> <span class="string">"Http.getUtf8"</span>
 <span class="kw">expect </span>task<span class="kw">.</span><span class="pl-en">args</span> <span class="kw">==</span> <span class="bracket">[</span><span class="string">"example.com/something"</span><span class="bracket">]</span>
 
-<span class="pl-en">fakeResponse</span> = <span class="string">"&lt;html&gt;&lt;body&gt;testing!&lt;/body&gt;&lt;/html&gt;"</span>
-<span class="pl-en">next</span> = task<span class="kw">.</span><span class="pl-en">afterwards</span> <span class="bracket">[</span>fakeResponse<span class="bracket">]</span>
+<span class="pl-en">fakeResponse</span> <span class="kw">=</span> <span class="string">"&lt;html&gt;&lt;body&gt;testing!&lt;/body&gt;&lt;/html&gt;"</span>
+<span class="pl-en">next</span> <span class="kw">=</span> task<span class="kw">.</span><span class="pl-en">afterwards</span> <span class="bracket">[</span>fakeResponse<span class="bracket">]</span>
 
 <span class="kw">expect </span>next<span class="kw">.</span><span class="pl-en">operation</span> <span class="kw">==</span> <span class="string">"writeUtf8"</span>
 <span class="kw">expect </span>answer<span class="kw">.</span><span class="pl-en">args</span> <span class="kw">==</span> <span class="bracket">[</span>filename, fakeResponse<span class="bracket">]</span></samp></pre>
@@ -526,8 +525,7 @@
             class="anchor"
             aria-label="Permalink: Trying Out Roc"
             href="#trying-out-roc"
-            ><span aria-hidden="true" class="octicon octicon-link"></span
-        ></a>
+            ></a>
         <p>
             If you're intrigued by this "functional semantics in imperative
             clothing" idea and want to give

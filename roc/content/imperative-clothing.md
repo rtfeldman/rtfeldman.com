@@ -73,7 +73,7 @@ Stdout.line! "Building site markdown content"
 roc! ["www/main.roc", "www/content/", "www/build/"]
 ```
 
-I really like how this reads! It looks totally imperative, which is a nice fit for a script that's doing a bunch of I/O and not much else.
+I really like how this reads! It looks totally imperative, which is a nice fit for a script that's doing lots of I/O and not much else.
 
 In fact, it's so visually similar to the Bash version, you might not even guess that the Roc version desugars to a big pile of 100% statically type-checked pure functions.
 
@@ -103,7 +103,9 @@ result <- Env.var "GITHUB_TOKEN" |> Task.await
 if Result.isOk result then
 ```
 
-(Even when conditionals weren't involved, seeing `<-` for some assignments and `=` for others, plus lots of `|> Task.await`, wasn't nearly as nice as the style we have now.)
+Even when conditionals weren't involved, seeing `<-` for some assignments and `=` for others, plus lots of `|> Task.await`, wasn't nearly as nice as the style we have now.
+
+It might look like a minor difference when comparing one small line to another, but multplied across the whole program, the <code>!</code> version of the script felt much less ceremonious.
 
 So what does the `!` suffix actually do? It basically desugars into two things:
 
@@ -229,7 +231,7 @@ This code in turn compiles down to something which looks similar to the followin
 
 Nothing but nested object literals where one field is a function that returns another object literal. No side effects anywhere! (This structure isn't exactly how Roc represents `Task` values in memory—the operation isn't a string, for example—but let's go with it for simplicity's sake.)
 
-## Example Runtime Implementation
+## Implementing a Runtime
 
 Now let's look at how a runtime can translate those nested object literals into I/O.
 

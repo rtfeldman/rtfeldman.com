@@ -1,7 +1,6 @@
 :root {
     /* WCAG AAA Compliant colors */
     --code-bg: #f4f8f9;
-    --gray-bg: #f4f8f9;
     --gray: #717171;
     --orange: #bf5000;
     --green: #0b8400;
@@ -13,7 +12,7 @@
     --magenta: #ff32cf;
 
     --primary-1: #5383ec;
-    --primary-2: #5383ec;
+    --primary-2: #5683e6;
     --highlight: #1bd6bd;
     --code-color: #eee;
     --link-color: var(--primary-2);
@@ -65,38 +64,29 @@ aside.timestamp {
 }
 
 p,
-aside {
-    margin-top: 0;
-}
-
-p,
 li,
 aside,
+blockquote,
 pre,
 hr {
-    max-width: 720px;
+    max-width: var(--body-max-width);
 }
 
 footer {
     width: 100%;
     color: var(--text-color);
     text-align: center;
-    font-size: var(--font-size-normal);
     padding: 20px;
     box-sizing: border-box;
-    margin-top: 24px;
-}
-
-#footer {
     max-width: var(--body-max-width);
-    margin: 0 auto;
+    margin: 24px auto;
 }
 
 hr {
     border: none;
     background-color: var(--primary-1);
     height: 4px;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
     margin-left: 0;
 }
 
@@ -158,11 +148,12 @@ h4 {
 
 blockquote {
     margin-inline-end: 0;
+    padding: 1rem 0;
 }
 
 h1 {
     font-size: 3.5rem;
-    line-height: 1.5;
+    line-height: 1.25;
     margin-bottom: 0.5rem;
     color: var(--heading-color);
 }
@@ -170,22 +161,12 @@ h1 {
 h2 {
     display: inline-block;
     font-size: 2.5rem;
-    line-height: 5rem;
     padding: 0;
     margin: 0;
+    margin-top: 1.5rem;
+    line-height: 1.25;
     margin-bottom: 0.5rem;
     color: var(--heading-color);
-}
-
-.article-layout main,
-.article-layout pre {
-    max-width: 720px;
-}
-
-.article-layout p,
-.article-layout li,
-.article-layout pre {
-    font-size: 20px;
 }
 
 h2 a,
@@ -202,21 +183,10 @@ h3 {
     font-size: 1.5rem;
 }
 
-.home-link-text {
-    padding: 8px;
-    font-size: 24px;
-    position: relative;
-    top: -0.6rem;
-}
-
-.home-examples-title {
-    margin-bottom: 4px;
-}
-
 main {
     max-width: var(--body-max-width);
     margin: auto;
-    padding: 12px;
+    padding: 20px;
     box-sizing: border-box;
 }
 
@@ -224,7 +194,7 @@ code,
 samp {
     font-family: var(--font-mono);
     color: var(--text-color);
-    background-color: var(--gray-bg);
+    background-color: var(--code-bg);
     display: inline-block;
     padding: 5px;
 }
@@ -254,13 +224,13 @@ pre {
     margin-bottom: 16px;
     padding: 0 0.35rem;
     box-sizing: border-box;
-    background-color: var(--gray-bg);
+    background-color: var(--code-bg);
     overflow-x: hidden;
     word-wrap: normal;
-    font-size: var(--font-size-normal);
     line-height: 1.76em;
     white-space: pre;
     background-color: var(--dark-code-bg);
+    margin-top: 0;
 }
 
 pre > samp,
@@ -307,9 +277,9 @@ td:last-child {
 
 p,
 aside,
+blockquote,
 li {
-    font-size: var(--font-size-normal);
-    line-height: 1.85rem;
+    line-height: 1.75;
 }
 
 .nowrap {
@@ -319,7 +289,7 @@ li {
 /* Mobile-friendly screen width */
 @media only screen and (max-width: 1023px) {
     :root {
-        --font-size-normal: 16px;
+        --font-size-normal: 18px;
         --body-max-width: none;
     }
 
@@ -332,7 +302,21 @@ li {
         display: inline;
     }
 
+    pre {
+        padding: 0 24px;
+    }
+
+    pre,
+    code {
+        font-size: 42px !important;
+    }
+
+    h1 {
+        font-size: 5rem !important;
+    }
+
     h2 {
+        font-size: 4rem !important;
         margin-top: 48px;
         padding: 12px 0;
     }
@@ -366,7 +350,6 @@ li {
     h4,
     h5 {
         line-height: 1.2em !important;
-        font-size: 2rem !important;
         width: auto;
     }
 }
@@ -374,8 +357,16 @@ li {
 /* iPhone SE and similar */
 @media only screen and (max-width: 320px) {
     :root {
-        --font-size-normal: 14px;
+        --font-size-normal: 18px;
         --body-max-width: 320px;
+    }
+
+    h1 {
+        font-size: 5rem !important;
+    }
+
+    h2 {
+        font-size: 4rem !important;
     }
 }
 
@@ -481,8 +472,7 @@ li {
 @media (prefers-color-scheme: dark) {
     :root {
         /* WCAG AAA Compliant colors */
-        --code-bg: #202746;
-        --gray-bg: #202746;
+        --code-bg: var(--dark-code-bg);
         --gray: #b6b6b6;
         --orange: #fd6e08;
         --green: #8ecc88;
@@ -492,7 +482,7 @@ li {
         --magenta: #f39bac;
 
         --primary-1: #5383ec;
-        --primary-2: #5383ec;
+        --primary-2: #5fb1f7;
         --text-color: #ccc;
         --body-bg-color: #151517;
         --border-color: var(--gray);
