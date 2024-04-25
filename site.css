@@ -41,7 +41,6 @@
 
 html {
     font-family: Lora, serif;
-    font-size: calc(110% + 0.2vw);
     line-height: 1.5;
     background: var(--body-bg-color);
     color: var(--text-color);
@@ -55,6 +54,10 @@ body {
     height: 100%;
     box-sizing: border-box;
     overflow-x: hidden; /* This shouldn't be necessary, but without it mobile has a right gutter. */
+}
+
+body {
+    font-size: 18px;
 }
 
 aside.timestamp {
@@ -151,7 +154,6 @@ blockquote {
 }
 
 h1 {
-    font-size: 3rem;
     line-height: 1.25;
     margin-bottom: 0.5rem;
     color: var(--heading-color);
@@ -159,7 +161,6 @@ h1 {
 
 h2 {
     display: inline-block;
-    font-size: 2rem;
     font-weight: normal;
     padding: 0;
     margin: 0;
@@ -288,11 +289,6 @@ li {
         --body-max-width: none;
     }
 
-    samp {
-        font-size: 2rem;
-        line-height: 1.65;
-    }
-
     /* Used for e.g. displaying the instruction "Click" on desktop and "Touch" on mobile. */
     .desktop {
         display: none;
@@ -306,23 +302,10 @@ li {
         padding: 0 24px;
     }
 
-    h1 {
-        font-size: 4rem;
-    }
-
     h2 {
-        font-size: 3rem;
         margin-top: 24px;
         padding-bottom: 0;
         margin-bottom: 0;
-    }
-
-    h1 code,
-    h2 code,
-    h3 code,
-    h4 code,
-    h5 code {
-        font-size: inherit;
     }
 
     code {
