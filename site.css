@@ -154,6 +154,7 @@ blockquote {
 }
 
 h1 {
+    font-size: 2rem;
     line-height: 1.25;
     margin-bottom: 0.5rem;
     color: var(--heading-color);
@@ -166,7 +167,6 @@ h2 {
     margin: 0;
     margin-top: 1.5rem;
     line-height: 1.25;
-    margin-bottom: 0.5rem;
     color: var(--heading-color);
 }
 
@@ -299,7 +299,7 @@ li {
     }
 
     pre {
-        padding: 0 24px;
+        padding: 0 10px;
     }
 
     h2 {
