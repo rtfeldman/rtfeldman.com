@@ -30,7 +30,6 @@
     --top-header-height: 67px;
     --sidebar-width: 280px;
 
-    --font-size-normal: 20px;
     --body-max-width: 720px;
     --dark-code-bg: #1c1d21;
 
@@ -41,11 +40,11 @@
 }
 
 html {
-    line-height: 1.5rem;
+    font-family: Lora, serif;
+    font-size: calc(110% + 0.2vw);
+    line-height: 1.5;
     background: var(--body-bg-color);
     color: var(--text-color);
-    font-family: Lora, serif;
-    font-size: var(--font-size-normal);
 }
 
 html,
@@ -152,7 +151,7 @@ blockquote {
 }
 
 h1 {
-    font-size: 3.5rem;
+    font-size: 3rem;
     line-height: 1.25;
     margin-bottom: 0.5rem;
     color: var(--heading-color);
@@ -160,7 +159,8 @@ h1 {
 
 h2 {
     display: inline-block;
-    font-size: 2.5rem;
+    font-size: 2rem;
+    font-weight: normal;
     padding: 0;
     margin: 0;
     margin-top: 1.5rem;
@@ -177,10 +177,6 @@ h3 a {
 h2:hover a {
     color: var(--link-color);
     text-decoration: none;
-}
-
-h3 {
-    font-size: 1.5rem;
 }
 
 main {
@@ -289,8 +285,12 @@ li {
 /* Mobile-friendly screen width */
 @media only screen and (max-width: 1023px) {
     :root {
-        --font-size-normal: 18px;
         --body-max-width: none;
+    }
+
+    samp {
+        font-size: 2rem;
+        line-height: 1.65;
     }
 
     /* Used for e.g. displaying the instruction "Click" on desktop and "Touch" on mobile. */
@@ -306,19 +306,15 @@ li {
         padding: 0 24px;
     }
 
-    pre,
-    code {
-        font-size: 42px !important;
-    }
-
     h1 {
-        font-size: 5rem !important;
+        font-size: 4rem;
     }
 
     h2 {
-        font-size: 4rem !important;
-        margin-top: 48px;
-        padding: 12px 0;
+        font-size: 3rem;
+        margin-top: 24px;
+        padding-bottom: 0;
+        margin-bottom: 0;
     }
 
     h1 code,
@@ -341,7 +337,7 @@ li {
     h6,
     p,
     code {
-        word-break: break-word !important;
+        word-break: break-word;
     }
 
     h1,
@@ -349,7 +345,7 @@ li {
     h3,
     h4,
     h5 {
-        line-height: 1.2em !important;
+        line-height: 1.2;
         width: auto;
     }
 }
@@ -357,16 +353,7 @@ li {
 /* iPhone SE and similar */
 @media only screen and (max-width: 320px) {
     :root {
-        --font-size-normal: 18px;
         --body-max-width: 320px;
-    }
-
-    h1 {
-        font-size: 5rem !important;
-    }
-
-    h2 {
-        font-size: 4rem !important;
     }
 }
 

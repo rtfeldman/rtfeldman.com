@@ -10,7 +10,7 @@ I've always wanted the purely functional [Roc programming language](https://www.
 
 Fortunately, as it turned out, all it took to achieve a delightful experience for purely functional I/O was a bit of syntax sugar!
 
-## Before and After
+## From Bash to Roc
 
 The shell script in question assembles some static assets for the [roc-lang.org](http://roc-lang.org) website. Here's part of the Bash version of the script:
 
@@ -176,7 +176,7 @@ Stdout.line "Wrote HTML to: $(filename)"
 
 Since this is the last task in a chain, the ! doesn't do anything and isn't necessary…so we just drop it during desugaring instead of giving a compiler error or generating an unnecessary Task.await. This allows for a more consistent visual style, where async I/O operations always end in the `!` suffix, but doesn't have any runtime cost.
 
-## I/O From Pure Functions
+## I/O from Pure Functions
 
 Earlier I said that this style of Roc code "desugars to a big pile of 100% statically type-checked pure functions."
 
