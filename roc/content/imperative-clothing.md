@@ -6,9 +6,9 @@ There's an old joke about programming with pure functions:
 
 <blockquote>“Eventually you have to do some effects. Otherwise you're just <span class="nowrap">heating up the CPU.”</span></blockquote>
 
-I've always wanted the purely functional [Roc programming language](https://www.roc-lang.org/) to be delightful for I/O-heavy use cases, including shell scripting. But when I recently sat down to port a shell script from Bash to Roc, I wasn't happy with how the code ended up feeling.
+I've always wanted the purely functional [Roc programming language](https://www.roc-lang.org/) to be delightful for I/O-heavy use cases. But when I recently sat down to port an I/O-heavy shell script from Bash to Roc, I wasn't happy with how the code felt.
 
-Fortunately, as it turned out, all it took to achieve a delightful experience for purely functional I/O was a bit of syntax sugar!
+Fortunately, all it took was a bit of syntax sugar to change that. Thanks to one little operator, purely functional I/O in Roc has now become a real delight!
 
 ## From Bash to Roc
 
@@ -105,7 +105,7 @@ if Result.isOk result then
 
 Even when conditionals weren't involved, seeing `<-` for some assignments and `=` for others, plus lots of `|> Task.await`, wasn't nearly as nice as the style we have now.
 
-It might look like a minor difference when comparing one small line to another, but multplied across the whole program, the <code>!</code> version of the script felt much less ceremonious.
+It might look like a minor difference when comparing one small line to another, but multplied across the whole program, the <code>!</code> version of the script felt much nicer.
 
 So what does the `!` suffix actually do? It basically desugars into two things:
 
