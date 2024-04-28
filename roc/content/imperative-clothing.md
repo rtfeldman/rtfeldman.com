@@ -1,5 +1,5 @@
 <h1>Functional Semantics <span class="nowrap">in Imperative</span> Clothing</h1>
-<aside class="timestamp">Posted on <time datetime="2023-04-21">April 23, 2024</time></aside>
+<aside class="timestamp">Posted on <time datetime="2023-04-21">April 29, 2024</time></aside>
 <hr>
 
 There's an old joke about programming with pure functions:
