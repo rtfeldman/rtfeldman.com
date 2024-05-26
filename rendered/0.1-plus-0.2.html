@@ -1,0 +1,896 @@
+<!doctype html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="site.css" />
+    </head>
+    <body>
+        <main>
+            <h1><code style="background: none">0.1 + 0.2</code></h1>
+            <aside class="timestamp">
+                <time datetime="2024-04-28">May 28, 2024</time>
+            </aside>
+            <hr />
+            <p>
+                Ask your favorite programming language what 0.1 + 0.2 is. What
+                does it say?
+            </p>
+            <p>
+                Here are the answers from the three most-used languages, plus a
+                bonus one:
+            </p>
+            <table>
+                <tr>
+                    <th>Language</th>
+                    <th style="text-align: left"><code>0.1 + 0.2</code></th>
+                </tr>
+                <tr>
+                    <td><a href="https://www.python.org/">Python</a></td>
+                    <td><code>0.30000000000000004</code></td>
+                </tr>
+                <tr>
+                    <td><a href="https://www.oracle.com/java">Java</a></td>
+                    <td><code>0.30000000000000004</code></td>
+                </tr>
+                <tr>
+                    <td>
+                        <a
+                            href="https://developer.mozilla.org/en-US/docs/Web/javascript"
+                            >JavaScript</a
+                        >
+                    </td>
+                    <td><code>0.30000000000000004</code></td>
+                </tr>
+                <tr>
+                    <td><a href="https://roc-lang.org">Roc</a></td>
+                    <td><code>0.3</code></td>
+                </tr>
+            </table>
+
+            <p>
+                The first time I saw 0.30000000000000004 as the answer to 0.1 +
+                0.2, I was unpleasantly surprised. Once I got used to seeing it
+                from so many languages, the surprise wore off; now I&#39;m
+                pleasantly surprised if I see 0.3 instead!
+            </p>
+            <p>
+                So why doesn&#39;t every language answer 0.3? Why is the most
+                common answer 0.30000000000000004, and what are the pros and
+                cons of having the answer be 0.3 instead?
+            </p>
+            <p>
+                The tradeoffs aren&#39;t as straightforward as they might seem!
+            </p>
+            <h2 id="base-10-and-base-2">Base-10 and Base-2</h2>
+            <p>
+                Like most programming languages, Python, Java, and JavaScript
+                all compile their decimal number literals into
+                <a href="https://en.wikipedia.org/wiki/IEEE_754#Binary"
+                    >base-2 floating-point</a
+                >
+                form. This runtime representation has serious performance
+                benefits (modern CPUs have dedicated instructions for it), but
+                its imprecise representation of base-10 numbers is a notorious
+                source of bugs—especially when money is involved.
+            </p>
+            <p>
+                Many fractions can be precisely represented in base-10. For
+                example, the fraction
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mfrac>
+                        <mn>1</mn>
+                        <mn>10</mn>
+                    </mfrac>
+                </math>
+                can be precisely represented in base-10 as <code>0.1</code>.
+                However, if we want to represent the fraction
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mfrac>
+                        <mn>1</mn>
+                        <mn>3</mn>
+                    </mfrac>
+                </math>
+                in base-10 format, we can write down
+                <code>0.33</code>, or <code>0.3333</code>, or maybe even
+                <code>0.3333333</code>—but no matter how many digits we use,
+                whatever decimal number we write down won&#39;t equal
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mfrac>
+                        <mn>1</mn>
+                        <mn>3</mn>
+                    </mfrac>
+                </math>
+                <i>exactly</i>. Some precision has been lost in that conversion
+                from fractional to decimal representation!
+            </p>
+            <p>
+                It&#39;s common knowledge that although
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                        <mfrac>
+                            <mn>1</mn>
+                            <mn>3</mn>
+                        </mfrac>
+                        <mo>+</mo>
+                        <mfrac>
+                            <mn>2</mn>
+                            <mn>3</mn>
+                        </mfrac>
+                        <mo>=</mo>
+                        <mn>1</mn>
+                    </mrow> </math
+                >, if we convert those fractions to decimal representations
+                before adding them&mdash;meaning we end up adding 0.3333 +
+                0.6666&mdash;we end up getting something just short of 1. Using
+                an ordinary calculator app to work with fractions often results
+                in that sort of precision loss.
+            </p>
+            <p>
+                The same flavor of precision loss that happens when we convert
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mfrac>
+                        <mn>1</mn>
+                        <mn>3</mn>
+                    </mfrac>
+                </math>
+                to a decimal (resulting in 0.3333…, so not
+                <i>exactly</i>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mfrac>
+                        <mn>1</mn>
+                        <mn>3</mn>
+                    </mfrac> </math
+                >) also happens when we convert
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mfrac>
+                        <mn>1</mn>
+                        <mn>10</mn>
+                    </mfrac>
+                </math>
+                to base-2: we end up with a number that's not <i>exactly</i>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mfrac>
+                        <mn>1</mn>
+                        <mn>10</mn>
+                    </mfrac>
+                </math>
+                even though it might be as close as we could get. This might not
+                be as familiar a source of precision loss as converting
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mfrac>
+                        <mn>1</mn>
+                        <mn>3</mn>
+                    </mfrac>
+                </math>
+                to decimal (base-10), but it's the same basic idea!
+            </p>
+            <h3 id="precision-loss-outside-of-calculations">
+                Precision loss outside of calculations
+            </h3>
+            <p>
+                For a long time after I found out about the 0.1 + 0.2
+                imprecision, I thought that the numbers 0.1 and 0.2 were being
+                represented precisely, and it was the <i>addition</i> that was
+                causing the problem. As it turns out, that's not true; in all of
+                those languages, writing down the numbers 0.1 and 0.2 does not
+                result in
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mfrac>
+                        <mn>1</mn>
+                        <mn>10</mn>
+                    </mfrac>
+                </math>
+                and
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mfrac>
+                        <mn>2</mn>
+                        <mn>10</mn>
+                    </mfrac>
+                </math>
+                getting stored in memory. Precision loss has already happened!
+            </p>
+            <p>
+                Here&#39;s what 0.1, 0.2, and 0.3 look like in memory if you ask
+                one of those top three languages to print out base-10
+                representations of the digits it&#39;s storing.
+            </p>
+            <table>
+                <tr>
+                    <td><code>0.1</code></td>
+                    <td>
+                        <code
+                            >0.100000000000000005551115123125782702118158340454101562</code
+                        >
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>0.2</code></td>
+                    <td>
+                        <code
+                            >0.200000000000000011102230246251565404236316680908203125</code
+                        >
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>0.3</code></td>
+                    <td>
+                        <code
+                            >0.299999999999999988897769753748434595763683319091796875</code
+                        >
+                    </td>
+                </tr>
+            </table>
+
+            <p>
+                When you add up those approximations of 0.1 and 0.2, the answer
+                is:
+            </p>
+            <p>
+                <code
+                    >0.3000000000000000444089209850062616169452667236328125</code
+                >
+            </p>
+            <p>
+                Not only is this not the three-tenths we&#39;d like to get from
+                adding one-tenth plus two-tenths (just like how 0.9999999999999
+                is not the answer we&#39;d like to get from adding one-third
+                plus two-thirds, but that&#39;s what a decimal calculator will
+                tell us), it&#39;s also not equal to the approximation we saw in
+                the table for the decimal 0.3, which got translated to base-2
+                representation as 0.29999999...
+            </p>
+            <p>
+                This is why 0.1 + 0.2 == 0.3 returns false in so many languages.
+                When you ask the program if 0.1 + 0.2 is equal to 0.3, what
+                it&#39;s actually comparing is:
+            </p>
+            <pre><code>0.100000000000000005551115123125782702118158340454101562 +
+0.200000000000000011102230246251565404236316680908203125 ==
+0.299999999999999988897769753748434595763683319091796875</code></pre>
+            <p>
+                This evaluates to false because adding the first two numbers
+                gives
+                <code
+                    >0.3000000000000000444089209850062616169452667236328125</code
+                >
+                and not
+                <code
+                    >0.299999999999999988897769753748434595763683319091796875</code
+                >, which is what the compiler translates the source code of
+                <code>0.3</code> into at runtime.
+            </p>
+            <p>
+                Even knowing what&#39;s going on behind the scenes, some results
+                of base-2 floating-point calculations can still be surprising.
+                For example, if you ask one of these same languages whether 0.1
+                + 0.1 == 0.2, it calculates:
+            </p>
+            <pre><code>0.100000000000000005551115123125782702118158340454101562 +
+0.100000000000000005551115123125782702118158340454101562 ==
+0.200000000000000011102230246251565404236316680908203125</code></pre>
+            <p>
+                You might expect this to also return false, because the last
+                digit of the first two numbers is 2, and there&#39;s no way
+                adding a pair of 2s together will equal 5 (the last digit of the
+                third number). However, it returns true!
+            </p>
+            <p>
+                This happens because even the printouts in the table above
+                (which were taken directly from programming language printouts)
+                have lost some precision compared to what&#39;s in memory! When
+                languages print out base-2 numbers as base-10 decimals, they
+                typically round off the last digit.
+            </p>
+            <p>
+                So not only is there precision loss when converting from the
+                source code representation of &quot;0.1&quot; to the in-memory
+                base-2 representation (which is only an approximation of
+                one-tenth), there&#39;s also additional precision loss when
+                converting that in-memory base-2 representation back into a
+                base-10 format for printing to the screen.
+            </p>
+            <p>
+                All this precision loss contributes to the general
+                recommendation to avoid using base-2 floats for base-10
+                calculations involving money, even though most languages make
+                base-2 the default.
+            </p>
+            <h3 id="hiding-precision-loss">Hiding precision loss</h3>
+            <p>
+                Earlier, we saw how adding the base-2 representations of 0.1 and
+                0.2 led to this answer in memory:
+            </p>
+            <pre><code>0.3000000000000000444089209850062616169452667236328125</code></pre>
+            <p>
+                However, none of the languages we looked at earlier printed out
+                that entire number. Instead they all printed a truncated version
+                of it: 0.30000000000000004—so, an approximation of the
+                approximation, meaning even more precision loss.
+            </p>
+            <p>
+                Other languages truncate even more digits during printing. For
+                example, in C# if you print the answer to 0.1 + 0.2, it will
+                show 0.3. Same with C++. This is not because they&#39;re getting
+                a more precise answer—it&#39;s the same floating-point operation
+                that Python, Java, and JavaScript are doing, and it puts the
+                same imprecise answer in memory—it&#39;s that they hide so many
+                digits when printing out
+                0.3000000000000000444089209850062616169452667236328125 that only
+                the 0.3 part is visible.
+            </p>
+            <p>
+                Hiding this many digits obscures the fact that any precision was
+                lost at all! This results in self-contradictory output like (0.1
+                + 0.2) printing out 0.3, yet (0.1 + 0.2 == 0.3) evaluating to
+                false. (This happens in both C++ and C#.) You can always opt
+                into printing more digits after the decimal point, which can
+                reveal the precision loss, but this default formatting can give
+                you an an inaccurate mental model of the relationships between
+                these numbers in the program.
+            </p>
+            <h3 id="compile-time-vs-runtime">Compile-time vs. runtime</h3>
+            <p>
+                Go takes a different approach. When you write 0.1 + 0.2 in Go,
+                that expression gets evaluated to 0.3 at compile time with no
+                precision loss. If you evaluate 0.1 + 0.2 == 0.3, you&#39;ll get
+                <code>true</code>. However, if you use variables instead of
+                constants—that is, set a := 0.1 and b := 0.2 and print a +
+                b—you&#39;ll once again see 0.30000000000000004. This is because
+                Go evaluates variables at runtime differently from constants at
+                compile time; constants use precise (but slower) base-10
+                addition, whereas variables use the same base-2 floating-point
+                math as Python, Java, JavaScript, and so on.
+            </p>
+            <p>
+                In contrast to all these designs, when Roc prints 0.3, it&#39;s
+                because the 0.1 + 0.2 operation is consistently doing base-10
+                arithmetic rather than the more common base-2. The reason you
+                aren&#39;t seeing precision loss is that there isn&#39;t any.
+            </p>
+            <h2 id="floating-point-versus-fixed-point">
+                Floating-Point versus Fixed-Point
+            </h2>
+            <p>
+                It&#39;s not that Roc <i>only</i> supports base-10 arithmetic.
+                It also supports the typical base-2 floating-point numbers,
+                because in many situations the performance benefits are
+                absolutely worth the cost of precision loss. What sets Roc apart
+                is its choice of default; when you write decimal literals like
+                0.1 or 0.2 in Roc, by default they&#39;re represented by a
+                128-bit fixed-point base-10 number that never loses precision,
+                making it reasonable to use for calculations involving money.
+            </p>
+            <p>In Roc, floats are opt-in rather than opt-out.</p>
+            <h3 id="cs-floating-point-base-10-systemdecimal">
+                C#&#39;s floating-point base-10 <code>System.Decimal</code>
+            </h3>
+            <p>
+                The C# standard library has its own
+                <a
+                    href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/floating-point-numeric-types#characteristics-of-the-floating-point-types"
+                    >128-bit decimal type</a
+                >, although it isn&#39;t used by default when you write normal
+                decimal literals. (The same is true of F#, which is a functional
+                language based on C#.) This type is called
+                <a
+                    href="https://learn.microsoft.com/en-us/dotnet/api/system.decimal?view=net-8.0"
+                    ><code>System.Decimal</code></a
+                >, and it has some important differences to Roc&#39;s base-10
+                <a href="https://www.roc-lang.org/builtins/Num#Dec"
+                    ><code>Dec</code></a
+                >
+                type.
+            </p>
+            <p>
+                One difference is that whereas Roc&#39;s <code>Dec</code> type
+                uses a <i>fixed-point</i> representation instead of
+                <i>floating-point</i>, <code>System.Decimal</code> is still
+                floating-point—just base-10 floating-point instead of base-2
+                floating-point. One difference between fixed-point and
+                floating-point is how many digits each can represent before and
+                after the decimal point.
+            </p>
+            <table>
+                <tr>
+                    <td><strong>Type</strong></td>
+                    <td><strong>Representation</strong></td>
+                    <td><strong>Digits</strong></td>
+                </tr>
+                <tr>
+                    <td>
+                        <a href="https://www.roc-lang.org/builtins/Num#Dec"
+                            ><code>Dec</code></a
+                        >
+                        (<a href="https://roc-lang.org">Roc</a>)
+                    </td>
+                    <td>fixed-point, base-10</td>
+                    <td>
+                        20 before the dot,
+                        <p>18 after the dot</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <a
+                            href="https://learn.microsoft.com/en-us/dotnet/api/system.decimal?view=net-8.0"
+                            ><code>System.Decimal</code></a
+                        >
+                        (<a
+                            href="https://dotnet.microsoft.com/en-us/languages/csharp"
+                            >C#</a
+                        >)
+                    </td>
+                    <td>floating-point, base-10</td>
+                    <td>28-29 total</td>
+                </tr>
+                <tr>
+                    <td>64-bit float (aka <code>double</code>)</td>
+                    <td>floating-point, base-2</td>
+                    <td>~15-17 total</td>
+                </tr>
+            </table>
+
+            <p>
+                It&#39;s possible to have a fixed-point, base-2 representation,
+                but we won&#39;t discuss that combination because it&#39;s so
+                rarely used in practice.
+            </p>
+            <h3 id="rocs-fixed-point-base-10-dec">
+                Roc&#39;s fixed-point base-10 <code>Dec</code>
+            </h3>
+            <p>
+                Fixed-point decimals have a hardcoded number of digits they
+                support before the decimal point, and a hardcoded number of
+                digits they support after it.
+            </p>
+            <p>
+                For example, <code>Dec</code> can always represent 20 full
+                digits before the decimal point and 18 full digits after it,
+                with no precision loss. If you put
+                11111111111111111111.111111111111111111 +
+                22222222222222222222.222222222222222222 into roc repl, it
+                happily prints out 33333333333333333333.333333333333333333.
+                (Each of those numbers has 20 digits before the decimal point
+                and 18 after it.) You can even put 20 nines followed by 18 nines
+                after the decimal point! However, if you try to put 21 nines
+                before the decimal point, you&#39;ll get an error.
+            </p>
+            <p>
+                In contrast, System.Decimal is floating-point. This means it
+                cares about the
+                <em>total number of digits</em> in the number, but it
+                doesn&#39;t care how many of those digits happen to be before or
+                after the decimal point. So you can absolutely put 21 nines into
+                a C# System.Decimal, with another 7 nines after the decimal
+                point if you like. For that matter, you can also put 7 nines
+                before the decimal point and then 21 nines after it. Dec&#39;s
+                fixed-point representation doesn&#39;t support either of those
+                numbers!
+            </p>
+            <h3 id="precision-loss-in-floating-point-base-10">
+                Precision loss in floating-point base-10
+            </h3>
+            <p>
+                This upside of <code>System.Decimal</code>&#39;s floating-point
+                representation comes at the cost of potential precision loss in
+                some arithmetic operations. Here&#39;s what
+                <code>11111111111111111111.11111111111111111</code> +
+                <code>44444444444444444444.44444444444444444</code> evaluates to
+                in the two different representations:
+            </p>
+            <table>
+                <tr>
+                    <td>Dec (fixed-point)</td>
+                    <td>55555555555555555555.55555555555555555</td>
+                </tr>
+                <tr>
+                    <td>System.Decimal (floating-point)</td>
+                    <td>55555555555555555555.555555555</td>
+                </tr>
+            </table>
+
+            <p>
+                Silent precision loss strikes again! This happens because
+                System.Decimal has a hardcoded limit on how many
+                <em>total</em> digits it can represent, and this answer requires
+                more total digits than it supports. The extra digits are
+                truncated.
+            </p>
+            <p>
+                Of course, there are also numbers too big for
+                <code>Dec</code> to represent. It supports adding
+                11111111111111111111.11111111111111111 +
+                22222222222222222222.22222222222222222 with no problem, but if
+                you add 99999999999999999999.99999999999999999 +
+                99999999999999999999.99999999999999999 instead, you&#39;ll get
+                the same outcome you would if you added two integers that
+                together formed an answer too big for that integer size: an
+                overflow runtime error.
+            </p>
+            <p>
+                This demonstrates a tradeoff between fixed-point versus
+                floating-point representations, which is totally separate from
+                base-2 versus base-10: fixed-point means addition overflow is
+                necessarily an error condition, whereas floating-point can
+                reasonably support two potential designs: overflowing to an
+                error, or to silent precision loss. (System.Decimal could have
+                treated addition overflow as an error, but it goes with the
+                silent precision loss design instead.)
+            </p>
+            <h3 id="precision-loss-in-fixed-point-base-10">
+                Precision loss in fixed-point base-10
+            </h3>
+            <p>
+                Silent precision loss can happen in fixed-point too. For
+                example, both fixed-point and floating-point typically choose
+                precision loss over crashing when division gives an answer that
+                can&#39;t be represented precisely. If you divide 1.0 by 3.0,
+                basically any base-10 or base-2 number system will quietly
+                discard information regardless of fixed-point or floating-point.
+                (There are number types which can support dividing 1 by 3
+                without precision loss, such as Clojure&#39;s
+                <a href="https://clojure.org/reference/data_structures#_ratio"
+                    >Ratio</a
+                >
+                or Scheme&#39;s
+                <a
+                    href="https://curtsinger.cs.grinnell.edu/teaching/2018F/CSC151/readings/numbers.html"
+                    >rational</a
+                >, which of course have their own tradeoffs.)
+            </p>
+            <p>
+                Fortunately, there&#39;s a generally high awareness of the edge
+                case of precision loss during division—even compared to other
+                common edge cases like
+                <a href="https://www.hillelwayne.com/post/divide-by-zero/"
+                    >division by zero</a
+                >—so it tends not to result in as many bugs in practice as edge
+                cases where there isn&#39;t as much awareness.
+            </p>
+            <p>
+                That said, it can happen in multiplication too; if you put
+                0.000000001 * 0.0000000001 into
+                <a href="https://www.roc-lang.org/tutorial#repl"
+                    ><code>roc repl</code></a
+                >, it will print 0 because the 18 digits after the decimal point
+                are all zeroes, and it only retains 18 digits after the decimal
+                point. The more times a decimal gets multiplied by another
+                decimal, the more likely it is that precision loss will
+                occur—and potentially in ways where the answer varies based on
+                order of operations. For example:
+            </p>
+            <pre><code>0.123456789 * 100000000000 * 0.00000000001</code></pre>
+            <pre><code>0.123456789 * 0.00000000001 * 100000000000</code></pre>
+            <p>
+                If you put these both into <code>roc repl</code>, the first
+                correctly returns <code>0.123456789</code> (100000000000 *
+                0.00000000001 equals 1). However, the second returns
+                <code>0.1234567</code> instead; it lost some precision because
+                it first multiplied by such a small number that it ran out of
+                digits after the decimal point and lost information. Multiplying
+                by a larger number after the fact can&#39;t bring that lost
+                information back!
+            </p>
+            <p>
+                This might sound like a situation where &quot;crash rather than
+                losing precision&quot; would be preferable, but then you&#39;d
+                end up in situations where dividing a number by 3 works fine (at
+                the cost of imprecision) but multiplying by (<code>1/3</code>)
+                crashes. There are many cases where that isn&#39;t an
+                improvement!
+            </p>
+            <p>
+                All of these are examples of why there isn&#39;t an obvious
+                &quot;best&quot; one-size-fits-all choice for decimal numbers.
+                No matter what you choose, there are always relevant tradeoffs.
+            </p>
+            <h3 id="overflowing-to-the-heap">Overflowing to the Heap</h3>
+            <p>
+                A design that often comes up in discussions of overflow and
+                precision loss is &quot;arbitrary-size&quot; numbers, which
+                switch to using heap allocations on overflow in order to store
+                larger numbers instead of crashing. <br />
+                <br />Of course, &quot;arbitrary-size&quot; numbers can&#39;t
+                actually represent <em>arbitrary</em> numbers because all but a
+                hilariously small proportion of numbers in mathematics are too
+                big to fit in any computer&#39;s memory. Even 1 divided by 3
+                can&#39;t be represented without precision loss in base-10 or
+                base-2 format, no matter how much memory you use in the attempt.
+            </p>
+            <p>
+                Still, overflowing to the heap can raise the maximum number of
+                digits from &quot;so high that overflow will only occur if
+                you&#39;re working with numbers in the undecillion range or
+                there&#39;s an infinite loop bug or something&quot; to &quot;a
+                whole lot higher than that, just in case.&quot; Naturally, how
+                often that distinction comes up in practice varies by use case.
+            </p>
+            <p>
+                A major reason not to allow numbers to automatically overflow to
+                the heap is that supporting this slows down
+                <i>all</i> arithmetic operations, even if the overflow never
+                comes up in practice. So to be worth that cost, the overflow has
+                to come up often enough—and the overflow-to-heap has to be
+                beneficial enough when it does come up—in practice to compensate
+                for slowing down all arithmetic.
+            </p>
+            <p>
+                This is one reason many languages (including Roc) choose not to
+                support it: essentially all programs would pay a performance
+                cost, and only a tiny number of outlier programs would see any
+                benefit.
+            </p>
+            <h2 id="performance">Performance</h2>
+            <p>
+                Speaking of performance, how do fixed-point and floating-point
+                base-10 and base-2 numbers perform?
+            </p>
+            <h3 id="representations">Representations</h3>
+            <p>
+                Here, performance depends on how things are represented.
+                Let&#39;s look at these three types from earlier:
+            </p>
+            <table>
+                <tr>
+                    <td>Type</td>
+                    <td>Representation</td>
+                    <td>Digits</td>
+                </tr>
+                <tr>
+                    <td>Dec (Roc)</td>
+                    <td>fixed-point, base-10</td>
+                    <td>
+                        20 before the dot,
+                        <p>18 after the dot</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>System.Decimal (C#)</td>
+                    <td>floating-point, base-10</td>
+                    <td>28-29 total</td>
+                </tr>
+                <tr>
+                    <td>64-bit float (aka "double")</td>
+                    <td>floating-point, base-2</td>
+                    <td>~15-17 total</td>
+                </tr>
+            </table>
+
+            <p>
+                Many guides have been written about the base-2 floating-point
+                representation; I personally like
+                <a href="https://floating-point-gui.de"
+                    >https://floating-point-gui.de</a
+                >, but there are plenty of others. Likewise, there are various
+                articles about how <code>System.Decimal</code> is represented in
+                memory; I liked
+                <a href="https://csharpindepth.com/Articles/Decimal">this one</a
+                >.
+            </p>
+            <p>
+                Without going into the level of depth those articles cover, the
+                main thing these floating-point numbers have in common is that
+                they store:
+            </p>
+            <ul>
+                <li>An <em>exponent</em> number</li>
+                <li>A <em>coefficient</em> number</li>
+            </ul>
+            <p>
+                The way these two stored values get translated into a single
+                number is basically one of these two calculations, depending on
+                whether it&#39;s base-2 or base-10:
+            </p>
+            <pre><code>coefficient * (10 ^ exponent)</code></pre>
+            <pre><code>coefficient *  (2 ^ exponent)</code></pre>
+            <p>
+                (When reading about floating-point numbers, the term
+                &quot;mantissa&quot; or &quot;significand&quot; is often used
+                instead of &quot;coefficient.&quot; All three words are pretty
+                fun.)
+            </p>
+            <p>
+                Floating-point numbers which follow the
+                <a href="https://en.wikipedia.org/wiki/IEEE_754"
+                    >IEEE 754 specification</a
+                >
+                include special values of
+                <a href="https://en.wikipedia.org/wiki/NaN">NaN</a>, Infinity,
+                and -Infinity. NaN is defined in the specification to be not
+                equal to NaN, which can cause various bugs. As such, Roc gives a
+                compile-time error if you try to compare two floating-point
+                numbers with <code>==</code> (although it&#39;s allowed for
+                <code>Dec</code> and integers).
+            </p>
+            <p>
+                Neither <code>System.Decimal</code> nor <code>Dec</code> have
+                NaN, Infinity, or -Infinity; calculations like division by zero
+                give a runtime error instead, just like they do for integers.
+            </p>
+            <h3 id="base-10-arithmetic">Base-10 arithmetic</h3>
+            <p>
+                Doing arithmetic on the base-10 version generally involves
+                converting things to integer representations, doing integer
+                arithmetic, and then converting those answers back into
+                coefficient and exponent. This makes essentially every
+                arithmetic operation on <code>System.Decimal</code> involve
+                several CPU instructions. In contrast, base-2 floating-point
+                numbers benefit from dedicated individual CPU instructions,
+                making arithmetic much faster.
+            </p>
+            <p>
+                Roc&#39;s
+                <a href="https://www.roc-lang.org/builtins/Num#Dec"
+                    ><code>Dec</code></a
+                >
+                implementation (largely the work of
+                <a href="https://github.com/bhansconnect">Brendan Hansknecht</a
+                >—thanks, Brendan!) is essentially represented in memory as a
+                128-bit integer, except one that gets rendered with a decimal
+                point in a hardcoded position. This means addition and
+                subtraction use the same instructions as normal integer addition
+                and subtraction. Those run so fast, they can actually outperform
+                addition and subtraction of 64-bit base-2 floats!
+            </p>
+            <p>
+                Multiplication and division are a different story. Those require
+                splitting up the 128 bits into two different 64-bit integers,
+                doing operations on them, and then reconstructing the 128-bit
+                representation. (You can look at
+                <a
+                    href="https://github.com/roc-lang/roc/blob/db97e3ed22deaee75ecb3ccb1ff368a338926d3e/crates/compiler/builtins/bitcode/src/dec.zig#L310"
+                    >the implementation</a
+                >
+                to see exactly how it works.) The end result is that
+                multiplication is usually several times slower than 64-bit float
+                multiplication, and performance is even worse than that for
+                division.
+            </p>
+            <p>
+                Some operations, such as sine, cosine, tangent, and square root,
+                have not yet been implemented for Dec. (If implementing any of
+                those operations for a fixed-point base-10 representation sounds
+                like a fun project, please
+                <a href="https://www.roc-lang.org/community#contributing"
+                    >get in touch</a
+                >! People on
+                <a
+                    href="https://roc.zulipchat.com/login/#narrow/stream/231634-beginners"
+                    >Roc chat</a
+                >
+                always happy to help new contributors get involved.)
+            </p>
+            <h2 id="choosing-a-default">Choosing a Default</h2>
+            <p>
+                So if a language supports both base-2 floating-point and base-10
+                fixed-point decimals, which should be used when you put in 0.1 +
+                0.2? Which is the better default for that language?
+            </p>
+            <h3 id="type-inference">Type inference</h3>
+            <p>
+                Many languages determine what numeric types to use based on
+                syntax. For example, in C#, 5 is always an integer, 5.0 is
+                always a float, and 5.0m is always a decimal. This means that if
+                you have a function that takes a float, you can&#39;t write 5 as
+                the argument; you have to write 5.0, or you&#39;ll get an error.
+                Similarly, if a function takes a decimal, you can&#39;t write 5
+                or 5.0; you have to write 5.0m.
+            </p>
+            <p>
+                Roc doesn&#39;t have this requirement. If a function takes a
+                number—whether it&#39;s an integer, a floating-point base-2
+                number, or a Dec—you can always write 5 as the number you&#39;re
+                passing in. (If it&#39;s an integer, you&#39;ll get a compiler
+                error if you try to write 5.5, but 5.5 will be accepted for
+                either floats or decimal numbers.)
+            </p>
+            <p>
+                Because of this, it&#39;s actually very rare in practice that
+                you&#39;ll write 0.1 + 0.2 in a .roc file and have it use the
+                default numeric type of Dec. Almost always, the type in question
+                will end up being determined by type inference—based on how you
+                ended up using the result of that operation.
+            </p>
+            <p>
+                For example, if you have a function that says it takes a
+                <code>Dec</code>, and you pass in (0.1 + 0.2), the compiler will
+                do Dec addition and that function will end up receiving 0.3 as
+                its argument. However, if you have a function that says it takes
+                <a href="https://www.roc-lang.org/builtins/Num#F64"
+                    ><code>F64</code></a
+                >
+                (a 64-bit base-2 floating-point number), and you write (0.1 +
+                0.2) as its argument, the compiler will infer that those two
+                numbers should be added as floats, and you&#39;ll end up passing
+                in the not-quite-0.3 number we&#39;ve been talking about all
+                along. (You can also write number literals like
+                <code>12.34f64</code> to opt into
+                <code>F64</code> representation without involving type
+                inference.)
+            </p>
+            <h3 id="constant-expressions">Constant expressions</h3>
+            <p>
+                Earlier, we noted that Go does something different than this. Go
+                always evaluates constant expressions (like &quot;0.1 +
+                0.2&quot;, which can be computed entirely at compile time with
+                no need to run the program) using full decimal precision. So
+                even if a Go function says it takes a float, the compiler will
+                end up treating the source code of &quot;0.1 + 0.2&quot; as if
+                the source code had been &quot;0.3&quot; when calling that
+                function.
+            </p>
+            <p>
+                An upside of this design is that there&#39;s less precision
+                loss. A downside is that it sacrifices
+                <i>substitutability;</i> if you have some Go code that takes
+                user inputs of 0.1 and 0.2 and computes an answer, and you try
+                to substitute hardcoded values of 0.1 and 0.2 (perhaps in a
+                particular special-case path that can improve performance by
+                skipping some operations), you&#39;ll potentially get a
+                different answer than the user-input version. A substitution
+                that might seem like a harmless refactor can actually change
+                program behavior.
+            </p>
+            <p>
+                It's for this exact reason that Roc&#39;s design intentionally
+                does the same thing regardless of whether the numbers are known
+                at compile time.
+            </p>
+            <h3 id="when-the-default-comes-up">When the default comes up</h3>
+            <p>
+                So given that, and given that Roc usually infers which operation
+                to do based on type information anyway…when does the default
+                actually come up? When are you ever writing 0.1 + 0.2 in a
+                situation where type inference wouldn&#39;t override the default
+                anyway?
+            </p>
+            <p>
+                One situation is where your whole program doesn&#39;t have type
+                annotations, and none of your fractional numbers end up being
+                used with outside code (such as libraries, which might request
+                specific fractional types like <code>Dec</code> or
+                <code>F64</code>). Roc has full type inference, so you never
+                need to write type annotations, and although it&#39;s common
+                practice to annotate top-level functions, you don&#39;t have to.
+            </p>
+            <p>
+                If you&#39;re writing a quick script, you might choose not to
+                annotate anything. In that scenario, <code>Dec</code> seems like
+                the best default because it involves the least precision loss,
+                and arithmetic performance is very unlikely to be noticeable.
+                (If it is, you can of course opt into floats instead.)
+            </p>
+            <p>
+                Another situation is for beginners who are new to programming.
+                If they&#39;ve learned decimal math in school but have never
+                encountered base-2 math, they would be in for some confusing
+                experiences early on if they were playing around in the
+                <a href="https://www.roc-lang.org/repl">REPL</a> and encountered
+                unexpected inequalities like 0.1 + 0.2 not being equal to 0.3.
+                Choosing <code>Dec</code> as the default means decimal math in
+                Roc works by default the way most people know from using
+                calculators, and beginners can learn about other representations
+                and their tradeoffs later on.
+            </p>
+            <p>
+                For these reasons, <code>Dec</code> seems like the best choice
+                for Roc&#39;s default representation of fractional numbers!
+            </p>
+            <h2 id="try-roc">Try Roc</h2>
+            <p>
+                If you&#39;re intrigued by these design choices and want to give
+                <a href="https://www.roc-lang.org/">Roc</a> a try for yourself,
+                the <a href="https://www.roc-lang.org/tutorial">tutorial</a> is
+                the easiest way to get up and running. It takes you from no Roc
+                experience whatsoever to building your first program, while
+                explaining language concepts along the way.
+            </p>
+            <p>
+                I also highly recommend dropping in to say hi on
+                <a href="https://roc.zulipchat.com/">Roc Zulip Chat</a>. There
+                are lots of friendly people on there, and we love to help
+                beginners get started!
+            </p>
+        </main>
+    </body>
+</html>
