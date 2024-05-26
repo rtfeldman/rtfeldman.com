@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 
 rm -rf build
-mkdir -p build
 
-cp *.html build
-cp *.css build
+cp -r rendered build
 cp -r fonts build
+cp *.css build
 
 # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 # set -euxo pipefail
