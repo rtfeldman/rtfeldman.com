@@ -456,12 +456,12 @@
                 before the decimal point, you&#39;ll get an error.
             </p>
             <p>
-                In contrast, System.Decimal is floating-point. This means it
+                In contrast, <code>System.Decimal</code> is floating-point. This means it
                 cares about the
                 <em>total number of digits</em> in the number, but it
                 doesn&#39;t care how many of those digits happen to be before or
                 after the decimal point. So you can absolutely put 21 nines into
-                a C# System.Decimal, with another 7 nines after the decimal
+                a C# <code>System.Decimal</code>, with another 7 nines after the decimal
                 point if you like. For that matter, you can also put 7 nines
                 before the decimal point and then 21 nines after it. Dec&#39;s
                 fixed-point representation doesn&#39;t support either of those
@@ -480,18 +480,18 @@
             </p>
             <table>
                 <tr>
-                    <td>Dec (fixed-point)</td>
+                    <td><code>Dec</code> (fixed-point)</td>
                     <td>55555555555555555555.55555555555555555</td>
                 </tr>
                 <tr>
-                    <td>System.Decimal (floating-point)</td>
+                    <td><code>System.Decimal</code> (floating-point)</td>
                     <td>55555555555555555555.555555555</td>
                 </tr>
             </table>
 
             <p>
                 Silent precision loss strikes again! This happens because
-                System.Decimal has a hardcoded limit on how many
+                <code>System.Decimal</code> has a hardcoded limit on how many
                 <em>total</em> digits it can represent, and this answer requires
                 more total digits than it supports. The extra digits are
                 truncated.
@@ -513,7 +513,7 @@
                 base-2 versus base-10: fixed-point means addition overflow is
                 necessarily an error condition, whereas floating-point can
                 reasonably support two potential designs: overflowing to an
-                error, or to silent precision loss. (System.Decimal could have
+                error, or to silent precision loss. (<code>System.Decimal</code> could have
                 treated addition overflow as an error, but it goes with the
                 silent precision loss design instead.)
             </p>
@@ -579,12 +579,20 @@
                 crashes. There are many cases where that isn&#39;t an
                 improvement!
             </p>
+            <p>Situations like this can come up in practice when multiplying many very
+                small (or very large) numbers, such as in scientific computing.
+                In these cases, floating-point can be preferable to fixed-point because
+                the number of digits after the decimal point can expand to avoid precision loss.
+                However, base-10 tends not to be a relevant improvement over base-2
+                in scientific computing, so base-2 floating-point is usually preferable over
+                <code>Dec</code> there anyway for its hardware-accelerated performance.
+            </p>
             <p>
                 All of these are examples of why there isn&#39;t an obvious
                 &quot;best&quot; one-size-fits-all choice for decimal numbers.
-                No matter what you choose, there are always relevant tradeoffs.
+                No matter what you choose, there are always relevant tradeoffs!
             </p>
-            <h3 id="overflowing-to-the-heap">Overflowing to the Heap</h3>
+the Heap</h3>
             <p>
                 A design that often comes up in discussions of overflow and
                 precision loss is &quot;arbitrary-size&quot; numbers, which
@@ -637,7 +645,7 @@
                     <td>Digits</td>
                 </tr>
                 <tr>
-                    <td>Dec (Roc)</td>
+                    <td><code>Dec</code> (Roc)</td>
                     <td>fixed-point, base-10</td>
                     <td>
                         20 before the dot,
@@ -645,7 +653,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td>System.Decimal (C#)</td>
+                    <td><code>System.Decimal</code> (C#)</td>
                     <td>floating-point, base-10</td>
                     <td>28-29 total</td>
                 </tr>
