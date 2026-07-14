@@ -1,0 +1,395 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>How Our Rust-to-Zig Rewrite is Going</title>
+        <link rel="stylesheet" href="site.css" />
+    </head>
+    <body>
+        <main>
+<h1>How Our Rust-to-Zig Rewrite is Going</h1>
+<aside class="timestamp">
+    <time datetime="2026-07-14">July 14, 2026</time>
+</aside><hr /><p>For the past year and a half, the team building <a href="https://www.roc-lang.org/">Roc</a>&#39;s compiler has been rewriting our 300,000 lines of Rust code into <a href="https://ziglang.org/">Zig</a>, for reasons I&#39;ll recap below. We recently passed an exciting milestone: feature parity with the original compiler!</p>
+<p>Since the Bun project recently shared <a href="https://bun.com/blog/bun-in-rust">an experience report</a> of their rewrite in the other direction (from Zig to Rust, although that&#39;s only the tip of the iceberg of differences between our rewrites), this seems like a nice time to reflect on how our move from Zig to Rust is going.</p>
+<h2>Passing Feature Parity</h2>
+<p>Hitting this milestone made it possible to update <a href="https://github.com/bhansconnect">Brendan Hansknecht</a>&#39;s charming 2024 <a href="https://wasm4.org/">WASM-4</a> game, <a href="https://github.com/lukewilliamboswell/roc-wasm4/blob/d4161199b0a8afd55d24c30dae304b8a0358f433/examples/rocci-bird.roc">Rocci Bird</a> (with art by Luke DeVault) to use the new compiler. It&#39;s a nice example because the whole game is under a thousand lines of Roc code, and you can <a href="http://itch.io">play it on itch.io</a> or right here via <a href="https://webassembly.org/">WebAssembly</a>:</p>
+<p>[embedded rocci bird will go here]</p>
+<p>Rocci Bird&#39;s updated source code is a bit more concise than <a href="https://github.com/lukewilliamboswell/roc-wasm4/blob/a769ade51cbd4613b4fca468764c9034f9c8070c/examples/rocci-bird.roc">the original</a>, and <code>roc build --opt=size</code> now outputs a 31KB wasm binary. (The original compiler produced a binary more than double that size.) Rocci Bird is by no means a large code base, but getting it to run at all required landing a <em>lot</em> of features in the new compiler. Seeing those chunky purple pixels brought a smile to my face when we finally got there!</p>
+<p>To be clear, this is a milestone but not a formal release. We aim to land version 0.1.0 of the new compiler later this year, which will be Roc&#39;s first-ever numbered release. You&#39;re welcome to try out a <a href="https://roc-lang.org/install/">Nightly build</a> before then, but in its current state you can still expect a variety of bugs, incomplete features, and unfinished docs.</p>
+<p>That said, this is a wonderful milestone to have reached, and I&#39;m extremely grateful to all the people who came together to make this happen! I want to thank some in particular who have been especially helpful in getting the language and compiler to this point:</p>
+<ul>
+<li><a href="https://github.com/gamebox">Anthony Bullard</a> and <a href="https://github.com/smores56">Sam Mohr</a> for collaborating on the new parser  </li>
+<li><a href="https://github.com/jaredramirez">Jared Ramirez</a> for the new type-checker (among many other things!)  </li>
+<li><a href="http://github.com/ayazhafiz/">Ayaz Hafiz</a> for <a href="https://github.com/ayazhafiz/cor/">the new lambda set resolution system</a>, plus tons of the original compiler  </li>
+<li><a href="https://github.com/ageron">Aurélien Geron</a> for hand-updating 108 (!) beginner exercises in <a href="https://exercism.org/tracks/roc">the Roc Exercism course</a> he originally created  </li>
+<li><a href="https://github.com/stephdin">Stephan</a> for getting the compiler&#39;s new &quot;echo&quot; platform running in the browser, so that anyone can now write <em>and</em> run basic Roc programs from the <a href="http://roc-lang.org">roc-lang.org</a> homepage via a 2.5MB WebAssembly binary!  </li>
+<li><a href="https://github.com/niclas-ahden">Niclas Åhdén</a>, Roc&#39;s most prolific production user, for patiently filing helpful bug reports and giving actionable feedback about the upgrade process  </li>
+<li><a href="https://github.com/JRI98">JRI98</a> for methodically reproducing and investigating fuzzer errors and other bugs, closing out issues that no longer reproduced, and more  </li>
+<li><a href="https://github.com/jwoudenberg">Jasper Woudenberg</a> for iterating on API designs for userspace packages using the new compiler  </li>
+<li><a href="https://github.com/folkertdev">Folkert de Vries</a>, <a href="https://github.com/bhansconnect">Brendan Hansknecht</a>, <a href="https://github.com/brian-carroll">Brian Carroll</a>, <a href="https://github.com/joshuawarner32">Josh Warner</a>, <a href="https://github.com/agu-z">Agus Zubiaga</a>, and <a href="https://github.com/JTeeuwissen">Jelle Teeuwissen</a> for building the foundation of the original compiler, without which the new compiler never would have existed  </li>
+<li>I&#39;ve saved the undisputed biggest contributors to the new compiler for last: <a href="https://github.com/Anton-4">Anton-4</a> and <a href="https://github.com/lukewilliamboswell/">Luke Boswell</a> for so many things I can&#39;t even keep track of them all—compiler work, builtins, platforms, packages, examples, fixing bugs, helping beginners on Roc Zulip…enumerating it all could take up a whole second post! It&#39;s been incredible seeing how much you&#39;ve built.</li>
+</ul>
+<p>Thank you all so much! I feel honored that you&#39;ve put so much of your valuable time into this project. Also thanks to our past and present sponsors—<a href="https://www.rwx.com/">rwx</a>, <a href="https://lambdaclass.com/">Lambda Class</a>, <a href="https://www.ohne-makler.net/">ohne-makler</a>, <a href="https://withmartian.com/">martian</a>, <a href="https://tweedegolf.nl">tweede golf</a>, <a href="https://www.vendr.com/">Vendr</a>, <a href="https://www.noredink.com/">NoRedInk</a>, and many <a href="https://github.com/sponsors/roc-lang/">generous individual sponsors</a>—who have helped get us to this point by <a href="https://roc-lang.org/donate">supporting our contributors</a>.</p>
+<p>Speaking of time: our 487-day rewrite took 476 days longer than <a href="https://bun.com/blog/bun-in-rust">Bun&#39;s 11-day rewrite</a> from their million lines of Zig into a million lines of Rust. There are many reasons for this difference which have nothing to do with Rust or Zig, including the fact that theirs was a direct port whereas we&#39;d decided to rewrite <em>because</em> of how much we were going to change. <a href="https://bun.com/blog/bun-in-rust#claude-rewrite-bun-in-rust">The techniques they used</a> wouldn&#39;t have worked in our case.</p>
+<p>The laundry list of changes we made also means comparing our original Rust code base and new Zig code base won&#39;t be apples-to-apples. Still, we&#39;ve reached a nice point to reflect on how the rewrite has gone, both in terms of what new features it has unlocked for Roc programmers, as well as how our experiences with Rust and Zig have compared.</p>
+<p>Let&#39;s get into it!</p>
+<h2>Hot Code Loading + Cross-Compiled Binaries</h2>
+<p>Roc&#39;s new compiler automatically does hot code loading during development. For example, I can run <code>roc server.roc</code> to start a Web server, then change some of its code while it&#39;s running. The next time that server handles a request, it&#39;ll automatically be handled using the new code. Here it is in action, both in a server and in a simple 2D game running at 120fps:</p>
+<p>[Screen recording will go here - hasn&#39;t been recorded yet but this stuff all works already]</p>
+<p>Hot loading is standard behavior for interpreted languages like Python, but not so much for high-performance compiled languages like Roc.</p>
+<p>When I&#39;m ready to deploy, <code>roc build server.roc</code> gets me an LLVM-optimized, self-contained executable that I can drop onto a machine and run. It also cross-compiles; no matter whether you&#39;re running macOS, Linux, or Windows, all of the following commands work, and output reproducible binaries (meaning the same input source bytes always produce the same output executable bytes—which <a href="https://xeiaso.net/notes/2026/anubis-wasm-vendor-binary/">not all compilers do</a>) that will run on the target system:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Command</th>
+<th align="left">Output binary runs on</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>roc build --target=wasm32</code></td>
+<td align="left">WebAssembly</td>
+</tr>
+<tr>
+<td align="left"><code>roc build --target=arm64mac</code></td>
+<td align="left">macOS Apple Silicon (use <code>x64mac</code> for Intel)</td>
+</tr>
+<tr>
+<td align="left"><code>roc build --target=x64win</code></td>
+<td align="left">x64 Windows (<code>arm64win</code> for 64-bit ARM)</td>
+</tr>
+<tr>
+<td align="left"><code>roc build --target=x64glibc</code></td>
+<td align="left">normal Linux distros (ones with <a href="https://www.gnu.org/software/libc/">glibc</a>)</td>
+</tr>
+<tr>
+<td align="left"><code>roc build --target=x64musl</code></td>
+<td align="left">Linux distros without glibc (e.g. <a href="https://www.alpinelinux.org/about/">Alpine</a>)</td>
+</tr>
+<tr>
+<td align="left"><code>roc build</code></td>
+<td align="left">(whatever the current system is)</td>
+</tr>
+</tbody></table>
+<p>The HTTP request-handling logic from that video looks like this:</p>
+<pre><code># Starts up the server; initializes a database and logger
+# based on environment variables.
+init! = |env, _args| {
+    { log_level, db_credentials } = env.parse()?
+
+    db = init_db!(db_credentials)?
+    log = init_logger!(log_level)?
+
+    # (other such initializations would happen here)
+
+    Ok({ db, log })
+}
+
+# Handles an incoming HTTP request (HTTP verb,
+# path, headers, body) using the db and log that
+# we initialized during init!()
+handle_req! = |{ db, log }, verb, path, headers, body| {
+    auth_token = headers.x_auth_token
+    user_agent = headers.user_agent
+
+    app = App.init({ auth_token, user_agent, db, log })?
+
+    match (verb, path) {
+        (GET, &quot;/users/${id}&quot;) =&gt; app.user_profile!(id)
+        (GET, &quot;/users/${id}/${page}&quot;) =&gt; match page {
+            &quot;&quot; | &quot;profile&quot; =&gt; app.user_profile!(user_id)
+            &quot;settings&quot; =&gt; app.user_settings!(user_id)
+            &quot;posts/${post_id}&quot; =&gt; {
+                app.user_post!(user_id, post_id)
+            }
+            _ =&gt; app.not_found!(verb, path)
+        }
+        (POST, &quot;/posts/new&quot;) =&gt; {
+            app.new_post!(body)
+        }
+        _ =&gt; app.not_found!(verb, path)
+    }
+}
+</code></pre>
+<p>This uses several features we introduced in the new compiler. For example, that <code>&quot;/users/${id}&quot;</code> syntax is not implemented with <a href="https://expressjs.com/en/guide/routing/#route-parameters">parsing template strings at runtime</a>, but rather with a new language feature: string interpolation inside pattern matching.</p>
+<p>Not only is this type-safe at compile time, this entire code snippet performs <em>zero heap allocations</em>. (We even have a regression test which sends various requests to a HTTP server running this code, and the test fails if the server attempts a single heap allocation at any time.) I&#39;d expect the typical language that ships with hot code loading to average closer to 1 allocation per line of code here…but Roc is aiming high on ergonomics, type safety, <em>and</em> performance!</p>
+<p>In what will become a recurring theme, hot code loading is innately memory-unsafe. We generate arbitrary machine instructions and have the CPU execute them—already memory-unsafe, but that&#39;s every compiler&#39;s job—and on top of that, we swap out some instructions for others while the compiled program is still running. There&#39;s a lot to get right, and we appreciate all the help we can get from our tools!</p>
+<h2>Compile-Time Evaluation of Pure Functions</h2>
+<p>We didn&#39;t get zero heap allocations in this common use case by chance; we got it by designing and implementing the new compiler to aggressively avoid doing unnecessary work at runtime. One of the strategies which avoids runtime allocations in this specific example is doing work at compile time instead of runtime.</p>
+<p>As an example, Python&#39;s popular FastAPI server framework lets you parse HTTP headers directly into Python objects based on the field names defined in the object&#39;s class. Here&#39;s a simplified <a href="https://fastapi.tiangolo.com/tutorial/header-param-models/#check-the-docs">example from FastAPI&#39;s docs</a>:</p>
+<pre><code>class CommonHeaders(BaseModel):
+    host: str
+    save_data: bool
+    if_modified_since: str | None = None
+
+@app.get(&quot;/items/&quot;)
+async def read_items(headers: Annotated[CommonHeaders, Header()]):
+    # …use headers somehow here
+</code></pre>
+<p>Presumably you&#39;d go on to use <code>headers</code> somehow in the body of <code>read_items</code>. By default, FastAPI will look for a HTTP header named <code>if-modified-since</code> (case-insensitive) to parse into the field named <code>if_modified_since</code>, because Python uses <a href="https://en.wikipedia.org/wiki/Snake_case">snake_case</a> whereas HTTP headers use <a href="https://en.wikipedia.org/wiki/Letter_case#Kebab_case">kebab-case</a>. This is done automatically based on the field name at runtime, at the cost of one heap allocation per field.</p>
+<p>If you ported this example to Rust with <a href="https://docs.rs/salvo/latest/salvo/extract/index.html">salvo</a>, you&#39;d get about the same level of convenience—but with full type safety and fewer runtime allocations:</p>
+<pre><code>#[derive(Deserialize, Extractible, Debug)]
+#[serde(rename_all = &quot;kebab-case&quot;)]
+#[salvo(extract(default_source(from = &quot;header&quot;)))]
+struct CommonHeaders {
+    host: String,
+    save_data: bool,
+    if_modified_since: Option&lt;String&gt;,
+}
+
+#[handler]
+async fn read_items(headers: CommonHeaders) -&gt; String {
+    // …use headers somehow here
+}
+</code></pre>
+<p>You&#39;d still have some runtime allocations though, because all of those fields except <code>save_data</code> have types involving heap allocations.</p>
+<p>Roc&#39;s equivalent is also fully-type safe, but it performs no any runtime heap allocations at all, and is a one-liner with no type declarations or annotations of any kind:</p>
+<pre><code>read_items = |headers| # …use headers somehow here
+</code></pre>
+<p>That&#39;s it, that&#39;s the code. You can try it out for yourself! The way this works in Roc is:</p>
+<ul>
+<li>Roc has a full type inference system which means it&#39;s always able to infer the type of everything in the program, even if there are no type annotations anywhere, and it always infers the most general type that could fit there.  <ul>
+<li>Formally speaking, Roc does <a href="https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Principal_type">principal</a>, <a href="https://en.wikipedia.org/wiki/Decidability_(logic)#Decidability_of_a_theory">decidable</a>, <a href="https://en.wikipedia.org/wiki/Type_safety#Definitions">sound</a>, <a href="https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system">Hindley-Milner type inference</a>.</li>
+</ul>
+</li>
+<li>Because of this, you don&#39;t need to write out the whole <code>class CommonHeaders</code> definition like in Python; that type information will be inferred at compile time based on how you use the fields like <code>if_modified_since</code> and the rest.  </li>
+<li>Whereas many languages like Python and JavaScript represent &quot;a group of fields&quot; as a heap-allocated object, Roc instead represents them as a stack-allocated <code>struct</code> like you&#39;d find in C, Go, Rust, Zig, etc.  <ul>
+<li>Those languages require defining the struct type ahead of time, like Python does with the class definition, but in Roc you can just use anonymous curly-brace literals (they look just like JavaScript object literals) and they compile to the equivalent of C structs at runtime.</li>
+</ul>
+</li>
+<li>Roc also has ways to implement things like HTTP header parsers (though of course not limited to that use case) using this statically-known type information.  <ul>
+<li>This is all done using ordinary Roc expressions and values; there isn&#39;t a separate metaprogramming language or anything like that. It&#39;s just normal Roc functions running at compile time, being automatically passed values that represent statically-known type information.</li>
+</ul>
+</li>
+<li>These parsers can be built by executing Roc code at compile time.  <ul>
+<li>In this case, what runs at compile time is code that receives the string names of the fields at compile time, e.g. <code>&quot;if_modified_since&quot;</code> and <code>&quot;save_data&quot;</code>, and then converts it—still at compile time—into kebab-case strings like <code>&quot;if-modified-since&quot;</code> and <code>&quot;save-data&quot;</code>.  <ul>
+<li>Like all heap allocations that get produced during Roc&#39;s compile time evaluation, these strings end up deduplicated in the final binary&#39;s static memory. No runtime heap allocations involved.</li>
+</ul>
+</li>
+<li>It then builds a parser which takes the raw HTTP header string, searches case-insensitively for these kebab-case strings, and when it finds one, loads it into the appropriate <code>header</code> field.  <ul>
+<li>Loading the parsed HTTP value into the <code>header</code> field doesn&#39;t need to allocate, because at runtime it&#39;s just a reference to a subset of the original HTTP request string.  <ul>
+<li>Roc strings are semantically immutable, and are allowed to share runtime memory with other strings. The parser takes advantage of that.</li>
+</ul>
+</li>
+<li>Rust&#39;s <a href="https://doc.rust-lang.org/std/primitive.slice.html">slices</a> and <a href="https://doc.rust-lang.org/std/borrow/enum.Cow.html"><code>Cow</code></a>s do this, but they require introducing annoying lifetime parameters to structs, which is presumably why libraries like salvo don&#39;t do it this way even though it&#39;s faster at runtime.  <ul>
+<li>Roc doesn&#39;t have lifetime parameters, and you&#39;d actually have to go out of your way to write a HTTP header parser that did allocations instead of sharing like this.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>So I wasn&#39;t kidding! This is really is the one line you need, and it gets you fewer heap allocations than even the equivalent Rust version:</p>
+<pre><code>read_items = |headers| # …use headers somehow here
+</code></pre>
+<p>Oh, and it will early-return a <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/400">HTTP 400</a> response if any non-optional headers were missing from the request, based on how you used your fields; like Rust, Roc also has <a href="https://en.wikipedia.org/wiki/Algebraic_data_type">sum types</a> and no <a href="https://en.wikipedia.org/wiki/Null_pointer">billion dollar mistake</a>.</p>
+<p>To be clear, you can absolutely build a faster-performing HTTP server in a systems language like Rust or Zig or C than you can in Roc. Automatic memory management has a cost! What I like about this example is not that it runs at absolute maximum performance, but that you&#39;re getting a lot of convenience <em>and</em> a lot of performance out of concise code that&#39;s fully type-safe.</p>
+<p>None of this is specific to HTTP headers, of course. The language features that make this possible can work the same way with JSON, image file formats, binary database query responses, and other strings or binary data you might want to parse. We had some of this functionality in the original compiler, but not the full experience.</p>
+<p>Continuing the recurring theme, compile-time execution of code we just compiled is innately memory-unsafe. As with hot code loading, we generate arbitrary machine instructions and have the CPU execute them, and on top of that, some of the memory involved in that execution is shared between the compiler and the running program—because they both need to read and write it!</p>
+<h2>Why a Scratch-Rewrite?</h2>
+<p>Unlike Rust, C, and Zig, Roc is not a systems language; it has automatic memory management (using reference counting, both to avoid tracing collector pauses and also for <a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2020/11/perceus-tr-v4.pdf">Perceus optimizations</a> and opportunistic mutation <a href="https://koka-lang.github.io/koka/doc/book.html#sec-fbip">like Koka&#39;s</a>). Roc would have <em>way</em> more heap allocations if it needed one heap allocation per closure capture (like most non-systems languages do), but our closure captures don&#39;t heap-allocate because Roc is the first non-academic language to implement <a href="https://www.cs.princeton.edu/~mpmilano/publication/lss/">polymorphic defunctionalization through lambda set specialization</a>.</p>
+<p>This might sound like a niche optimization, but in a functional language like Roc, defunctionalization turns out to be similar to <a href="https://en.wikipedia.org/wiki/Inline_expansion">inlining</a> in that it unlocks a treasure trove of follow-up optimizations. Although this system proved incredibly beneficial to Roc&#39;s runtime performance, it also proved incredibly difficult for us to implement correctly. We <a href="https://shows.acast.com/software-unscripted/episodes/664fde448c77cc0013b3338a">struggled with nasty bugs</a> in the original implementation, and only after <a href="https://github.com/ayazhafiz/cor/">Ayaz prototyped a new architecture</a> were we able to finally get it right in the new compiler. And even after all that, integrating it with everything else was hard, too!</p>
+<p>The good news about Ayaz&#39;s prototype was that it demonstrated that our defunctionalization problems were fixable. The bad news was that it also showed that the root of the problem was architectural and crossed multiple compiler phases; fixing it would require rewriting at least half of the compiler.</p>
+<p>This was one of the main reasons we decided to do a full rewrite in the first place—that, and several other contributors independently mentioning they were planning to rewrite other parts of the compiler for unrelated reasons. At some point we realized we were about to rewrite almost all of the compiler anyway, so it logically made sense to consider a full rewrite as an alternative to the <a href="https://en.wikipedia.org/wiki/Ship_of_Theseus">Ship of Theseus</a> approach.</p>
+<p>Compilers are unusual in that scratch-rewrites are the norm among successful projects. It&#39;s often the only way to <a href="https://en.wikipedia.org/wiki/Self-hosting_(compilers)">self-host</a>, although not all compilers rewrite into their own language; see for example <a href="https://devblogs.microsoft.com/typescript/typescript-native-port/">TypeScript&#39;s rewrite to Go</a>. My position has always been that <a href="https://www.roc-lang.org/faq#self-hosted-compiler">Roc&#39;s compiler should not self-host</a>, so the idea that someday the benefits of a rewrite might seem to outweigh <a href="https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/">their notorious costs</a> had frankly never occurred to me.</p>
+<p>Once we&#39;d decided to scratch-rewrite, the next question was whether to choose Rust again. Based on our experiences with both Rust and Zig (<a href="https://www.youtube.com/watch?v=jIZpKpLCOiU">we were already using Zig</a> for a bunch of primitives in our standard library), <a href="http://gist.github.com/rtfeldman/77fb430ee57b42f5f2ca973a3992532f">we decided to build the entire compiler in Zig this time</a>.</p>
+<h2>Why Zig?</h2>
+<p>I enjoy Rust, <a href="https://frontendmasters.com/courses/rust/">I&#39;ve taught a course on it</a>, and I happily use it daily for my work at <a href="https://zed.dev/">Zed</a>. Despite what Internet comments might have us believe, it&#39;s extremely normal for one language to be the best fit for one project, while a different language turns out to be the best fit for a different project. One size does not actually fit all!</p>
+<p>I&#39;ve talked in depth about our reasons for going with Zig elsewhere—<a href="https://gist.github.com/rtfeldman/77fb430ee57b42f5f2ca973a3992532f">in writing</a>, <a href="https://www.youtube.com/watch?v=E0n82muHMcM">on podcasts</a>, and so on—and we only seriously considered Rust and Zig, because those were the only languages our team knew well enough. (Roc&#39;s standard library has been <a href="https://youtu.be/jIZpKpLCOiU?si=ueY5kfKu1p7I7L4c">written in Zig</a> for years.) The biggest considerations on our minds when deciding between Rust and Zig were:</p>
+<ul>
+<li><strong>Build times.</strong> Our <code>cargo</code> build times were a major pain point, even for incremental builds. We expected our Zig build times to be faster.  </li>
+<li><strong>Memory control.</strong> We use a variety of different memory allocators throughout compilation, especially arenas, and struct-of-arrays layouts all over the place. Rust&#39;s ecosystem consistently assumes one global allocator, including <a href="https://docs.rs/soa-rs/latest/soa_rs/">soa_rs</a> (and there&#39;s no out-the-box struct-of-arrays support like Zig&#39;s std.MultiArrayList). As such, in the original compiler we often felt drawn toward rolling our own alternatives to standard Rust tools, and being frustrated that third-party dependencies were hardcoded to use the global allocator. Meanwhile, Zig&#39;s whole ecosystem assumes granular allocators, and struct-of-arrays support is standard.  </li>
+<li><strong>Ecosystem relevance.</strong> Rust&#39;s ecosystem is much bigger than Zig&#39;s overall…but almost no packages in either ecosystem are relevant to our particular needs. For the niche things we wanted to get off the shelf—such as a faster way to emit LLVM bitcode than wrapping LLVM&#39;s C++ library—more of that code existed in Zig than in Rust.  </li>
+<li><strong>Memory-unsafety assistance.</strong> Rust is designed to isolate memory-unsafe code inside rare <code>unsafe</code> blocks, and use things like <a href="https://github.com/rust-lang/miri">miri</a> or <a href="https://valgrind.org/">Valgrind</a> to vet those. Memory-unsafe code wasn&#39;t rare for us, though (remember those innately-unsafe features I&#39;ve pointed out already? Those weren&#39;t the only ones!) and we ended up with about 1,200 uses of <code>unsafe</code> (out of our 300K lines of Rust code; compare to about 40,000 uses of <code>unsafe</code> in <a href="https://github.com/rust-lang/rust/">rust</a>&#39;s 3.5M lines, and remember that for compilers which emit machine code, like <code>roc</code> and <code>rustc</code>, doing memory-unsafe things is a big part of the job). Zig has <a href="https://zackoverflow.dev/writing/unsafe-rust-vs-zig/">more features than Rust for making memory-unsafe code work correctly</a>, and that was the part we felt was harder to get right.</li>
+</ul>
+<p>There were a variety of other reasons, but I&#39;d say these were the main ones: we wanted faster build times, better allocator control, a more relevant ecosystem, and stronger assistance with memory-unsafe code.</p>
+<p>After a year and a half of rewriting, how did our expectations of Zig&#39;s benefits line up with the reality of what we got? And which parts of Rust did we end up missing once we no longer had access to them?</p>
+<h2>Life Without Borrow-Checking</h2>
+<p>Let&#39;s start with the big one: the borrow checker. It&#39;s been many years since I was a Rust beginner and felt like I was &quot;fighting the borrow checker,&quot; and at this point I get to appreciate its benefits without (usually) feeling frustrated about its restrictions.</p>
+<p>That said, it&#39;s important to contextualize what the borrow checker does and doesn&#39;t do. There&#39;s <a href="https://github.com/Microsoft/MSRC-Security-Research/blob/master/presentations/2019_02_BlueHatIL/2019_01%20-%20BlueHatIL%20-%20Trends%2C%20challenge%2C%20and%20shifts%20in%20software%20vulnerability%20mitigation.pdf">a famous 2019 Microsoft presentation</a> that says, on slide 10:</p>
+<p>~70% of the vulnerabilities addressed through a security update each year continue to be memory safety issues</p>
+<p>The next slide breaks down that 70% with details that are important when comparing Rust and Zig. It notes &quot;Stack corruptions are essentially dead,&quot; and shows that in 2018 (the last year studied), 23% of the vulnerabilities were out-of-bounds reads/writes, 16% were use-after-free, 13% were unsafe casts, and 10% were uninitialized reads.</p>
+<p>Relevantly for our particular rewrite, <strong>Rust and Zig address 84% of these memory-safety bugs in the same way</strong>:</p>
+<ul>
+<li>Both compilers prevent stack corruptions using guard pages and stack probes, which cause OS memory protections to raise segmentation faults instead of corrupting memory. (An unhandled segfault may not be the most graceful way for a program to end, but it&#39;s still a safe exit—unlike corrupted memory.)  </li>
+<li>Both compilers emit bounds checks for heap memory, so if you write <code>things[9]</code> on an array of length 4, you get a panic instead of corrupted memory.  </li>
+<li>Both compilers report errors for uninitialized reads by default, and neither does unsafe casts automatically. (Both languages let you opt into these.)</li>
+</ul>
+<p>The remaining 16% of the vulnerabilities are use-after-frees, which Rust famously addresses with borrow-checking at compile time. In contrast, Zig does what both compilers do for out-of-bounds errors: insert automatic runtime checks that panic instead of allowing memory corruption. Zig&#39;s use-after-free (and double-free) guards are enabled by default in debug and test builds to help catch bugs, and then can either be included in production using the <a href="https://ziglang.org/documentation/master/#ReleaseSafe">ReleaseSafe</a> build mode, or omitted with <a href="https://ziglang.org/documentation/master/#toc-ReleaseFast">ReleaseFast</a>.</p>
+<p>There are plenty of tradeoffs between Zig&#39;s approach and Rust&#39;s: compile-time costs versus runtime costs, potential runtime panics versus potential code contortions to satisfy the borrow checker, <a href="https://doc.rust-lang.org/nomicon/meet-safe-and-unsafe.html">safe subsets</a> versus <a href="https://zackoverflow.dev/writing/unsafe-rust-vs-zig/">whole-language tooling</a>…it&#39;s not a straightforward comparison. Still, both approaches have led to high-profile success stories of reliable, memory-safe software in practice.</p>
+<p>On the Zig side, <a href="https://tigerbeetle.com/">TigerBeetle</a> recently underwent a legendarily meticulous <a href="https://tigerbeetle.com/blog/2025-06-06-fuzzer-blind-spots-meet-jepsen/">Jepsen report  that found only two safety bugs</a>, neither related to memory safety. TigerBeetle does ReleaseSafe builds in production, whereas <a href="https://ghostty.org/">Ghostty</a>, which has <a href="https://app.opencve.io/cve/?vendor=ghostty">never had a memory-safety CVE</a>, does <a href="https://ziglang.org/documentation/master/#toc-ReleaseFast">ReleaseFast</a>. (If you want to learn more about these projects, I&#39;ve recorded in-depth conversations with their creators: <a href="https://youtu.be/8br5QcmYq84?si=qi7z2z8nSUKxiWlL">Joran Greef on TigerBeetle</a> and <a href="https://youtu.be/ljoNEH39lyw?si=fnm0emKYj5eH3sPP">Mitchell Hashimoto on Ghostty</a>.)</p>
+<p>In Roc, we&#39;re following Ghostty&#39;s lead: using Zig&#39;s automatic guards in debug and test builds to catch bugs in development, and omitting them in production so our compiler releases run as fast as possible.</p>
+<p>This is, of course, not as comprehensive as what Rust&#39;s borrow checker gave us in the original compiler. So with that background out of the way…how has the new approach worked out for us so far in practice? How many memory corruption incidents have we seen since rewriting our compiler from Rust to Zig?</p>
+<h2>Memory Safety Post-Rewrite</h2>
+<p>Here&#39;s a breakdown of bug reports in <a href="https://github.com/roc-lang/roc/issues">Roc&#39;s issue tracker</a>, as classified by Claude Opus 4.8 thanks to some of my free <a href="https://claude.com/contact-sales/claude-for-oss">Claude for Open Source</a> credits. (I decided not to spend hours manually classifying thousands of issues just for this one table.) Here are the results:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Type of bug in Roc&#39;s compiler</th>
+<th align="left">Rust</th>
+<th align="left">Zig</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Bug where memory corruption occurred</td>
+<td align="left">21</td>
+<td align="left">10</td>
+</tr>
+<tr>
+<td align="left">Bug where no memory corruption occurred</td>
+<td align="left">2,575</td>
+<td align="left">421</td>
+</tr>
+<tr>
+<td align="left">Total</td>
+<td align="left">2,596</td>
+<td align="left">431</td>
+</tr>
+</tbody></table>
+<p>Obviously, the total bug count is much lower for the rewrite. Should we therefore conclude that the Zig-based compiler is &quot;less buggy&quot; than the original? No, it&#39;s just younger, so it&#39;s been used less! Nor would it be sensible to compare the percentages and conclude one is &quot;proportionally more memory-safe&quot; than the other; if that were a useful metric, you could make any code &quot;more memory-safe&quot; by introducing bugs.</p>
+<p>Now you might be wondering how the Rust-based compiler had any memory corruption bugs at all, let alone more than double the total count of the Zig-based one. Isn&#39;t Rust supposed to be memory-safe?</p>
+<p>The explanation is simple: this particular Rust code base happens to <em>be a compiler.</em></p>
+<p>As foreshadowed earlier, compilers emit machine instructions. When your machine executes those instructions, they can cause memory corruption, resulting in memory corruption bug reports from the people who experienced them. Regardless of which process had the bug—the compiler or compiled program—in both cases the processor only did the bad thing because the compiler told it to. And in both cases the fix is the same: the compiler&#39;s code must change, since that code was what caused the memory corruption.</p>
+<p>Just like every compiler, ours has had bugs, and some of those have been miscompilations that led to memory corruption. This is where all 21 of the memory corruption bug reports in our original Rust-based compiler came from; none of those bugs occurred in the process of the compiler itself, which is a testament to the borrow-checker working as intended.</p>
+<p>In contrast, while 8 of the 10 memory corruption bugs in the Zig-based compiler were also miscompilations, the remaining 2 were in the compiler itself. Both were use-after-free bugs in error reporting, with the same symptom: filenames in error messages (<a href="https://github.com/roc-lang/roc/issues/8943">one in <code>roc check</code></a> and <a href="https://github.com/roc-lang/roc/issues/8606">the other in <code>roc bundle</code></a>) rendered as useless <a href="https://unicodeplus.com/U+FFFD">question-mark-in-diamond characters</a>.</p>
+<p>Now let&#39;s suppose we had instead chosen Rust for our rewrite, or Zig with <code>ReleaseSafe</code>. What would have been the impact in practice, holding all else equal?</p>
+<table>
+<thead>
+<tr>
+<th align="left">Tooling Choice</th>
+<th align="left">Memory-safety impact in practice</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Zig with <code>ReleaseFast</code></td>
+<td align="left">2 bug reports: some error reports fail to render filenames</td>
+</tr>
+<tr>
+<td align="left">Zig with <code>ReleaseSafe</code></td>
+<td align="left">2 bug reports: some error reports panic instead of rendering at all</td>
+</tr>
+<tr>
+<td align="left">Rust&#39;s borrow checker</td>
+<td align="left">neither of these bug reports</td>
+</tr>
+</tbody></table>
+<p>After 18 months of development, hundreds of total bug reports, and hundreds of thousands of lines of code, my main takeaway from retrospecting on this table is that picking a different row would have made no appreciable difference to the project. So far our choice has gotten us the outcome we&#39;d hoped for, and if a future retrospective goes differently, switching to <code>ReleaseSafe</code> is a build flag away.</p>
+<p>As I noted earlier, every project has different needs. When Bun rewrote in the opposite direction—from Zig to Rust—<a href="https://bun.com/blog/bun-in-rust#just-be-really-smart-and-don-t-make-mistakes">their accompanying post</a> noted:</p>
+<p>For Bun, correctly handling the lifetimes of garbage-collected values [from JavaScript] and manually-managed values has been a major source of stability issues - most often small memory leaks and occasionally, crashes. Every memory allocation has to be meticulously reviewed. Where do these bytes get freed? How do we ensure it only gets freed once? Did we check for JavaScript exceptions properly? Is this garbage-collected pointer visible to the conservative stack scanner? Is this garbage collected memory or manually managed memory?</p>
+<p>Roc&#39;s compiler doesn&#39;t have these challenges because it doesn&#39;t interface with JavaScript or any other tracing garbage collector. For Bun, &quot;use-after-free, double-free, and &#39;forgot to free&#39;&quot; errors have been &quot;a large percentage of bugs,&quot; whereas errors like these have been a small percentage of Roc&#39;s bugs. And of course Roc&#39;s compiler faces various challenges that Bun doesn&#39;t. Different projects have different needs!</p>
+<p>In our case, I&#39;m not sure how I could look back at what&#39;s actually happened and conclude that what we needed was a bigger investment in tooling to prevent memory safety bugs <em>in the compiler itself.</em> There&#39;s a much stronger case that we would benefit from better tooling to catch memory safety bugs <em>in our compiled output</em>, which is out of scope for the borrow checker.</p>
+<h2>Build Times</h2>
+<p>We wanted faster builds from Zig. Did we get them?</p>
+<p>Well, the good news is that <code>zig build --watch -fincremental</code> can rebuild a change to our current code base in about 35 milliseconds. That&#39;s even faster than what we were hoping for when we considered Zig&#39;s build speed a selling point for the rewrite!</p>
+<p>The bad news is that Zig&#39;s current stable 0.16.0 release has a bug that breaks <code>-fincremental</code> on our code base. <a href="https://codeberg.org/ziglang/zig/pulls/35533">The fix</a> already landed, but to get it we&#39;d have to build on a <a href="https://ziglang.org/download/">nightly 0.17.0 prerelease build</a> (which has breaking language changes), along with vendoring and upgrading our affected dependencies to 0.17.0. We decided to wait for the next stable release instead.</p>
+<p>As of the last commit that had Rust sources in our code base, here&#39;s a timing comparison on my Intel desktop machine running Ubuntu 26 for building cold (no cache, but packages downloaded locally) compared to doing an incremental rebuild after making a trivial edit to our parser:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Roc Compiler Version</th>
+<th align="left">LoC</th>
+<th align="left">Cold Build</th>
+<th align="left">Incremental</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Original on Rust 1.85.0</td>
+<td align="left">354K</td>
+<td align="left">32.4s</td>
+<td align="left">10.0s</td>
+</tr>
+<tr>
+<td align="left">Original on Rust 1.97.0</td>
+<td align="left">354K</td>
+<td align="left">25.4s</td>
+<td align="left">3.4s</td>
+</tr>
+<tr>
+<td align="left">Rewrite at feature parity on Zig 0.16.0</td>
+<td align="left">320K</td>
+<td align="left">39.6s</td>
+<td align="left">8.6s</td>
+</tr>
+<tr>
+<td align="left">Rewrite today on Zig 0.17.0</td>
+<td align="left">464K</td>
+<td align="left">32.1s</td>
+<td align="left">0.035s</td>
+</tr>
+</tbody></table>
+<p>(Note that our Zig build configuration as of the feature-parity commit was rebuilding rarely-changing artifacts on every build that we later decided to rebuild only on demand. That&#39;s why today&#39;s cold builds are faster than they were back at 300K LoC, even though our lines of code have increased by ~50% since then.)</p>
+<p>Rust 1.97 is the current stable release today, and 1.85 was the current stable release 487 days ago (the time our rewrite took to reach to feature parity). So if we&#39;d stayed on Rust for the same duration, we could have seen our incremental build times decrease from 10 seconds to 3.4. That&#39;s a big jump! I really appreciate all the hard work that Rust contributors have done to improve build times. Eliminating 2/3 of our incremental build times over 18 months would have been a very welcome change if we&#39;d stayed on Rust, and it&#39;s a bigger improvement than I would have expected in an 18-month period. Bravo!</p>
+<p>As impressive as that improvement is, Zig&#39;s 35ms is still way ahead. Not only is it 1/100th the build time of 3.4 seconds, it&#39;s also in <a href="https://www.youtube.com/watch?v=-jy4HaNEJCo&t=279s">a different performance category</a>—and that 35ms is on a Zig code base with ~50% more lines of code than the Rust one that got 3.4s. I expect Roc&#39;s code base to keep growing, and for this gap to keep growing with it; I&#39;ve never heard of any initiative on Rust&#39;s roadmap comparable to <code>-fincremental</code>.</p>
+<p>Still, it&#39;s a point in Rust&#39;s favor that our <code>cargo build</code> times after a rebuild (without a watch running) on current stable Rust are now faster than our <code>zig build</code> rebuild times on current stable Zig. That number is the relevant comparison for CI build times, as CI builds won&#39;t use <code>--watch -fincremental</code> at all.</p>
+<p>So while our decision to remain on stable 0.16.0 (plus how many of our contributors run Mac laptops with ARM processors; <code>-fincremental</code> only works on x86-64 CPUs right now) means we haven&#39;t yet reaped the anticipated build-time rewards of choosing Zig for the rewrite, we certainly have something to look forward to in the next stable Zig release!</p>
+<h2>Zero-Parse Deserialization</h2>
+<p>Roc&#39;s on-disk caching system uses a technique I first learned about from Zig&#39;s compiler, and which Casey Muratori told me is common practice in game programming. It relies on the happy coincidence that if you&#39;re organizing your memory in the way that runs fastest on modern hardware anyway, you can also load it from disk directly into memory and start using it without parsing anything.</p>
+<p>Here&#39;s how it works:</p>
+<ul>
+<li>When we load a Roc module (a .roc source file), we compute a BLAKE3 hash of its source bytes, and then hash that along with the current version of Roc&#39;s compiler. This is the module&#39;s &quot;source key.&quot;  <ul>
+<li>Parsing and name resolution (aka &quot;semantic analysis&quot; prior to type checking) are designed to be a pure function of source bytes, so we can write these arrays directly to disk under the module&#39;s source key and then load them directly back into memory when we&#39;re done. There is no parsing step to deserialize, just doing a fixed number of pointer relocations to put the arrays in the right places in memory.  </li>
+<li>This means we deserialize basically at the speed of loading the bytes from disk into memory, which also means if they&#39;re already in the operating system&#39;s disk cache, we deserialize at roughly the speed of <a href="https://www.man7.org/linux/man-pages/man3/memcpy.3.html">memcpy</a>.  </li>
+<li>This is, as you might guess, significantly faster than redoing lexing, parsing, and semantic analysis from scratch. So when we load a source file, we BLAKE3 hash its bytes to get its source key, go look up whether we have an entry in the global cache, and if so, read it into memory, do some pointer relocations, and we&#39;re done.</li>
+</ul>
+</li>
+<li>Each .roc file also has an &quot;implementation key,&quot; which is basically its source key recursively hashed together with the implementation keys of everything it imports.  <ul>
+<li>Type-checking, compile-time execution of constants, and executing tests of pure functions (you can write tests in the top level of .roc files using the <code>expect</code> keyword, e.g. <code>expect my_fn(123, 456) == 789</code> and they will get run during <code>roc test</code>), are all pure functions of a module&#39;s implementation key.  </li>
+<li>We cache these under the implementation key in the same way and with the same deserialization strategy as what we do for the source code.  <ul>
+<li>We use this different key because it can be invalidated if the module&#39;s dependencies change, at which point its saves time to be able to go get the cached source key for everything up to type-checking, and not have to redo that work.</li>
+</ul>
+</li>
+<li>So now we don&#39;t need to pay to redo type inference, or compile-time evaluation, or even rerun pure-function tests, for a given module. We just get its BLAKE3 hash and load a file into memory, and we&#39;re basically done. This is <em>much</em> cheaper than doing type inference, compile-time evaluation of constants, and re-running all your tests.</li>
+</ul>
+</li>
+</ul>
+<p>This zero-parse deserialization strategy only works because we use 32-bit array <a href="https://joegm.github.io/blog/indices-not-pointers/">indices over pointers</a> for all of our compiler data structures. Not only is this faster and more memory-efficient than 64-bit pointers, but if we used pointers (like almost all compilers do), deserialization couldn&#39;t be zero-parse.</p>
+<p>If you know exactly how many of these array-with-indices collections you need up front, Rust&#39;s borrow checker can help you avoid using an index with the wrong array by generating type tags like what <a href="https://docs.rs/compact_arena/0.5.0/compact_arena/"><code>compact_arena</code></a> does. Unfortunately, if you <em>can&#39;t</em> know exactly how many you need up front (e.g. because it varies by number of modules, as it does in our use case), the borrow checker can&#39;t help. That&#39;s why <code>compact_arena</code> <a href="https://docs.rs/compact_arena/0.5.0/compact_arena/struct.SmallArena.html#method.new">marks this functionality as <code>unsafe</code></a>.</p>
+<p>I certainly agree that <code>unsafe</code> is warranted here, but personally I wouldn&#39;t label <code>SmallArena::new</code> in particular as unsafe. <em>Creating</em> an empty arena will never cause memory unsafety, so putting an <code>unsafe</code> block around it isn&#39;t doing what <code>unsafe</code> is supposed to do in Rust: mark the parts of your code that must be audited extra-carefully.</p>
+<p>The reality is uncomfortable, but it is reality: what is actually memory-unsafe when you use this technique is <em>literally every single operation that looks up an index into an array.</em> Every single &quot;index-flavored pointer dereference&quot; is an opportunity to give the index to the wrong array, and end up with whatever random bytes happened to be in that incorrect array at that particular index. Those are the points of unsafety that need extra-careful auditing.</p>
+<p>So if we had adopted this technique pervasively in our Rust code base—as Zig&#39;s compiler does, and which we had decided to partly because it&#39;s a prerequisite for zero-parse deserialization—then the part of our code base that would use Unsafe Rust and therefore need extra-careful auditing would be <em>the entire code base.</em></p>
+<p><a href="https://doc.rust-lang.org/nomicon/meet-safe-and-unsafe.html">Safe Rust</a> is valuable because it (reasonably!) assumes that the amount of Unsafe Rust in your code base is small and isolated, which I believe is true for the vast majority of Rust code bases. But if <code>unsafe</code> is going to be pervasive, like in our case, the premise of that value proposition no longer holds, and it starts to sound more appealing to choose <a href="https://zackoverflow.dev/writing/unsafe-rust-vs-zig/">a language that&#39;s safer than Unsafe Rust</a>.</p>
+<h2>Ecosystem Relevance</h2>
+<p>Rust creator Graydon Hoare once jokingly described Rust as &quot;Linear ML in C++ clothing.&quot; When I first heard that, I assumed the &quot;C++ clothing&quot; he was referring to was syntax, but over time I&#39;ve increasingly thought of Drop—which is almost a direct translation of RAII—as being part of that &quot;C++ clothing.&quot; You could certainly make a Linear ML without Drop if you wanted to!</p>
+<p>Drop makes working in Rust feel, by default, like working in a language with a tracing garbage collector (like Go, or maybe OCaml—the language which Rust&#39;s initial compiler was written in). &quot;Garbage-collected, except with lifetime parameters in lots of type signatures, and with an additional borrow checking step on top of the usual type-checking step&quot; is how I felt about using Rust when I was first getting into it.</p>
+<p>I can think of two situations where Drop seems like pretty much exactly the right tool for the job. One is where you want to do a lot of automatic reference counting, like in Zed&#39;s code base. Manual reference counting is notoriously difficult to get right, and the bugs when you get it wrong are notoriously hard to track down. Automatic reference counting via Drop is way less error-prone.</p>
+<p>Another situation where Drop feels like the right tool for the job is when interfacing with a ton of memory that&#39;s managed by a tracing collector like JavaScript&#39;s—in other words, what Bun is doing. Before ultimately moving to Rust, they mentioned having developed their own &quot;smart pointer&quot; system in Zig to deal with this, but I&#39;d expect Drop to be a much more natural fit for what they wanted to do.</p>
+<p>In contrast, Drop has been a pain point for us because the Rust ecosystem is built around it. Imagine these two APIs for a wrapper around LLVM&#39;s C++ library:</p>
+<ol>
+<li>&quot;Call this function and we&#39;ll use a global allocator for all allocations, even if you have an arena you want to be used instead.&quot;  </li>
+<li>&quot;Call this function passing an allocator, so if you want to use an arena, no problem, you just pass it in.*</li>
+</ol>
+<p>Our arena-heavy code base always wants the second API, which Zig&#39;s ecosystem consistently follows, whereas basically Rust&#39;s whole ecosystem is designed to offer the former API every time. So Rust&#39;s ecosystem is optimized for the way Bun wants to be written, whereas Zig&#39;s is designed for the way Roc wants to be written.</p>
+<p>Separately, there&#39;s the question of what code we can access off the shelf. I mentioned LLVM earlier because, although it&#39;s a critical dependency for our optimizer (we do our own optimizations, but LLVM does a bunch more on top), it&#39;s also a project that makes major breaking API changes on a regular basis. Upgrading to new LLVM versions has been a major source of pain and lost time for Roc, but we keep doing it because we want the new optimizations.</p>
+<p>As it turns out, LLVM actually has a stable and backwards-compatible API that can be accessed to bypass this upgrade pain: its serialized &quot;bitcode&quot; format. If you write your own LLVM bitcode serializer, then you can tell each new version of LLVM to consume that, and you&#39;re off to the races. </p>
+<p>Of course, to access this strategy, you need a handwritten llvm bitcode serializer that&#39;s decoupled from the llvm c++ library and its breaking changes. I only know of one implementation of such a thing in the wild: Zig&#39;s compiler, which of course is written in Zig. And now there are two implementations in the wild, because Roc&#39;s new compiler is reusing that same Zig code. (Thanks for sharing it, Zig team!)</p>
+<p>Future considerations are relevant here too. Right now our final compiler executable is about 25mb of our own stuff and then over 100mb of LLVM and lld. They also both run very slowly, but today there&#39;s no viable alternative out there which does those jobs.</p>
+<p>I only know of one project that aims to replace both of those dependencies with fast, modern alternatives. Any guesses? Yeah, it&#39;s the Zig team. They want it for their own compiler, for the same reasons we do, and there&#39;s no Rust equivalent I&#39;ve ever heard of being developed.</p>
+<p>You might have noticed that the biggest source of dependencies we&#39;re interested in from the Zig ecosystem is the Zig compiler itself. This is unusual, but Roc is an unusual project with unusual needs. When I wrote the first line of code in the compiler back in 2019, I would not have guessed that the following would prove true: &quot;In the future, the richest gold mine of reusable code for this project will be an open-source compiler written in a language you haven&#39;t heard of yet.&quot;</p>
+<p>Life is full of surprises!</p>
+<h2>Things I Miss From Rust</h2>
+<p>Even though I&#39;m no longer using Rust for Roc, I remain immersed in the Rust world because I work at <a href="https://zed.dev/">Zed</a>, where we use it for pretty much everything. So when I say I miss something from Rust when building with Zig (or vice versa), it&#39;s not just rose-tinted memories of a distant past; it&#39;s more like memories from earlier in the same day.</p>
+<p>Something I was surprised to find myself missing from Rust is automatic allocation and deallocation in <em>tests.</em></p>
+<p>As discussed earlier, having full control over allocations and deallocations is what I want in our compiler&#39;s implementation. And in tests, I also appreciate the testing allocators detecting leaks—it can even detect leaks in compiled Roc code! Unfortunately, to get that benefit requires a lot of &quot;init this, defer deinit&quot; code in tests that has to be correct or else the test fails on a memory leak. None of that is necessary in Rust. I care more about the compiler&#39;s implementation being the way I want it than the tests looking nicer, but in a perfect world I could somehow have both.</p>
+<p>Both <a href="https://en.wikipedia.org/wiki/Parametric_polymorphism">parametric polymorphism</a> and <a href="https://en.wikipedia.org/wiki/Ad_hoc_polymorphism">ad hoc polymorphism</a> overlap with <code>comptime</code>, so it makes sense that Zig doesn&#39;t have them, but I do miss them. For example, Rust&#39;s <a href="https://doc.rust-lang.org/std/alloc/trait.Allocator.html">Allocator trait</a> has its allocate function taking &quot;self&quot; at its first argument, whereas in Zig, allocator implementations <a href="https://github.com/ziglang/zig/blob/738d2be9d6b6ef3ff3559130c05159ef53336224/lib/std/heap/arena_allocator.zig#L185-L186">like ArenaAllocator</a> need to receive an <code>anyopaque</code> pointer and then cast it to itself. </p>
+<p>I also miss private struct fields. I understand the reasoning for not having them, but I miss getting a compile error if I use something that is marked as &quot;not supposed to be accessed directly like this, even though it can be done if you really want to.&quot; This comes up when reviewing a diff, because in the diff I just see the field access; I don&#39;t see the docs on the original struct definition, and I don&#39;t want to go out of my way to look them up defensively every time.</p>
+<p>Occasionally I miss functions and variables and constants all using <code>snake_case</code>.</p>
+<p>I do miss aspects of <code>unsafe</code> and the borrow checker, even though their upsides come packaged with downside I don&#39;t miss. I don&#39;t think Zig should add either of these, but at the same time there is something calming about only worrying about certain classes of problems inside <code>unsafe</code> blocks. I can miss that feeling even while not wanting to pay the corresponding costs in this project.</p>
+<p>I&#39;m not sure how much of this is because of the way <code>comptime</code> works, but I certainly find myself being surprised to discover dead code in our Zig code base (which was caught by neither Zig&#39;s built-in tooling nor <a href="https://github.com/tigerbeetle/tigerbeetle/blob/97c7a8ef385270ebe0e1b75959d3d21d134629df/src/tidy.zig">TigerBeetle&#39;s tidy.zig</a>—by the way, thanks for open-sourcing that, TigerBeetle team!) more often than I&#39;m used to from Rust. Dead Zig code doesn&#39;t affect end users because the compiler doesn&#39;t even emit it into the binary, but obviously it would be better for our code base if we discovered it earlier. </p>
+<p>Finally, the Rust team does an admirable job with backwards compatibility in their releases. Upgrading to new minor releases barely took any effort, and even edition upgrades were mostly painless. Backwards-compatibility is a non-goal for Zig in its current stage of development, which is something we knew about going in and expected. It hasn&#39;t been a big problem for us, but do I miss the trivial upgrade process we had in Rust? Of course!</p>
+<h2>Things I Enjoy About Zig</h2>
+<p>I&#39;ve always enjoyed the <em>subtractive</em> aspect of functional programming. You&#39;d think that subtracting tools from my toolbox that I&#39;m accustomed to reaching for (e.g. mutation, unrestricted side effects, objects and classes) would be frustrating…but once I got used to the different techniques, I really came to enjoy the new properties I had unlocked (cacheability, non-flaking tests, concurrency niceties, reordering operations with no fear that their outputs might change, etc.) and no longer wanted to give <em>those</em> up.</p>
+<p>I have similar feelings about Zig. I like that it doesn&#39;t have macros. I may miss ad hoc polymorphism, but at the same time I enjoy how many problems (including parametric polymorphism) can be addressed by comptime and/or an ordinary function.</p>
+<p>I love the control over data layouts. It&#39;s great having out-the-box access to number types that aren&#39;t a power of 2, like <a href="https://github.com/roc-lang/roc/blob/012eb3d50f3cd0673a653e1b9bc4f653dbee1eb2/src/builtins/dec.zig#L93-L96">u7 and u5</a>, without having to do any bit-level work myself. <a href="https://github.com/roc-lang/roc/blob/012eb3d50f3cd0673a653e1b9bc4f653dbee1eb2/src/base/Ident.zig#L102">Packed structs</a> out-the-box, the option to inline functions at the call site instead of the declaration site…these are things you can get from Rust crates using macros, but I really like having them available without needing a separate dependency.</p>
+<p>Zig&#39;s build toolchain is second to none, which is presumably <a href="https://www.uber.com/us/en/blog/bootstrapping-ubers-infrastructure-on-arm64-with-zig/">why Uber uses it</a> even though they don&#39;t use Zig the language. Building self-contained binaries for things like Alpine Linux and WebAssembly has gone really well, even though we&#39;re doing weird stuff like compiling part of our code base (the &quot;builtins&quot;—Roc&#39;s standard library, essentially) into an opaque binary blob and including it in the final executable.</p>
+<p>I also really like <a href="https://ziglang.org/documentation/0.16.0/#Switching-on-Errors">Zig&#39;s error-handling strategy</a>, and especially how failed heap allocations are normal userspace errors. Roc has a similar &quot;errors naturally accumulate&quot; strategy (except using anonymous sum types that can have payloads), and I like both of those strategies better than <a href="https://docs.rs/anyhow/latest/anyhow/">anyerror</a>, <a href="https://docs.rs/thiserror/latest/thiserror/">thiserror</a>, or vanilla no-dependency error handling in Rust with <a href="https://doc.rust-lang.org/std/result/enum.Result.html">Result</a>. (That said, I do prefer Rust&#39;s postfix unary ? operator over Zig&#39;s <code>try</code> keyword, which is why we adopted the postfix unary ? operator in Roc.)</p>
+<p>Then of course there&#39;s all the project-specific stuff which I mentioned earlier: allocator-based APIs everywhere, an ecosystem of high-performance compiler goodies that we can&#39;t find anywhere else, and so on. I won&#39;t rehash them all here, but I very much enjoy them in addition to appreciating the benefits they&#39;ve had to the project.</p>
+<p>I&#39;ve had a very positive experience with Zig all around, and looking back I&#39;m really happy that we chose it for our rewrite!</p>
+<h2>What&#39;s Next for Roc</h2>
+<p>Next up we&#39;re working towards a formal 0.1.0 release of the language, aiming to have it out before the end of this year. I have a lot of documentation to write!</p>
+<p>By the way, the <a href="https://roc-lang.org/foundation">Roc Programming Language Foundation</a> is a <a href="https://en.wikipedia.org/wiki/501(c)(3)_organization">501(c)(3) nonprofit</a>, so <a href="https://roc-lang.org/donate">donations</a> are tax-free in the US, and we use donations primarily to compensate contributors. If you know of an organization that would like to sponsor our work, financially or in other ways, please <a href="https://roc-lang.org/donate">get in touch</a>! (Separately, if you know anyone at GitHub who could get us into <a href="https://github.com/solutions/industry/nonprofits">GH for Nonprofits</a>, that would be a huge help with our CI backlog.)</p>
+<p>Thank you again to everyone who has helped the language reach this milestone. I couldn&#39;t be more excited for the next one: our first-ever numbered release!</p>
+        </main>
+    </body>
+</html>
