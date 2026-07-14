@@ -8,11 +8,11 @@
 
 For the past year and a half, the team building [Roc](https://www.roc-lang.org/)'s compiler has been rewriting our 300,000 lines of Rust code into [Zig](https://ziglang.org/), for reasons I'll recap below. We recently passed an exciting milestone: feature parity with the original compiler\!
 
-Since the Bun project recently shared [an experience report](https://bun.com/blog/bun-in-rust) of their rewrite in the other direction (from Zig to Rust, although that's only the tip of the iceberg of differences between our rewrites), this seems like a nice time to reflect on how our move from Zig to Rust is going.
+Since the Bun project recently shared [an experience report](https://bun.com/blog/bun-in-rust) of their rewrite in the other direction (from Zig to Rust, although that's only the tip of the iceberg of differences between our rewrites), this seems like a nice time to reflect on how our move from Rust to Zig is going.
 
 ## Passing Feature Parity
 
-Hitting this milestone made it possible to update [Brendan Hansknecht](https://github.com/bhansconnect)'s charming 2024 [WASM-4](https://wasm4.org/) game, [Rocci Bird](https://github.com/lukewilliamboswell/roc-wasm4/blob/d4161199b0a8afd55d24c30dae304b8a0358f433/examples/rocci-bird.roc) (with art by Luke DeVault) to use the new compiler. It's a nice example because the whole game is under a thousand lines of Roc code, and you can [play it on itch.io](http://itch.io) or right here via [WebAssembly](https://webassembly.org/):
+Hitting this milestone made it possible to update [Brendan Hansknecht](https://github.com/bhansconnect)'s charming 2024 [WASM-4](https://wasm4.org/) game, [Rocci Bird](https://github.com/lukewilliamboswell/roc-wasm4/blob/d4161199b0a8afd55d24c30dae304b8a0358f433/examples/rocci-bird.roc) (with art by Luke DeVault) to use the new compiler. It's a nice example because the whole game is under a thousand lines of Roc code, and you can [play it on itch.io](https://itch.io) or right here via [WebAssembly](https://webassembly.org/):
 
 \[embedded rocci bird will go here\]
 
@@ -24,9 +24,9 @@ That said, this is a wonderful milestone to have reached, and I'm extremely grat
 
 * [Anthony Bullard](https://github.com/gamebox) and [Sam Mohr](https://github.com/smores56) for collaborating on the new parser  
 * [Jared Ramirez](https://github.com/jaredramirez) for the new type-checker (among many other things\!)  
-* [Ayaz Hafiz](http://github.com/ayazhafiz/) for [the new lambda set resolution system](https://github.com/ayazhafiz/cor/), plus tons of the original compiler  
+* [Ayaz Hafiz](https://github.com/ayazhafiz/) for [the new lambda set resolution system](https://github.com/ayazhafiz/cor/), plus tons of the original compiler  
 * [Aurélien Geron](https://github.com/ageron) for hand-updating 108 (\!) beginner exercises in [the Roc Exercism course](https://exercism.org/tracks/roc) he originally created  
-* [Stephan](https://github.com/stephdin) for getting the compiler's new "echo" platform running in the browser, so that anyone can now write *and* run basic Roc programs from the [roc-lang.org](http://roc-lang.org) homepage via a 2.5MB WebAssembly binary\!  
+* [Stephan](https://github.com/stephdin) for getting the compiler's new "echo" platform running in the browser, so that anyone can now write *and* run basic Roc programs from the [roc-lang.org](https://roc-lang.org) homepage via a 2.5MB WebAssembly binary\!  
 * [Niclas Åhdén](https://github.com/niclas-ahden), Roc's most prolific production user, for patiently filing helpful bug reports and giving actionable feedback about the upgrade process  
 * [JRI98](https://github.com/JRI98) for methodically reproducing and investigating fuzzer errors and other bugs, closing out issues that no longer reproduced, and more  
 * [Jasper Woudenberg](https://github.com/jwoudenberg) for iterating on API designs for userspace packages using the new compiler  
@@ -145,7 +145,7 @@ If you ported this example to Rust with [salvo](https://docs.rs/salvo/latest/sal
 
 You'd still have some runtime allocations though, because all of those fields except `save_data` have types involving heap allocations.
 
-Roc's equivalent is also fully-type safe, but it performs no any runtime heap allocations at all, and is a one-liner with no type declarations or annotations of any kind:
+Roc's equivalent is also fully type-safe, but it performs no runtime heap allocations at all, and is a one-liner with no type declarations or annotations of any kind:
 
 `read_items = |headers| # …use headers somehow here`
 
@@ -167,7 +167,7 @@ That's it, that's the code. You can try it out for yourself\! The way this works
     * Rust's [slices](https://doc.rust-lang.org/std/primitive.slice.html) and [`Cow`](https://doc.rust-lang.org/std/borrow/enum.Cow.html)s do this, but they require introducing annoying lifetime parameters to structs, which is presumably why libraries like salvo don't do it this way even though it's faster at runtime.  
       * Roc doesn't have lifetime parameters, and you'd actually have to go out of your way to write a HTTP header parser that did allocations instead of sharing like this.
 
-So I wasn't kidding\! This is really is the one line you need, and it gets you fewer heap allocations than even the equivalent Rust version:
+So I wasn't kidding\! This really is the one line you need, and it gets you fewer heap allocations than even the equivalent Rust version:
 
 `read_items = |headers| # …use headers somehow here`
 
@@ -191,7 +191,7 @@ This was one of the main reasons we decided to do a full rewrite in the first pl
 
 Compilers are unusual in that scratch-rewrites are the norm among successful projects. It's often the only way to [self-host](https://en.wikipedia.org/wiki/Self-hosting_\(compilers\)), although not all compilers rewrite into their own language; see for example [TypeScript's rewrite to Go](https://devblogs.microsoft.com/typescript/typescript-native-port/). My position has always been that [Roc's compiler should not self-host](https://www.roc-lang.org/faq#self-hosted-compiler), so the idea that someday the benefits of a rewrite might seem to outweigh [their notorious costs](https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/) had frankly never occurred to me.
 
-Once we'd decided to scratch-rewrite, the next question was whether to choose Rust again. Based on our experiences with both Rust and Zig ([we were already using Zig](https://www.youtube.com/watch?v=jIZpKpLCOiU) for a bunch of primitives in our standard library), [we decided to build the entire compiler in Zig this time](http://gist.github.com/rtfeldman/77fb430ee57b42f5f2ca973a3992532f).
+Once we'd decided to scratch-rewrite, the next question was whether to choose Rust again. Based on our experiences with both Rust and Zig ([we were already using Zig](https://www.youtube.com/watch?v=jIZpKpLCOiU) for a bunch of primitives in our standard library), [we decided to build the entire compiler in Zig this time](https://gist.github.com/rtfeldman/77fb430ee57b42f5f2ca973a3992532f).
 
 ## Why Zig?
 
@@ -228,7 +228,7 @@ The remaining 16% of the vulnerabilities are use-after-frees, which Rust famousl
 
 There are plenty of tradeoffs between Zig's approach and Rust's: compile-time costs versus runtime costs, potential runtime panics versus potential code contortions to satisfy the borrow checker, [safe subsets](https://doc.rust-lang.org/nomicon/meet-safe-and-unsafe.html) versus [whole-language tooling](https://zackoverflow.dev/writing/unsafe-rust-vs-zig/)…it's not a straightforward comparison. Still, both approaches have led to high-profile success stories of reliable, memory-safe software in practice.
 
-On the Zig side, [TigerBeetle](https://tigerbeetle.com/) recently underwent a legendarily meticulous [Jepsen report  that found only two safety bugs](https://tigerbeetle.com/blog/2025-06-06-fuzzer-blind-spots-meet-jepsen/), neither related to memory safety. TigerBeetle does ReleaseSafe builds in production, whereas [Ghostty](https://ghostty.org/), which has [never had a memory-safety CVE](https://app.opencve.io/cve/?vendor=ghostty), does [ReleaseFast](https://ziglang.org/documentation/master/#toc-ReleaseFast). (If you want to learn more about these projects, I've recorded in-depth conversations with their creators: [Joran Greef on TigerBeetle](https://youtu.be/8br5QcmYq84?si=qi7z2z8nSUKxiWlL) and [Mitchell Hashimoto on Ghostty](https://youtu.be/ljoNEH39lyw?si=fnm0emKYj5eH3sPP).)
+On the Zig side, [TigerBeetle](https://tigerbeetle.com/) recently underwent a legendarily meticulous [Jepsen report that found only two safety bugs](https://tigerbeetle.com/blog/2025-06-06-fuzzer-blind-spots-meet-jepsen/), neither related to memory safety. TigerBeetle does ReleaseSafe builds in production, whereas [Ghostty](https://ghostty.org/), which has [never had a memory-safety CVE](https://app.opencve.io/cve/?vendor=ghostty), does [ReleaseFast](https://ziglang.org/documentation/master/#toc-ReleaseFast). (If you want to learn more about these projects, I've recorded in-depth conversations with their creators: [Joran Greef on TigerBeetle](https://youtu.be/8br5QcmYq84?si=qi7z2z8nSUKxiWlL) and [Mitchell Hashimoto on Ghostty](https://youtu.be/ljoNEH39lyw?si=fnm0emKYj5eH3sPP).)
 
 In Roc, we're following Ghostty's lead: using Zig's automatic guards in debug and test builds to catch bugs in development, and omitting them in production so our compiler releases run as fast as possible.
 
@@ -312,9 +312,9 @@ Here's how it works:
   * This means we deserialize basically at the speed of loading the bytes from disk into memory, which also means if they're already in the operating system's disk cache, we deserialize at roughly the speed of [memcpy](https://www.man7.org/linux/man-pages/man3/memcpy.3.html).  
   * This is, as you might guess, significantly faster than redoing lexing, parsing, and semantic analysis from scratch. So when we load a source file, we BLAKE3 hash its bytes to get its source key, go look up whether we have an entry in the global cache, and if so, read it into memory, do some pointer relocations, and we're done.  
 * Each .roc file also has an "implementation key," which is basically its source key recursively hashed together with the implementation keys of everything it imports.  
-  * Type-checking, compile-time execution of constants, and executing tests of pure functions (you can write tests in the top level of .roc files using the \`expect\` keyword, e.g. \`expect my\_fn(123, 456\) \== 789\` and they will get run during \`roc test\`), are all pure functions of a module's implementation key.  
+  * Type-checking, compile-time execution of constants, and executing tests of pure functions (you can write tests in the top level of .roc files using the `expect` keyword, e.g. `expect my_fn(123, 456) == 789` and they will get run during `roc test`), are all pure functions of a module's implementation key.  
   * We cache these under the implementation key in the same way and with the same deserialization strategy as what we do for the source code.  
-    * We use this different key because it can be invalidated if the module's dependencies change, at which point its saves time to be able to go get the cached source key for everything up to type-checking, and not have to redo that work.  
+    * We use this different key because it can be invalidated if the module's dependencies change, at which point it saves time to be able to go get the cached source key for everything up to type-checking, and not have to redo that work.  
   * So now we don't need to pay to redo type inference, or compile-time evaluation, or even rerun pure-function tests, for a given module. We just get its BLAKE3 hash and load a file into memory, and we're basically done. This is *much* cheaper than doing type inference, compile-time evaluation of constants, and re-running all your tests.
 
 This zero-parse deserialization strategy only works because we use 32-bit array [indices over pointers](https://joegm.github.io/blog/indices-not-pointers/) for all of our compiler data structures. Not only is this faster and more memory-efficient than 64-bit pointers, but if we used pointers (like almost all compilers do), deserialization couldn't be zero-parse.
@@ -342,7 +342,7 @@ Another situation where Drop feels like the right tool for the job is when inter
 In contrast, Drop has been a pain point for us because the Rust ecosystem is built around it. Imagine these two APIs for a wrapper around LLVM's C++ library:
 
 1. "Call this function and we'll use a global allocator for all allocations, even if you have an arena you want to be used instead."  
-2. "Call this function passing an allocator, so if you want to use an arena, no problem, you just pass it in.\*
+2. "Call this function passing an allocator, so if you want to use an arena, no problem, you just pass it in."
 
 Our arena-heavy code base always wants the second API, which Zig's ecosystem consistently follows, whereas basically Rust's whole ecosystem is designed to offer the former API every time. So Rust's ecosystem is optimized for the way Bun wants to be written, whereas Zig's is designed for the way Roc wants to be written.
 
@@ -350,9 +350,9 @@ Separately, there's the question of what code we can access off the shelf. I men
 
 As it turns out, LLVM actually has a stable and backwards-compatible API that can be accessed to bypass this upgrade pain: its serialized "bitcode" format. If you write your own LLVM bitcode serializer, then you can tell each new version of LLVM to consume that, and you're off to the races. 
 
-Of course, to access this strategy, you need a handwritten llvm bitcode serializer that's decoupled from the llvm c++ library and its breaking changes. I only know of one implementation of such a thing in the wild: Zig's compiler, which of course is written in Zig. And now there are two implementations in the wild, because Roc's new compiler is reusing that same Zig code. (Thanks for sharing it, Zig team\!)
+Of course, to access this strategy, you need a handwritten LLVM bitcode serializer that's decoupled from the LLVM C++ library and its breaking changes. I only know of one implementation of such a thing in the wild: Zig's compiler, which of course is written in Zig. And now there are two implementations in the wild, because Roc's new compiler is reusing that same Zig code. (Thanks for sharing it, Zig team\!)
 
-Future considerations are relevant here too. Right now our final compiler executable is about 25mb of our own stuff and then over 100mb of LLVM and lld. They also both run very slowly, but today there's no viable alternative out there which does those jobs.
+Future considerations are relevant here too. Right now our final compiler executable is about 25MB of our own stuff and then over 100MB of LLVM and lld. They also both run very slowly, but today there's no viable alternative out there which does those jobs.
 
 I only know of one project that aims to replace both of those dependencies with fast, modern alternatives. Any guesses? Yeah, it's the Zig team. They want it for their own compiler, for the same reasons we do, and there's no Rust equivalent I've ever heard of being developed.
 
@@ -374,7 +374,7 @@ I also miss private struct fields. I understand the reasoning for not having the
 
 Occasionally I miss functions and variables and constants all using `snake_case`.
 
-I do miss aspects of \`unsafe\` and the borrow checker, even though their upsides come packaged with downside I don't miss. I don't think Zig should add either of these, but at the same time there is something calming about only worrying about certain classes of problems inside \`unsafe\` blocks. I can miss that feeling even while not wanting to pay the corresponding costs in this project.
+I do miss aspects of `unsafe` and the borrow checker, even though their upsides come packaged with downside I don't miss. I don't think Zig should add either of these, but at the same time there is something calming about only worrying about certain classes of problems inside `unsafe` blocks. I can miss that feeling even while not wanting to pay the corresponding costs in this project.
 
 I'm not sure how much of this is because of the way `comptime` works, but I certainly find myself being surprised to discover dead code in our Zig code base (which was caught by neither Zig's built-in tooling nor [TigerBeetle's tidy.zig](https://github.com/tigerbeetle/tigerbeetle/blob/97c7a8ef385270ebe0e1b75959d3d21d134629df/src/tidy.zig)—by the way, thanks for open-sourcing that, TigerBeetle team\!) more often than I'm used to from Rust. Dead Zig code doesn't affect end users because the compiler doesn't even emit it into the binary, but obviously it would be better for our code base if we discovered it earlier. 
 
