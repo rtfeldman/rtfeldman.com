@@ -16,7 +16,7 @@ Hitting this milestone made it possible to update [Brendan Hansknecht](https://g
 
 <div class="rocci-embed" style="margin:1rem 0 1.5rem;text-align:center">
 <canvas id="rocci-bird-screen" width="160" height="160" tabindex="0" style="width:min(360px,90vw);height:min(360px,90vw);image-rendering:pixelated;background:#071821;border-radius:6px;outline:none;cursor:pointer;touch-action:none"></canvas>
-<div style="font-size:.85rem;opacity:.65;margin-top:.5rem">Click the game, then press <kbd>Space</kbd> to flap (or tap it on a touchscreen).</div>
+<div style="font-size:.85rem;opacity:.65;margin-top:.5rem">Click or tap the game, then press <kbd>Space</kbd> (or tap) to flap. On mobile you don't have a right arrow key, so refresh the page to restart the game.</div>
 <script>
 // Self-contained WASM-4 runtime for Rocci Bird. Drawing routines and the 8x8
 // font are ported from the reference WASM-4 web runtime; the cart is fetched
@@ -272,7 +272,7 @@ That said, this is a wonderful milestone to have reached, and I'm extremely grat
 
 Thank you all so much! I feel honored that you've put so much of your valuable time into this project. Also thanks to our past and present sponsors—[rwx](https://www.rwx.com/), [Lambda Class](https://lambdaclass.com/), [ohne-makler](https://www.ohne-makler.net/), [martian](https://withmartian.com/), [tweede golf](https://tweedegolf.nl), [Vendr](https://www.vendr.com/), [NoRedInk](https://www.noredink.com/), and many [generous individual sponsors](https://github.com/sponsors/roc-lang/)—who have helped get us to this point by [supporting our contributors](https://roc-lang.org/donate).
 
-Speaking of time: our 487-day rewrite took 476 days longer than [Bun's 11-day rewrite](https://bun.com/blog/bun-in-rust) from their million lines of Zig into a million lines of Rust. There are many reasons for this difference which have nothing to do with Rust or Zig, including the fact that theirs was a direct port whereas we'd decided to rewrite *because* of how much we were going to change. [The techniques they used](https://bun.com/blog/bun-in-rust#claude-rewrite-bun-in-rust) wouldn't have worked in our case.
+Speaking of time: our 487-day rewrite took 476 days longer than [Bun's 11-day rewrite](https://bun.com/blog/bun-in-rust) from their ~500K lines of Zig into Rust. There are many reasons for this difference which have nothing to do with Rust or Zig, including the fact that theirs was a direct port whereas we'd decided to rewrite *because* of how much we were going to change. [The techniques they used](https://bun.com/blog/bun-in-rust#claude-rewrite-bun-in-rust) wouldn't have worked in our case.
 
 The laundry list of changes we made also means comparing our original Rust code base and new Zig code base won't be apples-to-apples. Still, we've reached a nice point to reflect on how the rewrite has gone, both in terms of what new features it has unlocked for Roc programmers, as well as how our experiences with Rust and Zig have compared.
 
