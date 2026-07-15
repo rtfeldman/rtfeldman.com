@@ -289,48 +289,50 @@ Hot loading is standard behavior for interpreted languages like Python, but not 
 
 The HTTP request-handling logic from that video looks like this:
 
-```roc
-# Starts up the server and initializes a database and logger
-# based on environment variables.
-init! = |env, _args| {
-    { log_level, db_credentials } = env.parse()?
+<pre><samp class="code-snippet"><span class="comment"># Starts up the server; initializes a database and logger</span>
+<span class="comment"># based on environment variables.</span>
+init! <span class="kw">=</span> <span class="kw">|</span>env<span class="punctuation separator">,</span> _args<span class="kw">|</span> <span class="punctuation section">{</span>
+    <span class="punctuation section">{</span> log_level<span class="punctuation separator">,</span> db_credentials <span class="punctuation section">}</span> <span class="kw">=</span> env.parse()<span class="kw">?</span>
 
-    db = init_db!(db_credentials)? 
-    log = init_logger!(log_level)?`
+    db <span class="kw">=</span> init_db!(db_credentials)<span class="kw">?</span>
+    log <span class="kw">=</span> init_logger!(log_level)<span class="kw">?</span>
 
-    # (other initialization work would happen here)
+    <span class="comment"># (other such initializations would happen here)</span>
 
-    Ok({ db, log }) 
-}
+    <span class="upperident">Ok</span><span class="punctuation section">(</span><span class="punctuation section">{</span> db<span class="punctuation separator">,</span> log <span class="punctuation section">}</span><span class="punctuation section">)</span>
+<span class="punctuation section">}</span>
 
-# Handles an incoming HTTP request (HTTP verb,  
-# path, headers, body) using the db and log that 
-# we initialized during init!() 
-handle_req! = |{ db, log }, verb, path, headers, body| { 
-    auth_token = headers.x_auth_token 
-    user_agent = headers.user_agent
+<span class="comment"># Handles an incoming HTTP request (HTTP verb,</span>
+<span class="comment"># path, headers, body) using the db and log that</span>
+<span class="comment"># we initialized during init!()</span>
+handle_req! <span class="kw">=</span> <span class="kw">|</span><span class="punctuation section">{</span> db<span class="punctuation separator">,</span> log <span class="punctuation section">}</span><span class="punctuation separator">,</span> verb<span class="punctuation separator">,</span> path<span class="punctuation separator">,</span> headers<span class="punctuation separator">,</span> body<span class="kw">|</span> <span class="punctuation section">{</span>
+    auth_token <span class="kw">=</span> headers.x_auth_token
+    user_agent <span class="kw">=</span> headers.user_agent
 
-    app = App.init({ auth_token, user_agent, db, log })?
+    app <span class="kw">=</span> <span class="upperident">App</span>.init<span class="punctuation section">(</span><span class="punctuation section">{</span> auth_token<span class="punctuation separator">,</span> user_agent<span class="punctuation separator">,</span> db<span class="punctuation separator">,</span> log <span class="punctuation section">}</span><span class="punctuation section">)</span><span class="kw">?</span>
 
-    match (verb, path) { 
-        (GET, "/users/${id}") => app.user_profile!(id) 
-        (GET, "/users/${id}/${page}") => match page { 
-            "" | "profile" => app.user_profile!(user_id) 
-            "settings" => app.user_settings!(user_id) 
-            "posts/${post_id}" => { 
-                app.user_post!(user_id, post_id) 
-            } 
-            _ => app.not_found!(verb, path) 
-        } 
-        (POST, "/posts/new") => { 
-            app.new_post!(body) 
-        } 
-        _ => app.not_found!(verb, path) 
-    } 
-}
-```
+    <span class="kw">match</span> <span class="punctuation section">(</span>verb<span class="punctuation separator">,</span> path<span class="punctuation section">)</span> <span class="punctuation section">{</span>
+        <span class="punctuation section">(</span><span class="upperident">GET</span><span class="punctuation separator">,</span> <span class="string">"/users/</span><span class="kw">${</span>id<span class="kw">}</span><span class="string">"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> app.user_profile!(id)
+        <span class="punctuation section">(</span><span class="upperident">GET</span><span class="punctuation separator">,</span> <span class="string">"/users/</span><span class="kw">${</span>id<span class="kw">}</span><span class="string">/</span><span class="kw">${</span>page<span class="kw">}</span><span class="string">"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> <span class="kw">match</span> page <span class="punctuation section">{</span>
+            <span class="string">""</span> <span class="kw">|</span> <span class="string">"profile"</span> <span class="kw">=&gt;</span> app.user_profile!(user_id)
+            <span class="string">"settings"</span> <span class="kw">=&gt;</span> app.user_settings!(user_id)
+            <span class="string">"posts/</span><span class="kw">${</span>post_id<span class="kw">}</span><span class="string">"</span> <span class="kw">=&gt;</span> <span class="punctuation section">{</span>
+                app.user_post!(user_id<span class="punctuation separator">,</span> post_id)
+            <span class="punctuation section">}</span>
+            _ <span class="kw">=&gt;</span> app.not_found!(verb<span class="punctuation separator">,</span> path)
+        <span class="punctuation section">}</span>
+        <span class="punctuation section">(</span><span class="upperident">POST</span><span class="punctuation separator">,</span> <span class="string">"/posts/new"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> <span class="punctuation section">{</span>
+            app.new_post!(body)
+        <span class="punctuation section">}</span>
+        _ <span class="kw">=&gt;</span> app.not_found!(verb<span class="punctuation separator">,</span> path)
+    <span class="punctuation section">}</span>
+<span class="punctuation section">}</span></samp></pre>
 
-That `"/users/${id}"` syntax is not implemented with [parsing template strings at runtime](https://expressjs.com/en/guide/routing/#route-parameters), but rather with a new language feature: string interpolation inside pattern matching. Not only is this type-safe at compile time, this entire snippet [performs *zero heap allocations*](/todo/link/to/relevant/test/suite). I'd expect the typical language that ships with hot code loading to average more than 1 allocation per line of code here…but Roc is aiming high on ergonomics, type safety, *and* performance!
+This uses several features we introduced in the new compiler. For example, that `"/users/${id}"` syntax is not implemented with [parsing template strings at runtime](https://expressjs.com/en/guide/routing/#route-parameters), but rather with a new language feature: string interpolation inside pattern matching.
+
+Not only is this type-safe at compile time, this entire code snippet performs *zero heap allocations*. (We even have a regression test which sends various requests to a HTTP server running this code, and the test fails if the server attempts a single heap allocation at any time.) I'd expect the typical language that ships with hot code loading to average closer to 1 allocation per line of code here…but Roc is aiming high on ergonomics, type safety, *and* performance!
+
+In what will become a recurring theme, hot code loading is innately memory-unsafe. We generate arbitrary machine instructions and have the CPU execute them—already memory-unsafe, but that's every compiler's job—and on top of that, we swap out some instructions for others while the compiled program is still running. There's a lot to get right, and we appreciate all the help we can get from our tools!
 
 ## Why a Scratch-Rewrite?
 
@@ -472,22 +474,15 @@ Personally I wouldn't label `SmallArena::new` as unsafe. `unsafe` is supposed to
 
 ## Ecosystem Relevance
 
-Rust creator Graydon Hoare once jokingly described Rust as "Linear ML in C++ clothing." When I first heard that, I assumed the "C++ clothing" he was referring to was syntax, but over time I've increasingly thought of [`Drop`](https://doc.rust-lang.org/std/ops/trait.Drop.html)—which is almost a direct translation of RAII—as being part of that "C++ clothing." You could certainly make a Linear ML without `Drop` if you wanted to!
+The Bun post talks about how Rust's [`Drop`](https://doc.rust-lang.org/std/ops/trait.Drop.html) could help with their unusual JavaScript inetrop challenges:
 
-`Drop` makes working in Rust feel, by default, like working in a language with a tracing garbage collector (like Go, or maybe OCaml—the language which Rust's initial compiler was written in). "Garbage-collected, except with lifetime parameters in lots of type signatures, and with an additional borrow checking step on top of the usual type-checking step" is how I felt about using Rust when I was first getting into it.
+> [...] other users of Zig don't have the bugs we had, and mixing GC with manually-managed memory is an uncommon enough thing for software to need that no language really designs for it. [...] One common way to reduce this class of issue is to ensure cleanup code is always run exactly once for code that needs it. Zig is designed to be a simple language with no hidden control flow, and so it prefers the explicit `defer` keyword to run code at the end of a scope over C++'s implicit ~Destructor or Rust's implicit `Drop`.
 
-I can think of two situations where `Drop` seems like pretty much exactly the right tool for the job. One is where you want to do a lot of automatic reference counting, like in Zed's code base. Manual reference counting is notoriously difficult to get right, and the bugs when you get it wrong are notoriously hard to track down. Automatic reference counting via `Drop` is way less error-prone.
+Our project is in almost the opposite boat: `Drop` has been a pain point for us because the Rust ecosystem is built around the assumption that everyone is using a global allocator and using `Drop` for implicit deallocation. But we want to be doing almost the opposite: separate [arenas](https://en.wikipedia.org/wiki/Region-based_memory_management) for each module and stage of compilation. Zig's ecosystem consistently passes around allocators, which is exactly what we want, whereas off-the-shelf Rust crates almost always assume a single global allocator.
 
-Another situation where `Drop` feels like the right tool for the job is when interfacing with a ton of memory that's managed by a tracing collector like JavaScript's—in other words, what Bun is doing. Before ultimately moving to Rust, they mentioned having developed their own "smart pointer" system in Zig to deal with this, but I'd expect `Drop` to be a much more natural fit for what they wanted to do.
+Simply put, Rust's ecosystem is optimized for the way Bun wants to be written, whereas Zig's is designed for the way Roc wants to be written.
 
-In contrast, `Drop` has been a pain point for us because the Rust ecosystem is built around it. Imagine these two APIs for a wrapper around LLVM's C++ library:
-
-1. "Call this function and we'll use a global allocator for all allocations, even if you have an arena you want to be used instead.
-2. "Call this function passing an allocator, so if you want to use an arena, no problem, you just pass it in."
-
-Our arena-heavy code base always wants the second API, which Zig's ecosystem consistently follows, whereas basically Rust's whole ecosystem is designed to offer the former API every time. So Rust's ecosystem is optimized for the way Bun wants to be written, whereas Zig's is designed for the way Roc wants to be written.
-
-Separately, there's the question of what code we can access off the shelf. I mentioned LLVM earlier because, although it's a critical dependency for our optimizer (we do our own optimizations, but LLVM does a bunch more on top), it's also a project that makes major breaking API changes on a regular basis. Upgrading to new LLVM versions has been a major source of pain and lost time for Roc, but we keep doing it because we want the new optimizations.
+Separately, there's the question of what relevant code we can access off the shelf. LLVM is a critical dependency for our optimizer (we do our own optimizations, but LLVM does more on top), but it's also a project that makes major breaking API changes on a regular basis. Upgrading to new LLVM versions has been a major source of pain and lost time for Roc, but we keep doing it because we want the new optimizations.
 
 As it turns out, LLVM actually has a stable and backwards-compatible API that can be accessed to bypass this upgrade pain: its serialized "bitcode" format. If you write your own LLVM bitcode serializer, then you can tell each new version of LLVM to consume that, and you're off to the races. 
 

@@ -313,48 +313,48 @@
 </tr>
 </tbody></table>
 <p>The HTTP request-handling logic from that video looks like this:</p>
-<pre><code># Starts up the server; initializes a database and logger
-# based on environment variables.
-init! = |env, _args| {
-    { log_level, db_credentials } = env.parse()?
+<pre><samp class="code-snippet"><span class="comment"># Starts up the server; initializes a database and logger</span>
+<span class="comment"># based on environment variables.</span>
+init! <span class="kw">=</span> <span class="kw">|</span>env<span class="punctuation separator">,</span> _args<span class="kw">|</span> <span class="punctuation section">{</span>
+    <span class="punctuation section">{</span> log_level<span class="punctuation separator">,</span> db_credentials <span class="punctuation section">}</span> <span class="kw">=</span> env.parse()<span class="kw">?</span>
 
-    db = init_db!(db_credentials)?
-    log = init_logger!(log_level)?
+    db <span class="kw">=</span> init_db!(db_credentials)<span class="kw">?</span>
+    log <span class="kw">=</span> init_logger!(log_level)<span class="kw">?</span>
 
-    # (other such initializations would happen here)
+    <span class="comment"># (other such initializations would happen here)</span>
 
-    Ok({ db, log })
-}
+    <span class="upperident">Ok</span><span class="punctuation section">(</span><span class="punctuation section">{</span> db<span class="punctuation separator">,</span> log <span class="punctuation section">}</span><span class="punctuation section">)</span>
+<span class="punctuation section">}</span>
 
-# Handles an incoming HTTP request (HTTP verb,
-# path, headers, body) using the db and log that
-# we initialized during init!()
-handle_req! = |{ db, log }, verb, path, headers, body| {
-    auth_token = headers.x_auth_token
-    user_agent = headers.user_agent
+<span class="comment"># Handles an incoming HTTP request (HTTP verb,</span>
+<span class="comment"># path, headers, body) using the db and log that</span>
+<span class="comment"># we initialized during init!()</span>
+handle_req! <span class="kw">=</span> <span class="kw">|</span><span class="punctuation section">{</span> db<span class="punctuation separator">,</span> log <span class="punctuation section">}</span><span class="punctuation separator">,</span> verb<span class="punctuation separator">,</span> path<span class="punctuation separator">,</span> headers<span class="punctuation separator">,</span> body<span class="kw">|</span> <span class="punctuation section">{</span>
+    auth_token <span class="kw">=</span> headers.x_auth_token
+    user_agent <span class="kw">=</span> headers.user_agent
 
-    app = App.init({ auth_token, user_agent, db, log })?
+    app <span class="kw">=</span> <span class="upperident">App</span>.init<span class="punctuation section">(</span><span class="punctuation section">{</span> auth_token<span class="punctuation separator">,</span> user_agent<span class="punctuation separator">,</span> db<span class="punctuation separator">,</span> log <span class="punctuation section">}</span><span class="punctuation section">)</span><span class="kw">?</span>
 
-    match (verb, path) {
-        (GET, "/users/${id}") =&gt; app.user_profile!(id)
-        (GET, "/users/${id}/${page}") =&gt; match page {
-            "" | "profile" =&gt; app.user_profile!(user_id)
-            "settings" =&gt; app.user_settings!(user_id)
-            "posts/${post_id}" =&gt; {
-                app.user_post!(user_id, post_id)
-            }
-            _ =&gt; app.not_found!(verb, path)
-        }
-        (POST, "/posts/new") =&gt; {
+    <span class="kw">match</span> <span class="punctuation section">(</span>verb<span class="punctuation separator">,</span> path<span class="punctuation section">)</span> <span class="punctuation section">{</span>
+        <span class="punctuation section">(</span><span class="upperident">GET</span><span class="punctuation separator">,</span> <span class="string">"/users/</span><span class="kw">${</span>id<span class="kw">}</span><span class="string">"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> app.user_profile!(id)
+        <span class="punctuation section">(</span><span class="upperident">GET</span><span class="punctuation separator">,</span> <span class="string">"/users/</span><span class="kw">${</span>id<span class="kw">}</span><span class="string">/</span><span class="kw">${</span>page<span class="kw">}</span><span class="string">"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> <span class="kw">match</span> page <span class="punctuation section">{</span>
+            <span class="string">""</span> <span class="kw">|</span> <span class="string">"profile"</span> <span class="kw">=&gt;</span> app.user_profile!(user_id)
+            <span class="string">"settings"</span> <span class="kw">=&gt;</span> app.user_settings!(user_id)
+            <span class="string">"posts/</span><span class="kw">${</span>post_id<span class="kw">}</span><span class="string">"</span> <span class="kw">=&gt;</span> <span class="punctuation section">{</span>
+                app.user_post!(user_id<span class="punctuation separator">,</span> post_id)
+            <span class="punctuation section">}</span>
+            _ <span class="kw">=&gt;</span> app.not_found!(verb<span class="punctuation separator">,</span> path)
+        <span class="punctuation section">}</span>
+        <span class="punctuation section">(</span><span class="upperident">POST</span><span class="punctuation separator">,</span> <span class="string">"/posts/new"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> <span class="punctuation section">{</span>
             app.new_post!(body)
-        }
-        _ =&gt; app.not_found!(verb, path)
-    }
-}
-</code></pre>
+        <span class="punctuation section">}</span>
+        _ <span class="kw">=&gt;</span> app.not_found!(verb<span class="punctuation separator">,</span> path)
+    <span class="punctuation section">}</span>
+<span class="punctuation section">}</span></samp></pre>
 <p>This uses several features we introduced in the new compiler. For example, that <code>"/users/${id}"</code> syntax is not implemented with <a href="https://expressjs.com/en/guide/routing/#route-parameters">parsing template strings at runtime</a>, but rather with a new language feature: string interpolation inside pattern matching.</p>
 <p>Not only is this type-safe at compile time, this entire code snippet performs <em>zero heap allocations</em>. (We even have a regression test which sends various requests to a HTTP server running this code, and the test fails if the server attempts a single heap allocation at any time.) I'd expect the typical language that ships with hot code loading to average closer to 1 allocation per line of code here…but Roc is aiming high on ergonomics, type safety, <em>and</em> performance!</p>
 <p>In what will become a recurring theme, hot code loading is innately memory-unsafe. We generate arbitrary machine instructions and have the CPU execute them—already memory-unsafe, but that's every compiler's job—and on top of that, we swap out some instructions for others while the compiled program is still running. There's a lot to get right, and we appreciate all the help we can get from our tools!</p>
+
 <h2>Compile-Time Evaluation of Pure Functions</h2>
 <p>We didn't get zero heap allocations in this common use case by chance; we got it by designing and implementing the new compiler to aggressively avoid doing unnecessary work at runtime. One of the strategies which avoids runtime allocations in this specific example is doing work at compile time instead of runtime.</p>
 <p>As an example, Python's popular FastAPI server framework lets you parse HTTP headers directly into Python objects based on the field names defined in the object's class. Here's a simplified <a href="https://fastapi.tiangolo.com/tutorial/header-param-models/#check-the-docs">example from FastAPI's docs</a>:</p>

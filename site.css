@@ -238,6 +238,12 @@ pre > code {
     color: var(--code-color);
 }
 
+.code-snippet {
+    --primary-1: #9b6bf2;
+    --primary-2: #7c38f5;
+    --code-color: white;
+}
+
 video.inline-video {
     display: block;
     width: 100%;
@@ -508,7 +514,7 @@ li {
 /* Comments `#` and Documentation comments `##` */
 samp .comment,
 code .comment {
-    color: #a9a9a9;
+    color: #ccc;
 }
 
 /* Number, String, Tag literals */
@@ -524,14 +530,12 @@ samp .constant,
 code .constant,
 samp .literal,
 code .literal {
-    color: #59d7e7;
+    color: var(--dark-cyan);
 }
 
 /* Keywords and punctuation */
 samp .keyword,
 code .keyword,
-samp .bracket,
-code .bracket,
 samp .punctuation.section,
 code .punctuation.section,
 samp .punctuation.separator,
@@ -540,7 +544,7 @@ samp .punctuation.terminator,
 code .punctuation.terminator,
 samp .kw,
 code .kw {
-    color: #5fb1f7;
+    color: var(--primary-1);
 }
 
 /* Operators */
@@ -554,6 +558,14 @@ code .colon {
 }
 
 /* Delimieters */
+samp .delimiter,
+code .delimiter {
+    color: var(--primary-1);
+}
+
+/* Compatibility with older hand-highlighted posts. */
+samp .bracket,
+code .bracket,
 samp .delimeter,
 code .delimeter {
     color: var(--primary-1);
