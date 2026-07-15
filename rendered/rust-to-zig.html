@@ -26,58 +26,54 @@
   var W = 160, H = 160;
   var ADDR_PALETTE = 0x04, ADDR_DRAW_COLORS = 0x14, ADDR_GAMEPAD1 = 0x16;
   var ADDR_SYSTEM_FLAGS = 0x1f, ADDR_FRAMEBUFFER = 0xa0;
-  var SYSTEM_PRESERVE_FRAMEBUFFER = 1;
-
-  function b64ToBytes(s) { return Uint8Array.from(atob(s), function (c) { return c.charCodeAt(0); }); }
-  var FONT = b64ToBytes("///////////Hx8fPz//P/5OTk///////kwGTk5MBk//vgy+D6QPv/51bN+/ZtXP/jycnjyUzgf/Pz8////////Pnz8/P5/P/n8/n5+fPn///k8cBx5P////n54Hn5//////////Pz5////+B////////////z8///fv379+/f//Hszk5OZvH/+fH5+fn54H/gznxw4cfAf+B8+fD+TmD/+PDkzMB8/P/Az8D+fk5g//Dnz8DOTmD/wE58+fPz8//hzsbh2F5g/+DOTmB+fOH///Pz//Pz////8/P/8/Pn//z58+fz+fz////Af8B////n8/n8+fPn/+DATnzx//H/4N9RVVBf4P/x5M5OQE5Of8DOTkDOTkD/8OZPz8/mcP/BzM5OTkzB/8BPz8DPz8B/wE/PwM/Pz//wZ8/MTmZwf85OTkBOTk5/4Hn5+fn54H/+fn5+fk5g/85MycPByMx/5+fn5+fn4H/OREBASk5Of85GQkBITE5/4M5OTk5OYP/Azk5OQM/P/+DOTk5ITOF/wM5OTEHIzH/hzM/g/k5g/+B5+fn5+fn/zk5OTk5OYP/OTk5EYPH7/85OSkBARE5/zkRg8eDETn/mZmZw+fn5/8B8ePHjx8B/8PPz8/Pz8P/f7/f7/f7/f+H5+fn5+eH/8eT/////////////////wHv9///////////g/mBOYH/Pz8DOTk5g////4E/Pz+B//n5gTk5OYH///+DOQE/g//x54Hn5+fn////gTk5gfmDPz8DOTk5Of/n/8fn5+eB//P/4/Pz8/OHPz8xAwcjMf/H5+fn5+eB////A0lJSUn///8DOTk5Of///4M5OTmD////Azk5Az8///+BOTmB+fn//5GPn5+f////gz+D+QP/5+eB5+fn5////zk5OTmB////mZmZw+f///9JSUlJgf///zkBxwE5////OTk5gfmD//8B48ePAf/z5+fP5+fz/+fn5+fn5+f/n8/P58/Pn////49F4///////////k5P/gykpESkpg/+DOQkRITmD//////////////////////+DESF9IRGD/4MRCX0JEYP/gxE5VRERg/+DERFVORGD////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////5//n58fHx//vgykvKYPv/8OZnwOfnwH//6Xb29ul//+ZmcOB54Hn/+fn5//n5+f/w5mH2+GZw/+T/////////8O9Zl5eZr3Dh8OTw///////yZMnk8n/////gfn5///////////////DvUZaRlq9w4P/////////79fv///////n54Hn5/+B/8fz58P/////w+fzx//////37///////////MzMzMwk/wZW1lcH19f/////Pz/////////////fP58fnw//////Hk5PH//////8nk8mTJ///vTu3rdmxff+9O7ep3btx/x271y3ZsX3/x//HnzkBg//f78eTOQE5//fvx5M5ATn/x5PHkzkBOf/Lp8eTOQE5/5P/x5M5ATn/79fHkzkBOf/BhychBych/8OZPz+Zw/fP3+8BPwM/Af/37wE/Az8B/8eTAT8DPwH/k/8BPwM/Af/v94Hn5+eB//fvgefn54H/58OB5+fngf+Z/4Hn5+eB/4eTmQmZk4f/y6cZCQEhMf/f74M5OTmD//fvgzk5OYP/x5ODOTk5g//Lp4M5OTmD/5P/gzk5OYP//7vX79e7//+DOTEpGTmD/9/vOTk5OYP/9+85OTk5g//Hk/85OTmD/5P/OTk5OYP/9++ZmcPn5/8/Azk5OQM//8OZmZOZiZP/3++D+YE5gf/374P5gTmB/8eTg/mBOYH/y6eD+YE5gf+T/4P5gTmB/+/Xg/mBOYH///+D6YEvg////4E/P4H3z9/vgzkBP4P/9++DOQE/g//Hk4M5AT+D/5P/gzkBP4P/3+//x+fngf/37//H5+eB/8eT/8fn54H/k//H5+fngf+bh2eDOTmD/8unAzk5OTn/3++DOTk5g//374M5OTmD/8eTgzk5OYP/y6eDOTk5g/+T/4M5OTmD///n/4H/5/////+DMSkZg//f7zk5OTmB//fvOTk5OYH/x5P/OTk5gf+T/zk5OTmB//fvOTk5gfmDPz8DOTkDPz+T/zk5OYH5gw==");
-
-  var memory = new WebAssembly.Memory({ initial: 1, maximum: 1 });
+  var SYSTEM_PRESERVE_FRAMEBUFFER = 1;<p>  function b64ToBytes(s) { return Uint8Array.from(atob(s), function (c) { return c.charCodeAt(0); }); }
+  var FONT = b64ToBytes("///////////Hx8fPz//P/5OTk///////kwGTk5MBk//vgy+D6QPv/51bN+/ZtXP/jycnjyUzgf/Pz8////////Pnz8/P5/P/n8/n5+fPn///k8cBx5P////n54Hn5//////////Pz5////+B////////////z8///fv379+/f//Hszk5OZvH/+fH5+fn54H/gznxw4cfAf+B8+fD+TmD/+PDkzMB8/P/Az8D+fk5g//Dnz8DOTmD/wE58+fPz8//hzsbh2F5g/+DOTmB+fOH///Pz//Pz////8/P/8/Pn//z58+fz+fz////Af8B////n8/n8+fPn/+DATnzx//H/4N9RVVBf4P/x5M5OQE5Of8DOTkDOTkD/8OZPz8/mcP/BzM5OTkzB/8BPz8DPz8B/wE/PwM/Pz//wZ8/MTmZwf85OTkBOTk5/4Hn5+fn54H/+fn5+fk5g/85MycPByMx/5+fn5+fn4H/OREBASk5Of85GQkBITE5/4M5OTk5OYP/Azk5OQM/P/+DOTk5ITOF/wM5OTEHIzH/hzM/g/k5g/+B5+fn5+fn/zk5OTk5OYP/OTk5EYPH7/85OSkBARE5/zkRg8eDETn/mZmZw+fn5/8B8ePHjx8B/8PPz8/Pz8P/f7/f7/f7/f+H5+fn5+eH/8eT/////////////////wHv9///////////g/mBOYH/Pz8DOTk5g////4E/Pz+B//n5gTk5OYH///+DOQE/g//x54Hn5+fn////gTk5gfmDPz8DOTk5Of/n/8fn5+eB//P/4/Pz8/OHPz8xAwcjMf/H5+fn5+eB////A0lJSUn///8DOTk5Of///4M5OTmD////Azk5Az8///+BOTmB+fn//5GPn5+f////gz+D+QP/5+eB5+fn5////zk5OTmB////mZmZw+f///9JSUlJgf///zkBxwE5////OTk5gfmD//8B48ePAf/z5+fP5+fz/+fn5+fn5+f/n8/P58/Pn////49F4///////////k5P/gykpESkpg/+DOQkRITmD//////////////////////+DESF9IRGD/4MRCX0JEYP/gxE5VRERg/+DERFVORGD////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////5//n58fHx//vgykvKYPv/8OZnwOfnwH//6Xb29ul//+ZmcOB54Hn/+fn5//n5+f/w5mH2+GZw/+T/////////8O9Zl5eZr3Dh8OTw///////yZMnk8n/////gfn5///////////////DvUZaRlq9w4P/////////79fv///////n54Hn5/+B/8fz58P/////w+fzx//////37///////////MzMzMwk/wZW1lcH19f/////Pz/////////////fP58fnw//////Hk5PH//////8nk8mTJ///vTu3rdmxff+9O7ep3btx/x271y3ZsX3/x//HnzkBg//f78eTOQE5//fvx5M5ATn/x5PHkzkBOf/Lp8eTOQE5/5P/x5M5ATn/79fHkzkBOf/BhychBych/8OZPz+Zw/fP3+8BPwM/Af/37wE/Az8B/8eTAT8DPwH/k/8BPwM/Af/v94Hn5+eB//fvgefn54H/58OB5+fngf+Z/4Hn5+eB/4eTmQmZk4f/y6cZCQEhMf/f74M5OTmD//fvgzk5OYP/x5ODOTk5g//Lp4M5OTmD/5P/gzk5OYP//7vX79e7//+DOTEpGTmD/9/vOTk5OYP/9+85OTk5g//Hk/85OTmD/5P/OTk5OYP/9++ZmcPn5/8/Azk5OQM//8OZmZOZiZP/3++D+YE5gf/374P5gTmB/8eTg/mBOYH/y6eD+YE5gf+T/4P5gTmB/+/Xg/mBOYH///+D6YEvg////4E/P4H3z9/vgzkBP4P/9++DOQE/g//Hk4M5AT+D/5P/gzkBP4P/3+//x+fngf/37//H5+eB/8eT/8fn54H/k//H5+fngf+bh2eDOTmD/8unAzk5OTn/3++DOTk5g//374M5OTmD/8eTgzk5OYP/y6eDOTk5g/+T/4M5OTmD///n/4H/5/////+DMSkZg//f7zk5OTmB//fvOTk5OYH/x5P/OTk5gf+T/zk5OTmB//fvOTk5gfmDPz8DOTkDPz+T/zk5OYH5gw==");</p>
+<p>  var memory = new WebAssembly.Memory({ initial: 1, maximum: 1 });
   var u8 = new Uint8Array(memory.buffer);
   var dv = new DataView(memory.buffer);
-  var fb = new Uint8Array(memory.buffer, ADDR_FRAMEBUFFER, (W * H) >>> 2);
-  function drawColors() { return dv.getUint16(ADDR_DRAW_COLORS, true); }
-
-  function drawPoint(color, x, y) {
-    var idx = (W * y + x) >>> 2, shift = (x & 0x3) << 1, mask = 0x3 << shift;
-    fb[idx] = (color << shift) | (fb[idx] & ~mask);
+  var fb = new Uint8Array(memory.buffer, ADDR_FRAMEBUFFER, (W * H) &gt;&gt;&gt; 2);
+  function drawColors() { return dv.getUint16(ADDR_DRAW_COLORS, true); }</p>
+<p>  function drawPoint(color, x, y) {
+    var idx = (W * y + x) &gt;&gt;&gt; 2, shift = (x &amp; 0x3) &lt;&lt; 1, mask = 0x3 &lt;&lt; shift;
+    fb[idx] = (color &lt;&lt; shift) | (fb[idx] &amp; ~mask);
   }
-  function drawPointU(color, x, y) { if (x >= 0 && x < W && y >= 0 && y < H) drawPoint(color, x, y); }
+  function drawPointU(color, x, y) { if (x &gt;= 0 &amp;&amp; x &lt; W &amp;&amp; y &gt;= 0 &amp;&amp; y &lt; H) drawPoint(color, x, y); }
   function hlineFast(color, startX, y, endX) {
-    var fillEnd = endX - (endX & 3), fillStart = Math.min((startX + 3) & ~3, fillEnd);
-    if (fillEnd - fillStart > 3) {
-      for (var xx = startX; xx < fillStart; xx++) drawPoint(color, xx, y);
-      fb.fill(color * 0x55, (W * y + fillStart) >>> 2, (W * y + fillEnd) >>> 2);
+    var fillEnd = endX - (endX &amp; 3), fillStart = Math.min((startX + 3) &amp; ~3, fillEnd);
+    if (fillEnd - fillStart &gt; 3) {
+      for (var xx = startX; xx &lt; fillStart; xx++) drawPoint(color, xx, y);
+      fb.fill(color * 0x55, (W * y + fillStart) &gt;&gt;&gt; 2, (W * y + fillEnd) &gt;&gt;&gt; 2);
       startX = fillEnd;
     }
-    for (var x2 = startX; x2 < endX; x2++) drawPoint(color, x2, y);
+    for (var x2 = startX; x2 &lt; endX; x2++) drawPoint(color, x2, y);
   }
   function hlineU(color, startX, y, endX) {
-    if (y >= 0 && y < H) { if (startX < 0) startX = 0; if (endX > W) endX = W; if (startX < endX) hlineFast(color, startX, y, endX); }
+    if (y &gt;= 0 &amp;&amp; y &lt; H) { if (startX &lt; 0) startX = 0; if (endX &gt; W) endX = W; if (startX &lt; endX) hlineFast(color, startX, y, endX); }
   }
-  function drawHLine(x, y, len) { var d = drawColors() & 0xf; if (d === 0) return; hlineU((d - 1) & 0x3, x, y, x + len); }
+  function drawHLine(x, y, len) { var d = drawColors() &amp; 0xf; if (d === 0) return; hlineU((d - 1) &amp; 0x3, x, y, x + len); }
   function drawVLine(x, y, len) {
-    if (y + len <= 0 || x < 0 || x >= W) return;
-    var d = drawColors() & 0xf; if (d === 0) return;
-    var sY = Math.max(0, y), eY = Math.min(H, y + len), sc = (d - 1) & 0x3;
-    for (var yy = sY; yy < eY; yy++) drawPoint(sc, x, yy);
+    if (y + len &lt;= 0 || x &lt; 0 || x &gt;= W) return;
+    var d = drawColors() &amp; 0xf; if (d === 0) return;
+    var sY = Math.max(0, y), eY = Math.min(H, y + len), sc = (d - 1) &amp; 0x3;
+    for (var yy = sY; yy &lt; eY; yy++) drawPoint(sc, x, yy);
   }
   function drawRect(x, y, width, height) {
     var sX = Math.max(0, x), sY = Math.max(0, y), eXU = x + width, eYU = y + height;
     var eX = Math.max(0, Math.min(eXU, W)), eY = Math.max(0, Math.min(eYU, H));
-    var dcv = drawColors(), dc0 = dcv & 0xf, dc1 = (dcv >>> 4) & 0xf, yy;
-    if (dc0 !== 0) { var fc = (dc0 - 1) & 0x3; for (yy = sY; yy < eY; ++yy) hlineFast(fc, sX, yy, eX); }
+    var dcv = drawColors(), dc0 = dcv &amp; 0xf, dc1 = (dcv &gt;&gt;&gt; 4) &amp; 0xf, yy;
+    if (dc0 !== 0) { var fc = (dc0 - 1) &amp; 0x3; for (yy = sY; yy &lt; eY; ++yy) hlineFast(fc, sX, yy, eX); }
     if (dc1 !== 0) {
-      var st = (dc1 - 1) & 0x3;
-      if (x >= 0 && x < W) for (yy = sY; yy < eY; ++yy) drawPoint(st, x, yy);
-      if (eXU > 0 && eXU <= W) for (yy = sY; yy < eY; ++yy) drawPoint(st, eXU - 1, yy);
-      if (y >= 0 && y < H) hlineFast(st, sX, y, eX);
-      if (eYU > 0 && eYU <= H) hlineFast(st, sX, eYU - 1, eX);
+      var st = (dc1 - 1) &amp; 0x3;
+      if (x &gt;= 0 &amp;&amp; x &lt; W) for (yy = sY; yy &lt; eY; ++yy) drawPoint(st, x, yy);
+      if (eXU &gt; 0 &amp;&amp; eXU &lt;= W) for (yy = sY; yy &lt; eY; ++yy) drawPoint(st, eXU - 1, yy);
+      if (y &gt;= 0 &amp;&amp; y &lt; H) hlineFast(st, sX, y, eX);
+      if (eYU &gt; 0 &amp;&amp; eYU &lt;= H) hlineFast(st, sX, eYU - 1, eX);
     }
   }
   function drawOval(x, y, width, height) {
-    var dcv = drawColors(), dc0 = dcv & 0xf, dc1 = (dcv >>> 4) & 0xf;
+    var dcv = drawColors(), dc0 = dcv &amp; 0xf, dc1 = (dcv &gt;&gt;&gt; 4) &amp; 0xf;
     if (dc1 === 0xf) return;
-    var st = (dc1 - 1) & 0x3, fc = (dc0 - 1) & 0x3;
+    var st = (dc1 - 1) &amp; 0x3, fc = (dc0 - 1) &amp; 0x3;
     var a = width - 1, b = height - 1, b1 = b % 2;
     var north = y + Math.floor(height / 2), west = x, east = x + width - 1, south = north - b1;
     var a2 = a * a, b2 = b * b, dx = 4 * (1 - a) * b2, dy = 4 * (b1 + 1) * a2, err = dx + dy + b1 * a2;
@@ -85,27 +81,27 @@
     do {
       drawPointU(st, east, north); drawPointU(st, west, north); drawPointU(st, west, south); drawPointU(st, east, south);
       var start = west + 1, len = east - start;
-      if (dc0 !== 0 && len > 0) { hlineU(fc, start, north, east); hlineU(fc, start, south, east); }
+      if (dc0 !== 0 &amp;&amp; len &gt; 0) { hlineU(fc, start, north, east); hlineU(fc, start, south, east); }
       var e2 = 2 * err;
-      if (e2 <= dy) { north += 1; south -= 1; dy += a; err += dy; }
-      if (e2 >= dx || e2 > dy) { west += 1; east -= 1; dx += b1; err += dx; }
-    } while (west <= east);
-    while (north - south < height) {
+      if (e2 &lt;= dy) { north += 1; south -= 1; dy += a; err += dy; }
+      if (e2 &gt;= dx || e2 &gt; dy) { west += 1; east -= 1; dx += b1; err += dx; }
+    } while (west &lt;= east);
+    while (north - south &lt; height) {
       drawPointU(st, west - 1, north); drawPointU(st, east + 1, north); north += 1;
       drawPointU(st, west - 1, south); drawPointU(st, east + 1, south); south -= 1;
     }
   }
   function drawLine(x1, y1, x2, y2) {
-    var d = drawColors() & 0xf; if (d === 0) return;
-    var sc = (d - 1) & 0x3, s;
-    if (y1 > y2) { s = x1; x1 = x2; x2 = s; s = y1; y1 = y2; y2 = s; }
-    var dx = Math.abs(x2 - x1), sx = x1 < x2 ? 1 : -1, dy = y2 - y1, err = (dx > dy ? dx : -dy) / 2, e2;
+    var d = drawColors() &amp; 0xf; if (d === 0) return;
+    var sc = (d - 1) &amp; 0x3, s;
+    if (y1 &gt; y2) { s = x1; x1 = x2; x2 = s; s = y1; y1 = y2; y2 = s; }
+    var dx = Math.abs(x2 - x1), sx = x1 &lt; x2 ? 1 : -1, dy = y2 - y1, err = (dx &gt; dy ? dx : -dy) / 2, e2;
     for (;;) {
       drawPointU(sc, x1, y1);
-      if (x1 === x2 && y1 === y2) break;
+      if (x1 === x2 &amp;&amp; y1 === y2) break;
       e2 = err;
-      if (e2 > -dx) { err -= dy; x1 += sx; }
-      if (e2 < dy) { err += dx; y1++; }
+      if (e2 &gt; -dx) { err -= dy; x1 += sx; }
+      if (e2 &lt; dy) { err += dx; y1++; }
     }
   }
   function blit(sprite, dstX, dstY, width, height, srcX, srcY, srcStride, bpp2, flipX, flipY, rotate) {
@@ -118,48 +114,47 @@
       cXMin = Math.max(0, dstX) - dstX; cYMin = Math.max(0, dstY) - dstY;
       cXMax = Math.min(width, W - dstX); cYMax = Math.min(height, H - dstY);
     }
-    for (var y = cYMin; y < cYMax; y++) {
-      for (var x = cXMin; x < cXMax; x++) {
+    for (var y = cYMin; y &lt; cYMax; y++) {
+      for (var x = cXMin; x &lt; cXMax; x++) {
         var tx = dstX + (rotate ? y : x), ty = dstY + (rotate ? x : y);
         var sx = srcX + (flipX ? width - x - 1 : x), sy = srcY + (flipY ? height - y - 1 : y);
         var colorIdx, bitIndex = sy * srcStride + sx, byte, shift;
-        if (bpp2) { byte = sprite[bitIndex >>> 2]; shift = 6 - ((bitIndex & 0x03) << 1); colorIdx = (byte >>> shift) & 0x3; }
-        else { byte = sprite[bitIndex >>> 3]; shift = 7 - (bitIndex & 0x7); colorIdx = (byte >>> shift) & 0x1; }
-        var dc = (dcv >>> (colorIdx << 2)) & 0x0f;
-        if (dc !== 0) drawPoint((dc - 1) & 0x03, tx, ty);
+        if (bpp2) { byte = sprite[bitIndex &gt;&gt;&gt; 2]; shift = 6 - ((bitIndex &amp; 0x03) &lt;&lt; 1); colorIdx = (byte &gt;&gt;&gt; shift) &amp; 0x3; }
+        else { byte = sprite[bitIndex &gt;&gt;&gt; 3]; shift = 7 - (bitIndex &amp; 0x7); colorIdx = (byte &gt;&gt;&gt; shift) &amp; 0x1; }
+        var dc = (dcv &gt;&gt;&gt; (colorIdx &lt;&lt; 2)) &amp; 0x0f;
+        if (dc !== 0) drawPoint((dc - 1) &amp; 0x03, tx, ty);
       }
     }
   }
   function drawText(arr, x, y) {
     var cx = x;
-    for (var i = 0, len = arr.length; i < len; ++i) {
+    for (var i = 0, len = arr.length; i &lt; len; ++i) {
       var cc = arr[i];
       if (cc === 0) return;
       else if (cc === 10) { y += 8; cx = x; }
-      else if (cc >= 32 && cc <= 255) { blit(FONT, cx, y, 8, 8, 0, (cc - 32) << 3, 8, false, false, false, false); cx += 8; }
+      else if (cc &gt;= 32 &amp;&amp; cc &lt;= 255) { blit(FONT, cx, y, 8, 8, 0, (cc - 32) &lt;&lt; 3, 8, false, false, false, false); cx += 8; }
       else cx += 8;
     }
-  }
-
-  var decoder = new TextDecoder();
+  }</p>
+<p>  var decoder = new TextDecoder();
   function strZ(ptr) { var e = ptr; while (u8[e] !== 0) e++; return u8.subarray(ptr, e); }
   var DISK_KEY = "rocci-bird-disk";
   var audioCtx = null;
   function ensureAudio() {
     if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
-    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    if (audioCtx &amp;&amp; audioCtx.state === "suspended") audioCtx.resume();
   }
   function tone(frequency, duration, volume, flags) {
     if (!audioCtx) return;
     try {
-      var startFreq = frequency & 0xffff, endFreq = (frequency >>> 16) & 0xffff;
-      var sustain = duration & 0xff, release = (duration >>> 8) & 0xff, decay = (duration >>> 16) & 0xff, attack = (duration >>> 24) & 0xff;
-      var sustainVol = (volume & 0xff) / 100, peakVol = (((volume >>> 8) & 0xff) || (volume & 0xff)) / 100, channel = flags & 0x3;
+      var startFreq = frequency &amp; 0xffff, endFreq = (frequency &gt;&gt;&gt; 16) &amp; 0xffff;
+      var sustain = duration &amp; 0xff, release = (duration &gt;&gt;&gt; 8) &amp; 0xff, decay = (duration &gt;&gt;&gt; 16) &amp; 0xff, attack = (duration &gt;&gt;&gt; 24) &amp; 0xff;
+      var sustainVol = (volume &amp; 0xff) / 100, peakVol = (((volume &gt;&gt;&gt; 8) &amp; 0xff) || (volume &amp; 0xff)) / 100, channel = flags &amp; 0x3;
       var F = 1 / 60, t0 = audioCtx.currentTime, tA = t0 + attack * F, tD = tA + decay * F, tS = tD + sustain * F, tR = tS + release * F;
       var osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
       osc.type = channel === 2 ? "triangle" : channel === 3 ? "sawtooth" : "square";
       osc.frequency.setValueAtTime(startFreq, t0);
-      if (endFreq && endFreq !== startFreq) osc.frequency.linearRampToValueAtTime(endFreq, tR);
+      if (endFreq &amp;&amp; endFreq !== startFreq) osc.frequency.linearRampToValueAtTime(endFreq, tR);
       var peak = Math.max(0.0001, peakVol * 0.25), sus = Math.max(0.0001, sustainVol * 0.25);
       gain.gain.setValueAtTime(0.0001, t0);
       gain.gain.linearRampToValueAtTime(peak, tA);
@@ -169,12 +164,11 @@
       osc.connect(gain).connect(audioCtx.destination);
       osc.start(t0); osc.stop(tR + 0.02);
     } catch (e) {}
-  }
-
-  var env = {
+  }</p>
+<p>  var env = {
     memory: memory,
-    blit: function (sp, x, y, w, h, f) { blit(new Uint8Array(memory.buffer, sp), x, y, w, h, 0, 0, w, f & 1, f & 2, f & 4, f & 8); },
-    blitSub: function (sp, x, y, w, h, sx, sy, st, f) { blit(new Uint8Array(memory.buffer, sp), x, y, w, h, sx, sy, st, f & 1, f & 2, f & 4, f & 8); },
+    blit: function (sp, x, y, w, h, f) { blit(new Uint8Array(memory.buffer, sp), x, y, w, h, 0, 0, w, f &amp; 1, f &amp; 2, f &amp; 4, f &amp; 8); },
+    blitSub: function (sp, x, y, w, h, sx, sy, st, f) { blit(new Uint8Array(memory.buffer, sp), x, y, w, h, sx, sy, st, f &amp; 1, f &amp; 2, f &amp; 4, f &amp; 8); },
     line: function (a, b, c, d) { drawLine(a, b, c, d); },
     hline: function (x, y, l) { drawHLine(x, y, l); },
     vline: function (x, y, l) { drawVLine(x, y, l); },
@@ -182,7 +176,7 @@
     rect: function (x, y, w, h) { drawRect(x, y, w, h); },
     text: function (ptr, x, y) { drawText(strZ(ptr), x, y); },
     textUtf8: function (ptr, len, x, y) { drawText(u8.subarray(ptr, ptr + len), x, y); },
-    textUtf16: function (ptr, byteLen, x, y) { var a = []; for (var i = 0; i < byteLen; i += 2) a.push(dv.getUint16(ptr + i, true)); drawText(a, x, y); },
+    textUtf16: function (ptr, byteLen, x, y) { var a = []; for (var i = 0; i &lt; byteLen; i += 2) a.push(dv.getUint16(ptr + i, true)); drawText(a, x, y); },
     tone: tone,
     diskr: function (ptr, size) {
       var s = null; try { s = localStorage.getItem(DISK_KEY); } catch (e) {}
@@ -192,42 +186,38 @@
     },
     diskw: function (ptr, size) {
       var bytes = u8.slice(ptr, ptr + size), bin = "";
-      for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      for (var i = 0; i &lt; bytes.length; i++) bin += String.fromCharCode(bytes[i]);
       try { localStorage.setItem(DISK_KEY, btoa(bin)); } catch (e) { return 0; }
       return size;
     },
     trace: function (ptr) { console.log(decoder.decode(strZ(ptr))); },
     traceUtf8: function (ptr, len) { console.log(decoder.decode(u8.subarray(ptr, ptr + len))); },
-    traceUtf16: function (ptr, byteLen) { var s = ""; for (var i = 0; i < byteLen; i += 2) s += String.fromCharCode(dv.getUint16(ptr + i, true)); console.log(s); }
-  };
-
-  var canvas = document.getElementById("rocci-bird-screen");
+    traceUtf16: function (ptr, byteLen) { var s = ""; for (var i = 0; i &lt; byteLen; i += 2) s += String.fromCharCode(dv.getUint16(ptr + i, true)); console.log(s); }
+  };</p>
+<p>  var canvas = document.getElementById("rocci-bird-screen");
   var ctx = canvas.getContext("2d");
   var img = ctx.createImageData(W, H);
-  var px = new Uint32Array(img.data.buffer);
-
-  var KEYMAP = { KeyX: 1, Space: 1, KeyZ: 2, KeyC: 2, ArrowLeft: 16, ArrowRight: 32, ArrowUp: 64, ArrowDown: 128 };
+  var px = new Uint32Array(img.data.buffer);</p>
+<p>  var KEYMAP = { KeyX: 1, Space: 1, KeyZ: 2, KeyC: 2, ArrowLeft: 16, ArrowRight: 32, ArrowUp: 64, ArrowDown: 128 };
   var held = {}, pointerBtn = 0;
   canvas.addEventListener("keydown", function (e) { if (e.code in KEYMAP) { held[e.code] = 1; ensureAudio(); e.preventDefault(); } });
   canvas.addEventListener("keyup", function (e) { if (e.code in KEYMAP) { held[e.code] = 0; e.preventDefault(); } });
   canvas.addEventListener("pointerdown", function (e) { canvas.focus(); ensureAudio(); pointerBtn = 1; e.preventDefault(); });
   window.addEventListener("pointerup", function () { pointerBtn = 0; });
-  function gamepad() { var b = pointerBtn; for (var k in KEYMAP) if (held[k]) b |= KEYMAP[k]; return b; }
-
-  function render() {
+  function gamepad() { var b = pointerBtn; for (var k in KEYMAP) if (held[k]) b |= KEYMAP[k]; return b; }</p>
+<p>  function render() {
     var pal = new Uint32Array(memory.buffer, ADDR_PALETTE, 4);
-    for (var i = 0; i < W * H; i++) {
-      var c = pal[(fb[i >> 2] >> ((i & 3) << 1)) & 3];
-      px[i] = 0xff000000 | ((c & 0xff) << 16) | (c & 0xff00) | ((c >> 16) & 0xff);
+    for (var i = 0; i &lt; W * H; i++) {
+      var c = pal[(fb[i &gt;&gt; 2] &gt;&gt; ((i &amp; 3) &lt;&lt; 1)) &amp; 3];
+      px[i] = 0xff000000 | ((c &amp; 0xff) &lt;&lt; 16) | (c &amp; 0xff00) | ((c &gt;&gt; 16) &amp; 0xff);
     }
     ctx.putImageData(img, 0, 0);
-  }
-
-  fetch("/assets/rocci-bird.wasm").then(function (r) { return r.arrayBuffer(); }).then(function (buf) {
+  }</p>
+<p>  fetch("/assets/rocci-bird.wasm").then(function (r) { return r.arrayBuffer(); }).then(function (buf) {
     return WebAssembly.instantiate(buf, { env: env });
   }).then(function (res) {
     var start = res.instance.exports.start, update = res.instance.exports.update;
-    new Uint32Array(memory.buffer).set([0xe0f8cf, 0x86c06c, 0x306850, 0x071821], ADDR_PALETTE >> 2);
+    new Uint32Array(memory.buffer).set([0xe0f8cf, 0x86c06c, 0x306850, 0x071821], ADDR_PALETTE &gt;&gt; 2);
     dv.setUint16(ADDR_DRAW_COLORS, 0x1203, true);
     if (typeof start === "function") start();
     render();
@@ -235,12 +225,12 @@
     function loop(now) {
       requestAnimationFrame(loop);
       acc += now - prev; prev = now;
-      if (acc > 250) acc = 250;
+      if (acc &gt; 250) acc = 250;
       var ran = false;
-      while (acc >= STEP) {
+      while (acc &gt;= STEP) {
         acc -= STEP;
         u8[ADDR_GAMEPAD1] = gamepad();
-        if (!(u8[ADDR_SYSTEM_FLAGS] & SYSTEM_PRESERVE_FRAMEBUFFER)) fb.fill(0);
+        if (!(u8[ADDR_SYSTEM_FLAGS] &amp; SYSTEM_PRESERVE_FRAMEBUFFER)) fb.fill(0);
         if (typeof update === "function") update();
         ran = true;
       }
@@ -251,9 +241,8 @@
     canvas.insertAdjacentHTML("afterend", "<div style='font-size:.85rem;color:#c0392b'>Couldn't load Rocci Bird: " + err + "</div>");
   });
 })();
-</script>
-</div>
-<p>Rocci Bird's updated source code is a bit more concise than <a href="https://github.com/lukewilliamboswell/roc-wasm4/blob/a769ade51cbd4613b4fca468764c9034f9c8070c/examples/rocci-bird.roc">the original</a>, and <code>roc build --opt=size</code> now outputs a 31KB wasm binary. (The original compiler produced a binary more than double that size.) Rocci Bird is by no means a large code base, but getting it to run at all required landing a <em>lot</em> of features in the new compiler. Seeing those chunky purple pixels brought a smile to my face when we finally got there!</p>
+</script></p>
+</div><p>Rocci Bird's updated source code is a bit more concise than <a href="https://github.com/lukewilliamboswell/roc-wasm4/blob/a769ade51cbd4613b4fca468764c9034f9c8070c/examples/rocci-bird.roc">the original</a>, and <code>roc build --opt=size</code> now outputs a 31KB wasm binary. (The original compiler produced a binary more than double that size.) Rocci Bird is by no means a large code base, but getting it to run at all required landing a <em>lot</em> of features in the new compiler. Seeing those chunky purple pixels brought a smile to my face when we finally got there!</p>
 <p>To be clear, this is a milestone but not a formal release. We aim to land version 0.1.0 of the new compiler later this year, which will be Roc's first-ever numbered release. You're welcome to try out a <a href="https://roc-lang.org/install/">Nightly build</a> before then, but in its current state you can still expect a variety of bugs, incomplete features, and unfinished docs.</p>
 <p>That said, this is a wonderful milestone to have reached, and I'm extremely grateful to all the people who came together to make this happen! I want to thank some in particular who have been especially helpful in getting the language and compiler to this point:</p>
 <ul>
@@ -277,8 +266,7 @@
 <video class="inline-video" controls preload="metadata" playsinline>
     <source src="/assets/hot-loading.mp4" type="video/mp4">
     <a href="/assets/hot-loading.mp4">Download the hot-loading demo video.</a>
-</video>
-<p>Hot loading is standard behavior for interpreted languages like Python, but not so much for high-performance compiled languages like Roc.</p>
+</video><p>Hot loading is standard behavior for interpreted languages like Python, but not so much for high-performance compiled languages like Roc.</p>
 <p>When I'm ready to deploy, <code>roc build server.roc</code> gets me an LLVM-optimized, self-contained executable that I can drop onto a machine and run. It also cross-compiles; no matter whether you're running macOS, Linux, or Windows, all of the following commands work, and output reproducible binaries (meaning the same input source bytes always produce the same output executable bytes—which <a href="https://xeiaso.net/notes/2026/anubis-wasm-vendor-binary/">not all compilers do</a>) that will run on the target system:</p>
 <table>
 <thead>
@@ -312,49 +300,24 @@
 <td align="left">(whatever the current system is)</td>
 </tr>
 </tbody></table>
+<h2>Pattern Matching with String Interpolation</h2>
 <p>The HTTP request-handling logic from that video looks like this:</p>
-<pre><samp class="code-snippet"><span class="comment"># Starts up the server; initializes a database and logger</span>
-<span class="comment"># based on environment variables.</span>
-init! <span class="kw">=</span> <span class="kw">|</span>env<span class="punctuation separator">,</span> _args<span class="kw">|</span> <span class="punctuation section">{</span>
-    <span class="punctuation section">{</span> log_level<span class="punctuation separator">,</span> db_credentials <span class="punctuation section">}</span> <span class="kw">=</span> env.parse()<span class="kw">?</span>
-
-    db <span class="kw">=</span> init_db!(db_credentials)<span class="kw">?</span>
-    log <span class="kw">=</span> init_logger!(log_level)<span class="kw">?</span>
-
-    <span class="comment"># (other such initializations would happen here)</span>
-
-    <span class="upperident">Ok</span><span class="punctuation section">(</span><span class="punctuation section">{</span> db<span class="punctuation separator">,</span> log <span class="punctuation section">}</span><span class="punctuation section">)</span>
-<span class="punctuation section">}</span>
-
-<span class="comment"># Handles an incoming HTTP request (HTTP verb,</span>
-<span class="comment"># path, headers, body) using the db and log that</span>
-<span class="comment"># we initialized during init!()</span>
-handle_req! <span class="kw">=</span> <span class="kw">|</span><span class="punctuation section">{</span> db<span class="punctuation separator">,</span> log <span class="punctuation section">}</span><span class="punctuation separator">,</span> verb<span class="punctuation separator">,</span> path<span class="punctuation separator">,</span> headers<span class="punctuation separator">,</span> body<span class="kw">|</span> <span class="punctuation section">{</span>
-    auth_token <span class="kw">=</span> headers.x_auth_token
-    user_agent <span class="kw">=</span> headers.user_agent
-
-    app <span class="kw">=</span> <span class="upperident">App</span>.init<span class="punctuation section">(</span><span class="punctuation section">{</span> auth_token<span class="punctuation separator">,</span> user_agent<span class="punctuation separator">,</span> db<span class="punctuation separator">,</span> log <span class="punctuation section">}</span><span class="punctuation section">)</span><span class="kw">?</span>
-
-    <span class="kw">match</span> <span class="punctuation section">(</span>verb<span class="punctuation separator">,</span> path<span class="punctuation section">)</span> <span class="punctuation section">{</span>
-        <span class="punctuation section">(</span><span class="upperident">GET</span><span class="punctuation separator">,</span> <span class="string">"/users/</span><span class="kw">${</span>id<span class="kw">}</span><span class="string">"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> app.user_profile!(id)
-        <span class="punctuation section">(</span><span class="upperident">GET</span><span class="punctuation separator">,</span> <span class="string">"/users/</span><span class="kw">${</span>id<span class="kw">}</span><span class="string">/</span><span class="kw">${</span>page<span class="kw">}</span><span class="string">"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> <span class="kw">match</span> page <span class="punctuation section">{</span>
-            <span class="string">""</span> <span class="kw">|</span> <span class="string">"profile"</span> <span class="kw">=&gt;</span> app.user_profile!(user_id)
-            <span class="string">"settings"</span> <span class="kw">=&gt;</span> app.user_settings!(user_id)
-            <span class="string">"posts/</span><span class="kw">${</span>post_id<span class="kw">}</span><span class="string">"</span> <span class="kw">=&gt;</span> <span class="punctuation section">{</span>
-                app.user_post!(user_id<span class="punctuation separator">,</span> post_id)
-            <span class="punctuation section">}</span>
-            _ <span class="kw">=&gt;</span> app.not_found!(verb<span class="punctuation separator">,</span> path)
-        <span class="punctuation section">}</span>
-        <span class="punctuation section">(</span><span class="upperident">POST</span><span class="punctuation separator">,</span> <span class="string">"/posts/new"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> <span class="punctuation section">{</span>
-            app.new_post!(body)
-        <span class="punctuation section">}</span>
-        _ <span class="kw">=&gt;</span> app.not_found!(verb<span class="punctuation separator">,</span> path)
+<pre><samp class="code-snippet"><span class="kw">match</span> <span class="punctuation section">(</span>verb<span class="punctuation separator">,</span> path<span class="punctuation section">)</span> <span class="punctuation section">{</span>
+    <span class="punctuation section">(</span><span class="string">"GET"</span><span class="punctuation separator">,</span> <span class="string">"/users/</span><span class="kw">${</span>id<span class="kw">}</span><span class="string">/</span><span class="kw">${</span>page<span class="kw">}</span><span class="string">"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> <span class="kw">match</span> page <span class="punctuation section">{</span>
+        <span class="string">""</span> <span class="kw">|</span> <span class="string">"profile"</span> <span class="kw">=&gt;</span> ok<span class="punctuation section">(</span>id<span class="punctuation section">)</span>
+        <span class="string">"settings"</span> <span class="kw">=&gt;</span> ok<span class="punctuation section">(</span>with_default<span class="punctuation section">(</span>user_agent<span class="punctuation separator">,</span> id<span class="punctuation section">)</span><span class="punctuation section">)</span>
+        <span class="string">"posts/</span><span class="kw">${</span>post_id<span class="kw">}</span><span class="string">"</span> <span class="kw">=&gt;</span> ok<span class="punctuation section">(</span><span class="string">"Post ID: </span><span class="kw">${</span>post_id<span class="kw">}</span><span class="string">"</span><span class="punctuation section">)</span>
+        _ <span class="kw">=&gt;</span> not_found
     <span class="punctuation section">}</span>
+
+    <span class="punctuation section">(</span><span class="string">"GET"</span><span class="punctuation separator">,</span> <span class="string">"/users/</span><span class="kw">${</span>id<span class="kw">}</span><span class="string">"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> ok<span class="punctuation section">(</span>id<span class="punctuation section">)</span>
+
+    <span class="punctuation section">(</span><span class="string">"POST"</span><span class="punctuation separator">,</span> <span class="string">"/posts/new"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> created<span class="punctuation section">(</span>with_default<span class="punctuation section">(</span>auth_token<span class="punctuation separator">,</span> body<span class="punctuation section">)</span><span class="punctuation section">)</span>
+
+    _ <span class="kw">=&gt;</span> not_found
 <span class="punctuation section">}</span></samp></pre>
 <p>This uses several features we introduced in the new compiler. For example, that <code>"/users/${id}"</code> syntax is not implemented with <a href="https://expressjs.com/en/guide/routing/#route-parameters">parsing template strings at runtime</a>, but rather with a new language feature: string interpolation inside pattern matching.</p>
 <p>Not only is this type-safe at compile time, this entire code snippet performs <em>zero heap allocations</em>. (We even have a regression test which sends various requests to a HTTP server running this code, and the test fails if the server attempts a single heap allocation at any time.) I'd expect the typical language that ships with hot code loading to average closer to 1 allocation per line of code here…but Roc is aiming high on ergonomics, type safety, <em>and</em> performance!</p>
-<p>In what will become a recurring theme, hot code loading is innately memory-unsafe. We generate arbitrary machine instructions and have the CPU execute them—already memory-unsafe, but that's every compiler's job—and on top of that, we swap out some instructions for others while the compiled program is still running. There's a lot to get right, and we appreciate all the help we can get from our tools!</p>
-
 <h2>Compile-Time Evaluation of Pure Functions</h2>
 <p>We didn't get zero heap allocations in this common use case by chance; we got it by designing and implementing the new compiler to aggressively avoid doing unnecessary work at runtime. One of the strategies which avoids runtime allocations in this specific example is doing work at compile time instead of runtime.</p>
 <p>As an example, Python's popular FastAPI server framework lets you parse HTTP headers directly into Python objects based on the field names defined in the object's class. Here's a simplified <a href="https://fastapi.tiangolo.com/tutorial/header-param-models/#check-the-docs">example from FastAPI's docs</a>:</p>
@@ -389,30 +352,30 @@ async fn read_items(headers: CommonHeaders) -&gt; String {
 </code></pre>
 <p>That's it, that's the code. You can try it out for yourself! The way this works in Roc is:</p>
 <ul>
-<li>Roc has a full type inference system which means it's always able to infer the type of everything in the program, even if there are no type annotations anywhere, and it always infers the most general type that could fit there.  <ul>
+<li>Roc has a full type inference system which means it's always able to infer the type of everything in the program, even if there are no type annotations anywhere, and it always infers the most general type that could fit there.<ul>
 <li>Formally speaking, Roc does <a href="https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Principal_type">principal</a>, <a href="https://en.wikipedia.org/wiki/Decidability_(logic)#Decidability_of_a_theory">decidable</a>, <a href="https://en.wikipedia.org/wiki/Type_safety#Definitions">sound</a>, <a href="https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system">Hindley-Milner type inference</a>.</li>
 </ul>
 </li>
-<li>Because of this, you don't need to write out the whole <code>class CommonHeaders</code> definition like in Python; that type information will be inferred at compile time based on how you use the fields like <code>if_modified_since</code> and the rest.  </li>
-<li>Whereas many languages like Python and JavaScript represent "a group of fields" as a heap-allocated object, Roc instead represents them as a stack-allocated <code>struct</code> like you'd find in C, Go, Rust, Zig, etc.  <ul>
+<li>Because of this, you don't need to write out the whole <code>class CommonHeaders</code> definition like in Python; that type information will be inferred at compile time based on how you use the fields like <code>if_modified_since</code> and the rest.</li>
+<li>Whereas many languages like Python and JavaScript represent "a group of fields" as a heap-allocated object, Roc instead represents them as a stack-allocated <code>struct</code> like you'd find in C, Go, Rust, Zig, etc.<ul>
 <li>Those languages require defining the struct type ahead of time, like Python does with the class definition, but in Roc you can just use anonymous curly-brace literals (they look just like JavaScript object literals) and they compile to the equivalent of C structs at runtime.</li>
 </ul>
 </li>
-<li>Roc also has ways to implement things like HTTP header parsers (though of course not limited to that use case) using this statically-known type information.  <ul>
+<li>Roc also has ways to implement things like HTTP header parsers (though of course not limited to that use case) using this statically-known type information.<ul>
 <li>This is all done using ordinary Roc expressions and values; there isn't a separate metaprogramming language or anything like that. It's just normal Roc functions running at compile time, being automatically passed values that represent statically-known type information.</li>
 </ul>
 </li>
-<li>These parsers can be built by executing Roc code at compile time.  <ul>
-<li>In this case, what runs at compile time is code that receives the string names of the fields at compile time, e.g. <code>"if_modified_since"</code> and <code>"save_data"</code>, and then converts it—still at compile time—into kebab-case strings like <code>"if-modified-since"</code> and <code>"save-data"</code>.  <ul>
+<li>These parsers can be built by executing Roc code at compile time.<ul>
+<li>In this case, what runs at compile time is code that receives the string names of the fields at compile time, e.g. <code>"if_modified_since"</code> and <code>"save_data"</code>, and then converts it—still at compile time—into kebab-case strings like <code>"if-modified-since"</code> and <code>"save-data"</code>.<ul>
 <li>Like all heap allocations that get produced during Roc's compile time evaluation, these strings end up deduplicated in the final binary's static memory. No runtime heap allocations involved.</li>
 </ul>
 </li>
-<li>It then builds a parser which takes the raw HTTP header string, searches case-insensitively for these kebab-case strings, and when it finds one, loads it into the appropriate <code>header</code> field.  <ul>
-<li>Loading the parsed HTTP value into the <code>header</code> field doesn't need to allocate, because at runtime it's just a reference to a subset of the original HTTP request string.  <ul>
+<li>It then builds a parser which takes the raw HTTP header string, searches case-insensitively for these kebab-case strings, and when it finds one, loads it into the appropriate <code>header</code> field.<ul>
+<li>Loading the parsed HTTP value into the <code>header</code> field doesn't need to allocate, because at runtime it's just a reference to a subset of the original HTTP request string.<ul>
 <li>Roc strings are semantically immutable, and are allowed to share runtime memory with other strings. The parser takes advantage of that.</li>
 </ul>
 </li>
-<li>Rust's <a href="https://doc.rust-lang.org/std/primitive.slice.html">slices</a> and <a href="https://doc.rust-lang.org/std/borrow/enum.Cow.html"><code>Cow</code></a>s do this, but they require introducing annoying lifetime parameters to structs, which is presumably why libraries like salvo don't do it this way even though it's faster at runtime.  <ul>
+<li>Rust's <a href="https://doc.rust-lang.org/std/primitive.slice.html">slices</a> and <a href="https://doc.rust-lang.org/std/borrow/enum.Cow.html"><code>Cow</code></a>s do this, but they require introducing annoying lifetime parameters to structs, which is presumably why libraries like salvo don't do it this way even though it's faster at runtime.<ul>
 <li>Roc doesn't have lifetime parameters, and you'd actually have to go out of your way to write a HTTP header parser that did allocations instead of sharing like this.</li>
 </ul>
 </li>
@@ -430,40 +393,43 @@ async fn read_items(headers: CommonHeaders) -&gt; String {
 <p>Continuing the recurring theme, compile-time execution of code we just compiled is innately memory-unsafe. As with hot code loading, we generate arbitrary machine instructions and have the CPU execute them, and on top of that, some of the memory involved in that execution is shared between the compiler and the running program—because they both need to read and write it!</p>
 <h2>Why a Scratch-Rewrite?</h2>
 <p>Unlike Rust, C, and Zig, Roc is not a systems language; it has automatic memory management (using reference counting, both to avoid tracing collector pauses and also for <a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2020/11/perceus-tr-v4.pdf">Perceus optimizations</a> and opportunistic mutation <a href="https://koka-lang.github.io/koka/doc/book.html#sec-fbip">like Koka's</a>). Roc would have <em>way</em> more heap allocations if it needed one heap allocation per closure capture (like most non-systems languages do), but our closure captures don't heap-allocate because Roc is the first non-academic language to implement <a href="https://www.cs.princeton.edu/~mpmilano/publication/lss/">polymorphic defunctionalization through lambda set specialization</a>.</p>
-<p>This might sound like a niche optimization, but in a functional language like Roc, defunctionalization turns out to be similar to <a href="https://en.wikipedia.org/wiki/Inline_expansion">inlining</a> in that it unlocks a treasure trove of follow-up optimizations. Although this system proved incredibly beneficial to Roc's runtime performance, it also proved incredibly difficult for us to implement correctly. We <a href="https://shows.acast.com/software-unscripted/episodes/664fde448c77cc0013b3338a">struggled with nasty bugs</a> in the original implementation, and only after <a href="https://github.com/ayazhafiz/cor/">Ayaz prototyped a new architecture</a> were we able to finally get it right in the new compiler. And even after all that, integrating it with everything else was hard, too!</p>
-<p>The good news about Ayaz's prototype was that it demonstrated that our defunctionalization problems were fixable. The bad news was that it also showed that the root of the problem was architectural and crossed multiple compiler phases; fixing it would require rewriting at least half of the compiler.</p>
-<p>This was one of the main reasons we decided to do a full rewrite in the first place—that, and several other contributors independently mentioning they were planning to rewrite other parts of the compiler for unrelated reasons. At some point we realized we were about to rewrite almost all of the compiler anyway, so it logically made sense to consider a full rewrite as an alternative to the <a href="https://en.wikipedia.org/wiki/Ship_of_Theseus">Ship of Theseus</a> approach.</p>
+<p>This might sound like a niche optimization, but in a functional language like Roc, defunctionalization turns out to be similar to <a href="https://en.wikipedia.org/wiki/Inline_expansion">inlining</a> in that it unlocks a treasure trove of follow-up optimizations. Although this system proved incredibly beneficial to Roc's runtime performance, it also proved incredibly difficult for us to implement correctly. We <a href="https://shows.acast.com/software-unscripted/episodes/664fde448c77cc0013b3338a">struggled with nasty bugs</a> in the original implementation, and only after <a href="https://github.com/ayazhafiz/cor/">Ayaz Hafiz prototyped a new architecture in OCaml</a> were we able to finally get it right in the new compiler.</p>
+<p>Ayaz's prototype showed that the root of our problems was architectural across several compiler phases, and fixing it would require rewriting most of the compiler. This was one reason we decided to rewrite in the first place—that, and several contributors independently mentioning they planned to rewrite various parts of the compiler for other reasons. We realized we were about to rewrite almost all of the compiler anyway, so it made sense to consider a full rewrite as an alternative to the <a href="https://en.wikipedia.org/wiki/Ship_of_Theseus">Ship of Theseus</a> approach.</p>
 <p>Compilers are unusual in that scratch-rewrites are the norm among successful projects. It's often the only way to <a href="https://en.wikipedia.org/wiki/Self-hosting_(compilers)">self-host</a>, although not all compilers rewrite into their own language; see for example <a href="https://devblogs.microsoft.com/typescript/typescript-native-port/">TypeScript's rewrite to Go</a>. My position has always been that <a href="https://www.roc-lang.org/faq#self-hosted-compiler">Roc's compiler should not self-host</a>, so the idea that someday the benefits of a rewrite might seem to outweigh <a href="https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/">their notorious costs</a> had frankly never occurred to me.</p>
-<p>Once we'd decided to scratch-rewrite, the next question was whether to choose Rust again. Based on our experiences with both Rust and Zig (<a href="https://www.youtube.com/watch?v=jIZpKpLCOiU">we were already using Zig</a> for a bunch of primitives in our standard library), <a href="https://gist.github.com/rtfeldman/77fb430ee57b42f5f2ca973a3992532f">we decided to build the entire compiler in Zig this time</a>.</p>
+<p>The more we talked about it, the more sense it made to do what basically every popular compiler today has done at some point: rewrite from scratch.</p>
 <h2>Why Zig?</h2>
+<p>Once we'd decided to scratch-rewrite, the next question was whether to choose Rust again. Based on our experiences with both Rust and Zig (<a href="https://www.youtube.com/watch?v=jIZpKpLCOiU">we were already using Zig</a> for a bunch of primitives in our standard library), <a href="https://gist.github.com/rtfeldman/77fb430ee57b42f5f2ca973a3992532f">we decided to build the entire compiler in Zig this time</a>.</p>
 <p>I enjoy Rust, <a href="https://frontendmasters.com/courses/rust/">I've taught a course on it</a>, and I happily use it daily for my work at <a href="https://zed.dev/">Zed</a>. Despite what Internet comments might have us believe, it's extremely normal for one language to be the best fit for one project, while a different language turns out to be the best fit for a different project. One size does not actually fit all!</p>
 <p>I've talked in depth about our reasons for going with Zig elsewhere—<a href="https://gist.github.com/rtfeldman/77fb430ee57b42f5f2ca973a3992532f">in writing</a>, <a href="https://www.youtube.com/watch?v=E0n82muHMcM">on podcasts</a>, and so on—and we only seriously considered Rust and Zig, because those were the only languages our team knew well enough. (Roc's standard library has been <a href="https://youtu.be/jIZpKpLCOiU?si=ueY5kfKu1p7I7L4c">written in Zig</a> for years.) The biggest considerations on our minds when deciding between Rust and Zig were:</p>
 <ul>
-<li><strong>Build times.</strong> Our <code>cargo</code> build times were a major pain point, even for incremental builds. We expected our Zig build times to be faster.  </li>
-<li><strong>Memory control.</strong> We use a variety of different memory allocators throughout compilation, especially arenas, and struct-of-arrays layouts all over the place. Rust's ecosystem consistently assumes one global allocator, including <a href="https://docs.rs/soa-rs/latest/soa_rs/">soa_rs</a> (and there's no out-the-box struct-of-arrays support like Zig's std.MultiArrayList). As such, in the original compiler we often felt drawn toward rolling our own alternatives to standard Rust tools, and being frustrated that third-party dependencies were hardcoded to use the global allocator. Meanwhile, Zig's whole ecosystem assumes granular allocators, and struct-of-arrays support is standard.  </li>
-<li><strong>Ecosystem relevance.</strong> Rust's ecosystem is much bigger than Zig's overall…but almost no packages in either ecosystem are relevant to our particular needs. For the niche things we wanted to get off the shelf—such as a faster way to emit LLVM bitcode than wrapping LLVM's C++ library—more of that code existed in Zig than in Rust.  </li>
-<li><strong>Memory-unsafety assistance.</strong> Rust is designed to isolate memory-unsafe code inside rare <code>unsafe</code> blocks, and use things like <a href="https://github.com/rust-lang/miri">miri</a> or <a href="https://valgrind.org/">Valgrind</a> to vet those. Memory-unsafe code wasn't rare for us, though (remember those innately-unsafe features I've pointed out already? Those weren't the only ones!) and we ended up with about 1,200 uses of <code>unsafe</code> (out of our 300K lines of Rust code; compare to about 40,000 uses of <code>unsafe</code> in <a href="https://github.com/rust-lang/rust/">rust</a>'s 3.5M lines, and remember that for compilers which emit machine code, like <code>roc</code> and <code>rustc</code>, doing memory-unsafe things is a big part of the job). Zig has <a href="https://zackoverflow.dev/writing/unsafe-rust-vs-zig/">more features than Rust for making memory-unsafe code work correctly</a>, and that was the part we felt was harder to get right.</li>
+<li><strong>Build times.</strong> Our <code>cargo</code> build times were a major pain point, even for incremental builds, and getting worse as our code base grew. We expected build times in a Zig rewrite to be much faster.</li>
+<li><strong>Memory control.</strong> We use a variety of different memory allocators throughout compilation, especially arenas, and struct-of-arrays layouts all over the place. Rust's ecosystem consistently assumes one global allocator, including <a href="https://docs.rs/soa-rs/latest/soa_rs/">soa_rs</a>. Zig's whole ecosystem assumes granular allocators, and struct-of-arrays support is standard.</li>
+<li><strong>Ecosystem relevance.</strong> Rust's ecosystem is much bigger than Zig's overall…but almost no packages in either ecosystem are relevant to our particular needs. For the niche things we wanted to get off the shelf—such as a faster way to emit LLVM bitcode than wrapping LLVM's C++ library—more of that code existed in Zig than in Rust.</li>
+<li><strong>Memory-unsafety assistance.</strong> Rust is designed to isolate memory-unsafe code inside rare <code>unsafe</code> blocks, and use things like <a href="https://github.com/rust-lang/miri">miri</a> or <a href="https://valgrind.org/">Valgrind</a> to vet those. Memory-unsafe code wasn't rare for us, though (more on this later) and we ended up with about 1,200 uses of <code>unsafe</code> (out of our 300K lines of Rust code; compare to about 40,000 uses of <code>unsafe</code> in <a href="https://github.com/rust-lang/rust/">rust</a>'s 3.5M lines, and remember that for compilers which emit machine code, like <code>roc</code> and <code>rustc</code>, doing memory-unsafe things is a big part of the job). Zig has <a href="https://zackoverflow.dev/writing/unsafe-rust-vs-zig/">more features than Rust for making memory-unsafe code work correctly</a>, and that was the area where we wanted the most help.</li>
 </ul>
-<p>There were a variety of other reasons, but I'd say these were the main ones: we wanted faster build times, better allocator control, a more relevant ecosystem, and stronger assistance with memory-unsafe code.</p>
 <p>After a year and a half of rewriting, how did our expectations of Zig's benefits line up with the reality of what we got? And which parts of Rust did we end up missing once we no longer had access to them?</p>
 <h2>Life Without Borrow-Checking</h2>
-<p>Let's start with the big one: the borrow checker. It's been many years since I was a Rust beginner and felt like I was "fighting the borrow checker," and at this point I get to appreciate its benefits without (usually) feeling frustrated about its restrictions.</p>
-<p>That said, it's important to contextualize what the borrow checker does and doesn't do. There's <a href="https://github.com/Microsoft/MSRC-Security-Research/blob/master/presentations/2019_02_BlueHatIL/2019_01%20-%20BlueHatIL%20-%20Trends%2C%20challenge%2C%20and%20shifts%20in%20software%20vulnerability%20mitigation.pdf">a famous 2019 Microsoft presentation</a> that says, on slide 10:</p>
-<p>~70% of the vulnerabilities addressed through a security update each year continue to be memory safety issues</p>
-<p>The next slide breaks down that 70% with details that are important when comparing Rust and Zig. It notes "Stack corruptions are essentially dead," and shows that in 2018 (the last year studied), 23% of the vulnerabilities were out-of-bounds reads/writes, 16% were use-after-free, 13% were unsafe casts, and 10% were uninitialized reads.</p>
-<p>Relevantly for our particular rewrite, <strong>Rust and Zig address 84% of these memory-safety bugs in the same way</strong>:</p>
+<p>Let's start with memory safety. There's <a href="https://github.com/Microsoft/MSRC-Security-Research/blob/master/presentations/2019_02_BlueHatIL/2019_01%20-%20BlueHatIL%20-%20Trends%2C%20challenge%2C%20and%20shifts%20in%20software%20vulnerability%20mitigation.pdf">a famous 2019 Microsoft presentation</a> that says, on slide 10:</p>
+<blockquote>
+<p>~70% of the vulnerabilities addressed through a security update each year continue to be memory safety issues.</p>
+</blockquote>
+<p>The presentation's next slide has a breakdown by type of memory safety issue, which paints the following picture when it comes to Rust and Zig specifically:</p>
 <ul>
-<li>Both compilers prevent stack corruptions using guard pages and stack probes, which cause OS memory protections to raise segmentation faults instead of corrupting memory. (An unhandled segfault may not be the most graceful way for a program to end, but it's still a safe exit—unlike corrupted memory.)  </li>
-<li>Both compilers emit bounds checks for heap memory, so if you write <code>things[9]</code> on an array of length 4, you get a panic instead of corrupted memory.  </li>
-<li>Both compilers report errors for uninitialized reads by default, and neither does unsafe casts automatically. (Both languages let you opt into these.)</li>
+<li>83.6% of vulnerabilities addressed through a security update in 2018 would have been <em>completely unaffected by the choice of Rust or Zig</em>, because both languages handle all of these scenarios (out-of-bounds reads/write, unsafe casts, uninitialized reads, stack overflows, and non-memory-safety issues) in the same way.</li>
+<li>16.4% of the vulnerabilities were specifically use-after-free errors. These could have been caught by Zig's <a href="https://ziglang.org/documentation/master/#toc-ReleaseSafe"><code>ReleaseSafe</code></a> runtime memory-safety checks, or Rust's borrow checker, or the checks <a href="https://fil-c.org/">Fil-C</a> uses, and so on. Modern languages offer a variety of ways to help catch UAFs, but these languages represented a tiny fraction of all systems language code running in 2018.</li>
 </ul>
-<p>The remaining 16% of the vulnerabilities are use-after-frees, which Rust famously addresses with borrow-checking at compile time. In contrast, Zig does what both compilers do for out-of-bounds errors: insert automatic runtime checks that panic instead of allowing memory corruption. Zig's use-after-free (and double-free) guards are enabled by default in debug and test builds to help catch bugs, and then can either be included in production using the <a href="https://ziglang.org/documentation/master/#ReleaseSafe">ReleaseSafe</a> build mode, or omitted with <a href="https://ziglang.org/documentation/master/#toc-ReleaseFast">ReleaseFast</a>.</p>
-<p>There are plenty of tradeoffs between Zig's approach and Rust's: compile-time costs versus runtime costs, potential runtime panics versus potential code contortions to satisfy the borrow checker, <a href="https://doc.rust-lang.org/nomicon/meet-safe-and-unsafe.html">safe subsets</a> versus <a href="https://zackoverflow.dev/writing/unsafe-rust-vs-zig/">whole-language tooling</a>…it's not a straightforward comparison. Still, both approaches have led to high-profile success stories of reliable, memory-safe software in practice.</p>
-<p>On the Zig side, <a href="https://tigerbeetle.com/">TigerBeetle</a> recently underwent a legendarily meticulous <a href="https://tigerbeetle.com/blog/2025-06-06-fuzzer-blind-spots-meet-jepsen/">Jepsen report that found only two safety bugs</a>, neither related to memory safety. TigerBeetle does ReleaseSafe builds in production, whereas <a href="https://ghostty.org/">Ghostty</a>, which has <a href="https://app.opencve.io/cve/?vendor=ghostty">never had a memory-safety CVE</a>, does <a href="https://ziglang.org/documentation/master/#toc-ReleaseFast">ReleaseFast</a>. (If you want to learn more about these projects, I've recorded in-depth conversations with their creators: <a href="https://youtu.be/8br5QcmYq84?si=qi7z2z8nSUKxiWlL">Joran Greef on TigerBeetle</a> and <a href="https://youtu.be/ljoNEH39lyw?si=fnm0emKYj5eH3sPP">Mitchell Hashimoto on Ghostty</a>.)</p>
-<p>In Roc, we're following Ghostty's lead: using Zig's automatic guards in debug and test builds to catch bugs in development, and omitting them in production so our compiler releases run as fast as possible.</p>
-<p>This is, of course, not as comprehensive as what Rust's borrow checker gave us in the original compiler. So with that background out of the way…how has the new approach worked out for us so far in practice? How many memory corruption incidents have we seen since rewriting our compiler from Rust to Zig?</p>
+<p><a href="https://ziglang.org/documentation/master/#toc-ReleaseSafe"><code>ReleaseSafe</code></a> catches use-after-free errors through runtime checks which panic if the program tries to use freed memory. Compared to <a href="https://doc.rust-lang.org/nomicon/meet-safe-and-unsafe.html">Rust's safe subset</a>, Zig's checks <a href="https://github.com/ziglang/zig/issues/3180">are less comprehensive</a>, have a runtime cost, and can panic. That said, Zig with <code>ReleaseSafe</code> has worked great in practice for the <a href="https://tigerbeetle.com/">TigerBeetle</a> database, which recently underwent a legendarily meticulous <a href="https://tigerbeetle.com/blog/2025-06-06-fuzzer-blind-spots-meet-jepsen/">Jepsen report that found only two safety bugs</a>, neither related to memory safety.</p>
+<p><a href="https://ziglang.org/documentation/master/#toc-ReleaseFast"><code>ReleaseFast</code></a> skips these checks in production builds to avoid their overhead, but keeps them in debug builds and tests to catch memory-safety issues during development. If your tests covered every possible real-world code path, <code>ReleaseFast</code> would give you the same level of memory safety as <code>ReleaseSafe</code>, but that level of test coverage is rarely practical; the real question is what slips through the coverage cracks in practice. Bun talked about their struggles with use-after-frees, but other widely-used projects building with <code>ReleaseFast</code> have had no CVEs caused by memory unsafety in their Zig code. <a href="https://ghostty.org/">Ghostty</a> <a href="https://app.opencve.io/cve/?vendor=ghostty">is one</a>, and Zig's compiler itself <a href="/todo/link/to/this">is another</a>.</p>
+<blockquote>
+<p>If you want to learn more about these projects, I've recorded in-depth conversations with their creators: <a href="https://youtu.be/8br5QcmYq84?si=qi7z2z8nSUKxiWlL">Joran Greef on TigerBeetle</a>, <a href="https://youtu.be/ljoNEH39lyw?si=fnm0emKYj5eH3sPP">Mitchell Hashimoto on Ghostty</a>, and <a href="https://youtu.be/w74rC-6caxE?si=_THc5UBxeyc4nMe-">Andrew Kelley on Zig</a>.</p>
+</blockquote>
+<p>Rust code has a different source of memory-safety gaps: the <code>unsafe</code> sections that nearly every Rust program has somewhere in its dependencies. <a href="https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html">Unsafe Rust</a> has all the memory unsafety risk of <code>ReleaseFast</code> Zig code, but none of the runtime checks to catch issues during development. So there's less of it, but you get less help with it. The Rust ecosytsem does have <a href="https://github.com/rust-lang/miri">miri</a> to find bugs in non-FFI <code>unsafe</code> code, and <a href="https://valgrind.org/">Valgrind</a> can help too, but both are opt-in and only a small percentage of Rust projects use either. That said, the cultural norm of using <code>unsafe</code> rarely, and auditing it extra carefully, has worked out well enough to earn Rust a strong reputation for memory safety in practice.</p>
+<p>Of course, Rust memory unsafety errors can and do still slip through the cracks. <a href="https://deno.com">Deno</a>, a Bun competitor which is written in Rust, has had memory-unsafety CVEs including an <a href="https://osv.dev/vulnerability/GHSA-c25x-cm9x-qqgx">out-of-bounds read</a> as well as a <a href="https://osv.dev/vulnerability/GHSA-3j27-563v-28wf">use-after-free</a>, both involving the use of Unsafe Rust. <a href="https://rocket.rs/">Rocket</a>, a Rust Web Framework, has had a <a href="https://osv.dev/vulnerability/GHSA-vcw4-8ph6-7vw8">use-after-free CVE</a>, and <a href="https://actix.rs/">Actix</a>, has had a variety of memory-unsafety CVEs from a period when its use of <code>unsafe</code> was abnormally high.</p>
+<p>When we were deciding between Rust and Zig for the new compiler, we were aware of all of this. We knew Rust had a well-deserved reputation for memory safety, but that memory unsafety could still happen, and we'd experienced all of that firsthand with the original compiler. We also knew we'd be using <code>unsafe</code> way more than typical Rust projects, and even though we were already using Valgrind, getting help with innately memory-unsafe code from Zig's additional checks sounded appealing. We wanted the hard stuff to get easier, and we weren't worried about use-after-free issues in a compiler where allocations would be overwhelmingly done in arenas with straightforward lifetimes.</p>
+<p>We knew high-profile Zig projects had achieved great performance <em>and</em> memory safety in practice, and we decided to aim for becoming another of those success stories.</p>
 <h2>Memory Safety Post-Rewrite</h2>
-<p>Here's a breakdown of bug reports in <a href="https://github.com/roc-lang/roc/issues">Roc's issue tracker</a>, as classified by Claude Opus 4.8 thanks to some of my free <a href="https://claude.com/contact-sales/claude-for-oss">Claude for Open Source</a> credits. (I decided not to spend hours manually classifying thousands of issues just for this one table.) Here are the results:</p>
+<p>It's easy to theorize about how things will go with a particular technology choice, but where the rubber meets the road is what end users encounter in real-world usage. So how has Zig with <code>ReleaseFast</code> worked out for us in practice? How many memory corruption incidents—from use-after-frees or any other cause—have we seen since rewriting our compiler from Rust to Zig?</p>
+<p>Here's a breakdown of bug reports in <a href="https://github.com/roc-lang/roc/issues">Roc's issue tracker</a>, as classified by Claude Opus 4.8:</p>
 <table>
 <thead>
 <tr>
@@ -488,12 +454,10 @@ async fn read_items(headers: CommonHeaders) -&gt; String {
 <td align="left">431</td>
 </tr>
 </tbody></table>
-<p>Obviously, the total bug count is much lower for the rewrite. Should we therefore conclude that the Zig-based compiler is "less buggy" than the original? No, it's just younger, so it's been used less! Nor would it be sensible to compare the percentages and conclude one is "proportionally more memory-safe" than the other; if that were a useful metric, you could make any code "more memory-safe" by introducing bugs.</p>
-<p>Now you might be wondering how the Rust-based compiler had any memory corruption bugs at all, let alone more than double the total count of the Zig-based one. Isn't Rust supposed to be memory-safe?</p>
-<p>The explanation is simple: this particular Rust code base happens to <em>be a compiler.</em></p>
-<p>As foreshadowed earlier, compilers emit machine instructions. When your machine executes those instructions, they can cause memory corruption, resulting in memory corruption bug reports from the people who experienced them. Regardless of which process had the bug—the compiler or compiled program—in both cases the processor only did the bad thing because the compiler told it to. And in both cases the fix is the same: the compiler's code must change, since that code was what caused the memory corruption.</p>
-<p>Just like every compiler, ours has had bugs, and some of those have been miscompilations that led to memory corruption. This is where all 21 of the memory corruption bug reports in our original Rust-based compiler came from; none of those bugs occurred in the process of the compiler itself, which is a testament to the borrow-checker working as intended.</p>
-<p>In contrast, while 8 of the 10 memory corruption bugs in the Zig-based compiler were also miscompilations, the remaining 2 were in the compiler itself. Both were use-after-free bugs in error reporting, with the same symptom: filenames in error messages (<a href="https://github.com/roc-lang/roc/issues/8943">one in <code>roc check</code></a> and <a href="https://github.com/roc-lang/roc/issues/8606">the other in <code>roc bundle</code></a>) rendered as useless <a href="https://unicodeplus.com/U+FFFD">question-mark-in-diamond characters</a>.</p>
+<p>You might be wondering how the Rust-based compiler had any memory corruption bugs at all, let alone more than double the total count of the Zig-based one. Is it because of that pesky Unsafe Rust again?</p>
+<p>Actually, no. None of those 21 memory corruption bugs occurred in the compiler's logic itself, which is a testament to Rust's borrow-checker working as intended. The reason we had memory corruption bugs in our Rust-based compiler is that <em>it's a compiler.</em></p>
+<p>Compilers emit machine instructions. When a machine executes those instructions, they can cause memory corruption, resulting in memory corruption bug reports from the people who experienced them. Regardless of which process had the bug—the compiler or compiled program—in both cases the processor only did the bad thing because the compiler told it to. And in both cases the fix is the same: the compiler's code must change, since that code was what caused the memory corruption.</p>
+<p>Just like every compiler, ours has had bugs, and some of those have been miscompilations that led to memory corruption. That said, while 8 of the 10 memory corruption bugs in the Zig-based compiler were also miscompilations, the remaining 2 were in the compiler itself. Both were use-after-free bugs in error reporting, with the same symptom: filenames in error messages (<a href="https://github.com/roc-lang/roc/issues/8943">one in <code>roc check</code></a> and <a href="https://github.com/roc-lang/roc/issues/8606">the other in <code>roc bundle</code></a>) rendered as useless <a href="https://unicodeplus.com/U+FFFD">question-mark-in-diamond characters</a>. Rust's borrow checker would have caught both.</p>
 <p>Now let's suppose we had instead chosen Rust for our rewrite, or Zig with <code>ReleaseSafe</code>. What would have been the impact in practice, holding all else equal?</p>
 <table>
 <thead>
@@ -504,25 +468,27 @@ async fn read_items(headers: CommonHeaders) -&gt; String {
 </thead>
 <tbody><tr>
 <td align="left">Zig with <code>ReleaseFast</code></td>
-<td align="left">2 bug reports: some error reports fail to render filenames</td>
+<td align="left">2 bug reports: some error messages fail to render filenames</td>
 </tr>
 <tr>
 <td align="left">Zig with <code>ReleaseSafe</code></td>
-<td align="left">2 bug reports: some error reports panic instead of rendering at all</td>
+<td align="left">2 bug reports: some error messages panic instead of rendering at all</td>
 </tr>
 <tr>
 <td align="left">Rust's borrow checker</td>
 <td align="left">neither of these bug reports</td>
 </tr>
 </tbody></table>
-<p>After 18 months of development, hundreds of total bug reports, and hundreds of thousands of lines of code, my main takeaway from retrospecting on this table is that picking a different row would have made no appreciable difference to the project. So far our choice has gotten us the outcome we'd hoped for, and if a future retrospective goes differently, switching to <code>ReleaseSafe</code> is a build flag away.</p>
+<p>After 18 months of development, hundreds of total bug reports, and hundreds of thousands of lines of code, my main takeaway from retrospecting on this table is that picking a different row would have made no appreciable difference to the project. So far our choice has gotten us the outcome we'd hoped for.</p>
 <p>As I noted earlier, every project has different needs. When Bun rewrote in the opposite direction—from Zig to Rust—<a href="https://bun.com/blog/bun-in-rust#just-be-really-smart-and-don-t-make-mistakes">their accompanying post</a> noted:</p>
+<blockquote>
 <p>For Bun, correctly handling the lifetimes of garbage-collected values [from JavaScript] and manually-managed values has been a major source of stability issues - most often small memory leaks and occasionally, crashes. Every memory allocation has to be meticulously reviewed. Where do these bytes get freed? How do we ensure it only gets freed once? Did we check for JavaScript exceptions properly? Is this garbage-collected pointer visible to the conservative stack scanner? Is this garbage collected memory or manually managed memory?</p>
-<p>Roc's compiler doesn't have these challenges because it doesn't interface with JavaScript or any other tracing garbage collector. For Bun, "use-after-free, double-free, and 'forgot to free'" errors have been "a large percentage of bugs," whereas errors like these have been a small percentage of Roc's bugs. And of course Roc's compiler faces various challenges that Bun doesn't. Different projects have different needs!</p>
-<p>In our case, I'm not sure how I could look back at what's actually happened and conclude that what we needed was a bigger investment in tooling to prevent memory safety bugs <em>in the compiler itself.</em> There's a much stronger case that we would benefit from better tooling to catch memory safety bugs <em>in our compiled output</em>, which is out of scope for the borrow checker.</p>
+</blockquote>
+<p>Roc's compiler doesn't have these particular challenges because it doesn't interface with JavaScript or any other tracing garbage collector. For Bun, "use-after-free, double-free, and 'forgot to free'" errors have been "a large percentage of bugs," whereas errors like these have been a small percentage of Roc's bugs. And of course Roc's compiler faces other challenges that Bun doesn't. Different projects have different needs!</p>
+<p>In our case, I'm not sure how I could look back at what's actually happened and conclude that what we needed was a bigger investment in tooling to prevent memory safety bugs <em>in the compiler itself.</em> There's a much stronger case that we would benefit from better tooling to catch memory safety bugs <em>in our compiled output</em>, which has always been out of scope for the borrow checker.</p>
 <h2>Build Times</h2>
 <p>We wanted faster builds from Zig. Did we get them?</p>
-<p>Well, the good news is that <code>zig build --watch -fincremental</code> can rebuild a change to our current code base in about 35 milliseconds. That's even faster than what we were hoping for when we considered Zig's build speed a selling point for the rewrite!</p>
+<p>Well, the good news is that <code>zig build --watch -fincremental</code> can rebuild a change to our current ~450K lines of Zig code in about 35 milliseconds. That's even faster than what we were hoping for when we considered Zig's build speed a selling point for the rewrite!</p>
 <p>The bad news is that Zig's current stable 0.16.0 release has a bug that breaks <code>-fincremental</code> on our code base. <a href="https://codeberg.org/ziglang/zig/pulls/35533">The fix</a> already landed, but to get it we'd have to build on a <a href="https://ziglang.org/download/">nightly 0.17.0 prerelease build</a> (which has breaking language changes), along with vendoring and upgrading our affected dependencies to 0.17.0. We decided to wait for the next stable release instead.</p>
 <p>As of the last commit that had Rust sources in our code base, here's a timing comparison on my Intel desktop machine running Ubuntu 26 for building cold (no cache, but packages downloaded locally) compared to doing an incremental rebuild after making a trivial edit to our parser:</p>
 <table>
@@ -559,53 +525,38 @@ async fn read_items(headers: CommonHeaders) -&gt; String {
 <td align="left">0.035s</td>
 </tr>
 </tbody></table>
-<p>(Note that our Zig build configuration as of the feature-parity commit was rebuilding rarely-changing artifacts on every build that we later decided to rebuild only on demand. That's why today's cold builds are faster than they were back at 300K LoC, even though our lines of code have increased by ~50% since then.)</p>
-<p>Rust 1.97 is the current stable release today, and 1.85 was the current stable release 487 days ago (the time our rewrite took to reach to feature parity). So if we'd stayed on Rust for the same duration, we could have seen our incremental build times decrease from 10 seconds to 3.4. That's a big jump! I really appreciate all the hard work that Rust contributors have done to improve build times. Eliminating 2/3 of our incremental build times over 18 months would have been a very welcome change if we'd stayed on Rust, and it's a bigger improvement than I would have expected in an 18-month period. Bravo!</p>
+<blockquote>
+<p>Note that our Zig build configuration as of the feature-parity commit was rebuilding rarely-changing artifacts on every build that we later decided to rebuild only on demand. That's why today's cold builds are faster than they were back at 300K LoC, even though our lines of code have increased by ~50% since then.</p>
+</blockquote>
+<p>Rust 1.97 is the current stable release today, and 1.85 was the current stable release 487 days ago (the time our rewrite took to reach to feature parity). So if we'd stayed on Rust for the same duration, we could have seen our incremental build times decrease from 10 seconds to 3.4. That's a big jump! I really appreciate all the hard work that Rust contributors have done to improve build times. Eliminating 2/3 of our incremental build times over 18 months would have been a very welcome change if we'd stayed on Rust, and it's a bigger improvement than I would have anticipated in an 18-month period. Bravo!</p>
 <p>As impressive as that improvement is, Zig's 35ms is still way ahead. Not only is it 1/100th the build time of 3.4 seconds, it's also in <a href="https://www.youtube.com/watch?v=-jy4HaNEJCo&t=279s">a different performance category</a>—and that 35ms is on a Zig code base with ~50% more lines of code than the Rust one that got 3.4s. I expect Roc's code base to keep growing, and for this gap to keep growing with it; I've never heard of any initiative on Rust's roadmap comparable to <code>-fincremental</code>.</p>
-<p>Still, it's a point in Rust's favor that our <code>cargo build</code> times after a rebuild (without a watch running) on current stable Rust are now faster than our <code>zig build</code> rebuild times on current stable Zig. That number is the relevant comparison for CI build times, as CI builds won't use <code>--watch -fincremental</code> at all.</p>
 <p>So while our decision to remain on stable 0.16.0 (plus how many of our contributors run Mac laptops with ARM processors; <code>-fincremental</code> only works on x86-64 CPUs right now) means we haven't yet reaped the anticipated build-time rewards of choosing Zig for the rewrite, we certainly have something to look forward to in the next stable Zig release!</p>
-<h2>Zero-Parse Deserialization</h2>
-<p>Roc's on-disk caching system uses a technique I first learned about from Zig's compiler, and which Casey Muratori told me is common practice in game programming. It relies on the happy coincidence that if you're organizing your memory in the way that runs fastest on modern hardware anyway, you can also load it from disk directly into memory and start using it without parsing anything.</p>
+<h2>Memory Control: Zero-Parse Deserialization</h2>
+<p>Roc's new on-disk caching system uses a technique I first learned about from Zig's compiler, and which Casey Muratori told me is common practice in game programming. It relies on the happy coincidence that if you're organizing your memory in the way that runs fastest on modern hardware anyway, you can also load it from disk directly into memory and start using it without parsing anything.</p>
 <p>Here's how it works:</p>
 <ul>
-<li>When we load a Roc module (a .roc source file), we compute a BLAKE3 hash of its source bytes, and then hash that along with the current version of Roc's compiler. This is the module's "source key."  <ul>
-<li>Parsing and name resolution (aka "semantic analysis" prior to type checking) are designed to be a pure function of source bytes, so we can write these arrays directly to disk under the module's source key and then load them directly back into memory when we're done. There is no parsing step to deserialize, just doing a fixed number of pointer relocations to put the arrays in the right places in memory.  </li>
-<li>This means we deserialize basically at the speed of loading the bytes from disk into memory, which also means if they're already in the operating system's disk cache, we deserialize at roughly the speed of <a href="https://www.man7.org/linux/man-pages/man3/memcpy.3.html">memcpy</a>.  </li>
-<li>This is, as you might guess, significantly faster than redoing lexing, parsing, and semantic analysis from scratch. So when we load a source file, we BLAKE3 hash its bytes to get its source key, go look up whether we have an entry in the global cache, and if so, read it into memory, do some pointer relocations, and we're done.</li>
+<li>All of our compiler data structures are represented as arrays with 32-bit <a href="https://joegm.github.io/blog/indices-not-pointers/">indices over pointers</a> (and often in <a href="https://en.wikipedia.org/wiki/AoS_and_SoA">structure-of-arrays</a> form).</li>
+<li>This not only saves memory and runs faster, it also means our data structures can be written directly to disk without needing to be serialized into a different format first.</li>
+<li>The bigger benefit is that this lets us <em>deserialize</em> them back into memory without parsing the on-disk bytes in any way. We load the bytes into memory, do some relocations to point our existing data structures to the newly-loaded arrays, and we're ready to go.</li>
+<li>This means we deserialize at the speed of loading the bytes from disk into memory—so, <a href="https://shows.acast.com/software-unscripted/episodes/664fde448c77cc0013b33399"><em>actually</em> I/O bound</a>. If those bytes are already in the operating system's disk cache, it means we load cached work from previous builds at roughly the speed of <a href="https://www.man7.org/linux/man-pages/man3/memcpy.3.html">memcpy</a>.</li>
 </ul>
-</li>
-<li>Each .roc file also has an "implementation key," which is basically its source key recursively hashed together with the implementation keys of everything it imports.  <ul>
-<li>Type-checking, compile-time execution of constants, and executing tests of pure functions (you can write tests in the top level of .roc files using the <code>expect</code> keyword, e.g. <code>expect my_fn(123, 456) == 789</code> and they will get run during <code>roc test</code>), are all pure functions of a module's implementation key.  </li>
-<li>We cache these under the implementation key in the same way and with the same deserialization strategy as what we do for the source code.  <ul>
-<li>We use this different key because it can be invalidated if the module's dependencies change, at which point it saves time to be able to go get the cached source key for everything up to type-checking, and not have to redo that work.</li>
-</ul>
-</li>
-<li>So now we don't need to pay to redo type inference, or compile-time evaluation, or even rerun pure-function tests, for a given module. We just get its BLAKE3 hash and load a file into memory, and we're basically done. This is <em>much</em> cheaper than doing type inference, compile-time evaluation of constants, and re-running all your tests.</li>
-</ul>
-</li>
-</ul>
-<p>This zero-parse deserialization strategy only works because we use 32-bit array <a href="https://joegm.github.io/blog/indices-not-pointers/">indices over pointers</a> for all of our compiler data structures. Not only is this faster and more memory-efficient than 64-bit pointers, but if we used pointers (like almost all compilers do), deserialization couldn't be zero-parse.</p>
-<p>If you know exactly how many of these array-with-indices collections you need up front, Rust's borrow checker can help you avoid using an index with the wrong array by generating type tags like what <a href="https://docs.rs/compact_arena/0.5.0/compact_arena/"><code>compact_arena</code></a> does. Unfortunately, if you <em>can't</em> know exactly how many you need up front (e.g. because it varies by number of modules, as it does in our use case), the borrow checker can't help. That's why <code>compact_arena</code> <a href="https://docs.rs/compact_arena/0.5.0/compact_arena/struct.SmallArena.html#method.new">marks this functionality as <code>unsafe</code></a>.</p>
-<p>I certainly agree that <code>unsafe</code> is warranted here, but personally I wouldn't label <code>SmallArena::new</code> in particular as unsafe. <em>Creating</em> an empty arena will never cause memory unsafety, so putting an <code>unsafe</code> block around it isn't doing what <code>unsafe</code> is supposed to do in Rust: mark the parts of your code that must be audited extra-carefully.</p>
-<p>The reality is uncomfortable, but it is reality: what is actually memory-unsafe when you use this technique is <em>literally every single operation that looks up an index into an array.</em> Every single "index-flavored pointer dereference" is an opportunity to give the index to the wrong array, and end up with whatever random bytes happened to be in that incorrect array at that particular index. Those are the points of unsafety that need extra-careful auditing.</p>
-<p>So if we had adopted this technique pervasively in our Rust code base—as Zig's compiler does, and which we had decided to partly because it's a prerequisite for zero-parse deserialization—then the part of our code base that would use Unsafe Rust and therefore need extra-careful auditing would be <em>the entire code base.</em></p>
-<p><a href="https://doc.rust-lang.org/nomicon/meet-safe-and-unsafe.html">Safe Rust</a> is valuable because it (reasonably!) assumes that the amount of Unsafe Rust in your code base is small and isolated, which I believe is true for the vast majority of Rust code bases. But if <code>unsafe</code> is going to be pervasive, like in our case, the premise of that value proposition no longer holds, and it starts to sound more appealing to choose <a href="https://zackoverflow.dev/writing/unsafe-rust-vs-zig/">a language that's safer than Unsafe Rust</a>.</p>
+<p>When you run <code>roc check</code> twice in a row, the first time it caches all of its outputs on disk using this strategy. The second time, if the input source code files haven't changed, all the parsed/type-checked/etc. data structures jump straight from disk into memory. It's <em>extremely</em> fast. <code>roc test</code> similarly caches the outcomes for tests of pure functions (which are deterministic), and all of this is done with file-level granularity, so if you change one file you'll only be paying for redoing work of that file and any others that depend on it.</p>
+<p>This zero-parse deserialization strategy only works because we're following this <a href="https://www.hytradboi.com/2025/05c72e39-c07e-41bc-ac40-85e8308f2917-programming-without-pointers">programming without pointers</a> style for all of our compiler data structures. If we instead used pointers everywhere (like almost all compilers do), deserialization couldn't be zero-parse.</p>
+<p>This approach has safety risks, however. Similarly to how a pointer in memory can point to the wrong address (e.g. leading to a use-after-free), any index can be used as a lookup into the wrong array at runtime, at which point you end up with whatever random bytes happened to be at that location. Rust's borrow checker is designed to help with pointer lifetimes, but it doesn't attempt to answer the question "which index goes with which array?" because that has never been in scope for its design.</p>
+<p>If you know exactly how many of these arrays you need up front, the Rust crate <a href="https://docs.rs/compact_arena/0.5.0/compact_arena/"><code>compact_arena</code></a> can help you avoid indexing into the wrong array by generating type tags with a macro. Unfortunately, if you <em>can't</em> know exactly how many you need up front (e.g. because it varies by number of modules, as it does in our use case), this technique doesn't work. That's why <code>compact_arena</code> <a href="https://docs.rs/compact_arena/0.5.0/compact_arena/struct.SmallArena.html#method.new">marks <code>SmallArena::new</code>  as <code>unsafe</code></a>.</p>
+<p>Personally I wouldn't label <code>SmallArena::new</code> as unsafe. <code>unsafe</code> is supposed to mark the parts of your code base that should be audited extra-carefully, and creating an empty arena doesn't need auditing because it can't cause unsafety. Unfortunately, the potentially-unsafe operation is indexing into an array, which comes up <em>constantly</em>. "Audit every part of your code base extra carefully" is not great advice, and neither is "avoid this technique that massively improves performance" when Zig itself has shown that a spotless memory-safety CVE record is achievable while doing exactly this.</p>
+<p><a href="https://doc.rust-lang.org/nomicon/meet-safe-and-unsafe.html">Safe Rust</a> is effective in practice because it assumes that the amount of Unsafe Rust in your code base is small and isolated, and that assumption holds for the vast majority of Rust code bases. But if <code>unsafe</code> is going to be pervasive, like in our case, the assuption no longer holds, and it starts to sound more appealing to choose <a href="https://zackoverflow.dev/writing/unsafe-rust-vs-zig/">a language that's safer than Unsafe Rust</a>.</p>
 <h2>Ecosystem Relevance</h2>
-<p>Rust creator Graydon Hoare once jokingly described Rust as "Linear ML in C++ clothing." When I first heard that, I assumed the "C++ clothing" he was referring to was syntax, but over time I've increasingly thought of Drop—which is almost a direct translation of RAII—as being part of that "C++ clothing." You could certainly make a Linear ML without Drop if you wanted to!</p>
-<p>Drop makes working in Rust feel, by default, like working in a language with a tracing garbage collector (like Go, or maybe OCaml—the language which Rust's initial compiler was written in). "Garbage-collected, except with lifetime parameters in lots of type signatures, and with an additional borrow checking step on top of the usual type-checking step" is how I felt about using Rust when I was first getting into it.</p>
-<p>I can think of two situations where Drop seems like pretty much exactly the right tool for the job. One is where you want to do a lot of automatic reference counting, like in Zed's code base. Manual reference counting is notoriously difficult to get right, and the bugs when you get it wrong are notoriously hard to track down. Automatic reference counting via Drop is way less error-prone.</p>
-<p>Another situation where Drop feels like the right tool for the job is when interfacing with a ton of memory that's managed by a tracing collector like JavaScript's—in other words, what Bun is doing. Before ultimately moving to Rust, they mentioned having developed their own "smart pointer" system in Zig to deal with this, but I'd expect Drop to be a much more natural fit for what they wanted to do.</p>
-<p>In contrast, Drop has been a pain point for us because the Rust ecosystem is built around it. Imagine these two APIs for a wrapper around LLVM's C++ library:</p>
-<ol>
-<li>"Call this function and we'll use a global allocator for all allocations, even if you have an arena you want to be used instead."  </li>
-<li>"Call this function passing an allocator, so if you want to use an arena, no problem, you just pass it in."</li>
-</ol>
-<p>Our arena-heavy code base always wants the second API, which Zig's ecosystem consistently follows, whereas basically Rust's whole ecosystem is designed to offer the former API every time. So Rust's ecosystem is optimized for the way Bun wants to be written, whereas Zig's is designed for the way Roc wants to be written.</p>
-<p>Separately, there's the question of what code we can access off the shelf. I mentioned LLVM earlier because, although it's a critical dependency for our optimizer (we do our own optimizations, but LLVM does a bunch more on top), it's also a project that makes major breaking API changes on a regular basis. Upgrading to new LLVM versions has been a major source of pain and lost time for Roc, but we keep doing it because we want the new optimizations.</p>
+<p>The Bun post talks about how Rust's <a href="https://doc.rust-lang.org/std/ops/trait.Drop.html"><code>Drop</code></a> could help with their unusual JavaScript inetrop challenges:</p>
+<blockquote>
+<p>[...] other users of Zig don't have the bugs we had, and mixing GC with manually-managed memory is an uncommon enough thing for software to need that no language really designs for it. [...] One common way to reduce this class of issue is to ensure cleanup code is always run exactly once for code that needs it. Zig is designed to be a simple language with no hidden control flow, and so it prefers the explicit <code>defer</code> keyword to run code at the end of a scope over C++'s implicit ~Destructor or Rust's implicit <code>Drop</code>.</p>
+</blockquote>
+<p>Our project is in almost the opposite boat: <code>Drop</code> has been a pain point for us because the Rust ecosystem is built around the assumption that everyone is using a global allocator and using <code>Drop</code> for implicit deallocation. But we want to be doing almost the opposite: separate <a href="https://en.wikipedia.org/wiki/Region-based_memory_management">arenas</a> for each module and stage of compilation. Zig's ecosystem consistently passes around allocators, which is exactly what we want, whereas off-the-shelf Rust crates almost always assume a single global allocator.</p>
+<p>Simply put, Rust's ecosystem is optimized for the way Bun wants to be written, whereas Zig's is designed for the way Roc wants to be written.</p>
+<p>Separately, there's the question of what relevant code we can access off the shelf. <a href="https://llvm.org">LLVM</a> is a critical dependency for our optimizer (we do our own optimizations, but LLVM does more on top), but it's also a project that makes major breaking API changes on a regular basis. Upgrading to new LLVM versions has been a major source of pain and lost time for Roc, but we keep doing it because we want the new optimizations.</p>
 <p>As it turns out, LLVM actually has a stable and backwards-compatible API that can be accessed to bypass this upgrade pain: its serialized "bitcode" format. If you write your own LLVM bitcode serializer, then you can tell each new version of LLVM to consume that, and you're off to the races. </p>
 <p>Of course, to access this strategy, you need a handwritten LLVM bitcode serializer that's decoupled from the LLVM C++ library and its breaking changes. I only know of one implementation of such a thing in the wild: Zig's compiler, which of course is written in Zig. And now there are two implementations in the wild, because Roc's new compiler is reusing that same Zig code. (Thanks for sharing it, Zig team!)</p>
-<p>Future considerations are relevant here too. Right now our final compiler executable is about 25MB of our own stuff and then over 100MB of LLVM and lld. They also both run very slowly, but today there's no viable alternative out there which does those jobs.</p>
-<p>I only know of one project that aims to replace both of those dependencies with fast, modern alternatives. Any guesses? Yeah, it's the Zig team. They want it for their own compiler, for the same reasons we do, and there's no Rust equivalent I've ever heard of being developed.</p>
+<p>Future considerations are relevant here too. Right now our final compiler executable is about 25MB of our own stuff and then over 100MB of LLVM and lld. They also both run very slowly, but today there's no viable alternative out there which does those jobs. I only know of one project that aims to replace both of those dependencies with fast, modern alternatives. Any guesses? Yep, it's the Zig team! They want it for their own compiler, for the same reasons we do, and there's no Rust equivalent I've ever heard of being developed.</p>
 <p>You might have noticed that the biggest source of dependencies we're interested in from the Zig ecosystem is the Zig compiler itself. This is unusual, but Roc is an unusual project with unusual needs. When I wrote the first line of code in the compiler back in 2019, I would not have guessed that the following would prove true: "In the future, the richest gold mine of reusable code for this project will be an open-source compiler written in a language you haven't heard of yet."</p>
 <p>Life is full of surprises!</p>
 <h2>Things I Miss From Rust</h2>
@@ -627,9 +578,9 @@ async fn read_items(headers: CommonHeaders) -&gt; String {
 <p>Then of course there's all the project-specific stuff which I mentioned earlier: allocator-based APIs everywhere, an ecosystem of high-performance compiler goodies that we can't find anywhere else, and so on. I won't rehash them all here, but I very much enjoy them in addition to appreciating the benefits they've had to the project.</p>
 <p>I've had a very positive experience with Zig all around, and looking back I'm really happy that we chose it for our rewrite!</p>
 <h2>What's Next for Roc</h2>
-<p>Next up we're working towards a formal 0.1.0 release of the language, aiming to have it out before the end of this year. I have a lot of documentation to write!</p>
+<p>We aim to land version 0.1.0 of the new compiler later this year, which will be Roc's first-ever numbered release. You're welcome to try out a <a href="https://roc-lang.org/install/">Nightly build</a> before then, although in its current state you can still expect a variety of bugs, incomplete features, and unfinished docs. I have a lot of documentation to write between now and then!</p>
 <p>By the way, the <a href="https://roc-lang.org/foundation">Roc Programming Language Foundation</a> is a <a href="https://en.wikipedia.org/wiki/501(c)(3)_organization">501(c)(3) nonprofit</a>, so <a href="https://roc-lang.org/donate">donations</a> are tax-free in the US, and we use donations primarily to compensate contributors. If you know of an organization that would like to sponsor our work, financially or in other ways, please <a href="https://roc-lang.org/donate">get in touch</a>! (Separately, if you know anyone at GitHub who could get us into <a href="https://github.com/solutions/industry/nonprofits">GH for Nonprofits</a>, that would be a huge help with our CI backlog.)</p>
-<p>Thank you again to everyone who has helped the language reach this milestone. I couldn't be more excited for the next one: our first-ever numbered release!</p>
+<p>Thank you again to everyone who has helped the language reach this milestone. I couldn't be more excited for the next one: our first-ever numbered release! If you'd like to follow along, ask questions, or just come say hi, feel free to come chat with us on <a href="roc.zulipchat.com/">Roc Zulip</a>.</p>
         </main>
     </body>
 </html>

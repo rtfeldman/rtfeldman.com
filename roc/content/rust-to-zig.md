@@ -255,7 +255,9 @@ Hitting this milestone made it possible to update [Brendan Hansknecht](https://g
 
 Rocci Bird's updated source code is a bit more concise than [the original](https://github.com/lukewilliamboswell/roc-wasm4/blob/a769ade51cbd4613b4fca468764c9034f9c8070c/examples/rocci-bird.roc), and `roc build --opt=size` now outputs a 31KB wasm binary. (The original compiler produced a binary more than double that size.) Rocci Bird is by no means a large code base, but getting it to run at all required landing a *lot* of features in the new compiler. Seeing those chunky purple pixels brought a smile to my face when we finally got there!
 
-This is a wonderful milestone to have reached, and I'm extremely grateful to all the people who came together to make this happen. I want to thank some in particular who have been especially helpful in getting the language and compiler to this point:
+To be clear, this is a milestone but not a formal release. We aim to land version 0.1.0 of the new compiler later this year, which will be Roc's first-ever numbered release. You're welcome to try out a [Nightly build](https://roc-lang.org/install/) before then, but in its current state you can still expect a variety of bugs, incomplete features, and unfinished docs.
+
+That said, this is a wonderful milestone to have reached, and I'm extremely grateful to all the people who came together to make this happen! I want to thank some in particular who have been especially helpful in getting the language and compiler to this point:
 
 * [Anthony Bullard](https://github.com/gamebox) and [Sam Mohr](https://github.com/smores56) for collaborating on the new parser  
 * [Jared Ramirez](https://github.com/jaredramirez) for the new type-checker (among many other things!)  
@@ -274,65 +276,129 @@ Speaking of time: our 487-day rewrite took 476 days longer than [Bun's 11-day re
 
 The laundry list of changes we made also means comparing our original Rust code base and new Zig code base won't be apples-to-apples. Still, we've reached a nice point to reflect on how the rewrite has gone, both in terms of what new features it has unlocked for Roc programmers, as well as how our experiences with Rust and Zig have compared.
 
+Let's get into it!
+
 ## Hot Code Loading + Cross-Compiled Binaries
 
-Roc's new compiler automatically does hot code loading during development. For example, I can run `roc server.roc` to start a Web server, then change some of its code while it's running. The next time that server handles a request, it'll automatically be handled using the new code. Here it is in action, both in a server and in a simple 2D game:
+Roc's new compiler automatically does hot code loading during development. For example, I can run `roc server.roc` to start a Web server, then change some of its code while it's running. The next time that server handles a request, it'll automatically be handled using the new code. Here it is in action, both in a server and in a simple 2D game running at 120fps:
 
 <video class="inline-video" controls preload="metadata" playsinline>
     <source src="/assets/hot-loading.mp4" type="video/mp4">
     <a href="/assets/hot-loading.mp4">Download the hot-loading demo video.</a>
 </video>
 
-Hot loading is standard behavior for interpreted languages like Python, but not so much for high-performance compiled languages like Roc. When I'm ready to deploy, `roc build server.roc` gets me an LLVM-optimized, self-contained binary that I can drop onto a machine and run. Roc also cross-compiles; building a static binary that runs on Alpine Linux is as simple as `roc build --target=x64musl`, and that command will produce the same output bytes (for the same input source code bytes) when run on a Mac or any other system—which [not all compilers guarantee](https://xeiaso.net/notes/2026/anubis-wasm-vendor-binary/).
+Hot loading is standard behavior for interpreted languages like Python, but not so much for high-performance compiled languages like Roc.
+
+When I'm ready to deploy, `roc build server.roc` gets me an LLVM-optimized, self-contained executable that I can drop onto a machine and run. It also cross-compiles; no matter whether you're running macOS, Linux, or Windows, all of the following commands work, and output reproducible binaries (meaning the same input source bytes always produce the same output executable bytes—which [not all compilers do](https://xeiaso.net/notes/2026/anubis-wasm-vendor-binary/)) that will run on the target system:
+
+| Command | Output binary runs on |
+| :---- | :---- |
+| `roc build --target=wasm32` | WebAssembly |
+| `roc build --target=arm64mac` | macOS Apple Silicon (use `x64mac` for Intel) |
+| `roc build --target=x64win` | x64 Windows (`arm64win` for 64-bit ARM) |
+| `roc build --target=x64glibc` | normal Linux distros (ones with [glibc](https://www.gnu.org/software/libc/)) |
+| `roc build --target=x64musl` | Linux distros without glibc (e.g. [Alpine](https://www.alpinelinux.org/about/)) |
+| `roc build` | (whatever the current system is) |
 
 ## Pattern Matching with String Interpolation
 
 The HTTP request-handling logic from that video looks like this:
 
-<pre><samp class="code-snippet"><span class="comment"># Starts up the server; initializes a database and logger</span>
-<span class="comment"># based on environment variables.</span>
-init! <span class="kw">=</span> <span class="kw">|</span>env<span class="punctuation separator">,</span> _args<span class="kw">|</span> <span class="punctuation section">{</span>
-    <span class="punctuation section">{</span> log_level<span class="punctuation separator">,</span> db_credentials <span class="punctuation section">}</span> <span class="kw">=</span> env.parse()<span class="kw">?</span>
-
-    db <span class="kw">=</span> init_db!(db_credentials)<span class="kw">?</span>
-    log <span class="kw">=</span> init_logger!(log_level)<span class="kw">?</span>
-
-    <span class="comment"># (other such initializations would happen here)</span>
-
-    <span class="upperident">Ok</span><span class="punctuation section">(</span><span class="punctuation section">{</span> db<span class="punctuation separator">,</span> log <span class="punctuation section">}</span><span class="punctuation section">)</span>
-<span class="punctuation section">}</span>
-
-<span class="comment"># Handles an incoming HTTP request (HTTP verb,</span>
-<span class="comment"># path, headers, body) using the db and log that</span>
-<span class="comment"># we initialized during init!()</span>
-handle_req! <span class="kw">=</span> <span class="kw">|</span><span class="punctuation section">{</span> db<span class="punctuation separator">,</span> log <span class="punctuation section">}</span><span class="punctuation separator">,</span> verb<span class="punctuation separator">,</span> path<span class="punctuation separator">,</span> headers<span class="punctuation separator">,</span> body<span class="kw">|</span> <span class="punctuation section">{</span>
-    auth_token <span class="kw">=</span> headers.x_auth_token
-    user_agent <span class="kw">=</span> headers.user_agent
-
-    app <span class="kw">=</span> <span class="upperident">App</span>.init<span class="punctuation section">(</span><span class="punctuation section">{</span> auth_token<span class="punctuation separator">,</span> user_agent<span class="punctuation separator">,</span> db<span class="punctuation separator">,</span> log <span class="punctuation section">}</span><span class="punctuation section">)</span><span class="kw">?</span>
-
-    <span class="kw">match</span> <span class="punctuation section">(</span>verb<span class="punctuation separator">,</span> path<span class="punctuation section">)</span> <span class="punctuation section">{</span>
-        <span class="punctuation section">(</span><span class="upperident">GET</span><span class="punctuation separator">,</span> <span class="string">"/users/</span><span class="kw">${</span>id<span class="kw">}</span><span class="string">"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> app.user_profile!(id)
-        <span class="punctuation section">(</span><span class="upperident">GET</span><span class="punctuation separator">,</span> <span class="string">"/users/</span><span class="kw">${</span>id<span class="kw">}</span><span class="string">/</span><span class="kw">${</span>page<span class="kw">}</span><span class="string">"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> <span class="kw">match</span> page <span class="punctuation section">{</span>
-            <span class="string">""</span> <span class="kw">|</span> <span class="string">"profile"</span> <span class="kw">=&gt;</span> app.user_profile!(user_id)
-            <span class="string">"settings"</span> <span class="kw">=&gt;</span> app.user_settings!(user_id)
-            <span class="string">"posts/</span><span class="kw">${</span>post_id<span class="kw">}</span><span class="string">"</span> <span class="kw">=&gt;</span> <span class="punctuation section">{</span>
-                app.user_post!(user_id<span class="punctuation separator">,</span> post_id)
-            <span class="punctuation section">}</span>
-            _ <span class="kw">=&gt;</span> app.not_found!(verb<span class="punctuation separator">,</span> path)
-        <span class="punctuation section">}</span>
-        <span class="punctuation section">(</span><span class="upperident">POST</span><span class="punctuation separator">,</span> <span class="string">"/posts/new"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> <span class="punctuation section">{</span>
-            app.new_post!(body)
-        <span class="punctuation section">}</span>
-        _ <span class="kw">=&gt;</span> app.not_found!(verb<span class="punctuation separator">,</span> path)
+<pre><samp class="code-snippet"><span class="kw">match</span> <span class="punctuation section">(</span>verb<span class="punctuation separator">,</span> path<span class="punctuation section">)</span> <span class="punctuation section">{</span>
+    <span class="punctuation section">(</span><span class="string">"GET"</span><span class="punctuation separator">,</span> <span class="string">"/users/</span><span class="kw">${</span>id<span class="kw">}</span><span class="string">/</span><span class="kw">${</span>page<span class="kw">}</span><span class="string">"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> <span class="kw">match</span> page <span class="punctuation section">{</span>
+        <span class="string">""</span> <span class="kw">|</span> <span class="string">"profile"</span> <span class="kw">=&gt;</span> ok<span class="punctuation section">(</span>id<span class="punctuation section">)</span>
+        <span class="string">"settings"</span> <span class="kw">=&gt;</span> ok<span class="punctuation section">(</span>with_default<span class="punctuation section">(</span>user_agent<span class="punctuation separator">,</span> id<span class="punctuation section">)</span><span class="punctuation section">)</span>
+        <span class="string">"posts/</span><span class="kw">${</span>post_id<span class="kw">}</span><span class="string">"</span> <span class="kw">=&gt;</span> ok<span class="punctuation section">(</span><span class="string">"Post ID: </span><span class="kw">${</span>post_id<span class="kw">}</span><span class="string">"</span><span class="punctuation section">)</span>
+        _ <span class="kw">=&gt;</span> not_found
     <span class="punctuation section">}</span>
+
+    <span class="punctuation section">(</span><span class="string">"GET"</span><span class="punctuation separator">,</span> <span class="string">"/users/</span><span class="kw">${</span>id<span class="kw">}</span><span class="string">"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> ok<span class="punctuation section">(</span>id<span class="punctuation section">)</span>
+
+    <span class="punctuation section">(</span><span class="string">"POST"</span><span class="punctuation separator">,</span> <span class="string">"/posts/new"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> created<span class="punctuation section">(</span>with_default<span class="punctuation section">(</span>auth_token<span class="punctuation separator">,</span> body<span class="punctuation section">)</span><span class="punctuation section">)</span>
+
+    _ <span class="kw">=&gt;</span> not_found
 <span class="punctuation section">}</span></samp></pre>
 
 This uses several features we introduced in the new compiler. For example, that `"/users/${id}"` syntax is not implemented with [parsing template strings at runtime](https://expressjs.com/en/guide/routing/#route-parameters), but rather with a new language feature: string interpolation inside pattern matching.
 
 Not only is this type-safe at compile time, this entire code snippet performs *zero heap allocations*. (We even have a regression test which sends various requests to a HTTP server running this code, and the test fails if the server attempts a single heap allocation at any time.) I'd expect the typical language that ships with hot code loading to average closer to 1 allocation per line of code here…but Roc is aiming high on ergonomics, type safety, *and* performance!
 
-In what will become a recurring theme, hot code loading is innately memory-unsafe. We generate arbitrary machine instructions and have the CPU execute them—already memory-unsafe, but that's every compiler's job—and on top of that, we swap out some instructions for others while the compiled program is still running. There's a lot to get right, and we appreciate all the help we can get from our tools!
+## Compile-Time Evaluation of Pure Functions
+
+We didn't get zero heap allocations in this common use case by chance; we got it by designing and implementing the new compiler to aggressively avoid doing unnecessary work at runtime. One of the strategies which avoids runtime allocations in this specific example is doing work at compile time instead of runtime.
+
+As an example, Python's popular FastAPI server framework lets you parse HTTP headers directly into Python objects based on the field names defined in the object's class. Here's a simplified [example from FastAPI's docs](https://fastapi.tiangolo.com/tutorial/header-param-models/#check-the-docs):
+
+```
+class CommonHeaders(BaseModel):
+    host: str
+    save_data: bool
+    if_modified_since: str | None = None
+
+@app.get("/items/")
+async def read_items(headers: Annotated[CommonHeaders, Header()]):
+    # …use headers somehow here
+```
+
+Presumably you'd go on to use `headers` somehow in the body of `read_items`. By default, FastAPI will look for a HTTP header named `if-modified-since` (case-insensitive) to parse into the field named `if_modified_since`, because Python uses [snake_case](https://en.wikipedia.org/wiki/Snake_case) whereas HTTP headers use [kebab-case](https://en.wikipedia.org/wiki/Letter_case#Kebab_case). This is done automatically based on the field name at runtime, at the cost of one heap allocation per field.
+
+If you ported this example to Rust with [salvo](https://docs.rs/salvo/latest/salvo/extract/index.html), you'd get about the same level of convenience—but with full type safety and fewer runtime allocations:
+
+```
+#[derive(Deserialize, Extractible, Debug)]
+#[serde(rename_all = "kebab-case")]
+#[salvo(extract(default_source(from = "header")))]
+struct CommonHeaders {
+    host: String,
+    save_data: bool,
+    if_modified_since: Option<String>,
+}
+
+#[handler]
+async fn read_items(headers: CommonHeaders) -> String {
+    // …use headers somehow here
+}
+```
+
+You'd still have some runtime allocations though, because all of those fields except `save_data` have types involving heap allocations.
+
+Roc's equivalent is also fully type-safe, but it performs no runtime heap allocations at all, and is a one-liner with no type declarations or annotations of any kind:
+
+```
+read_items = |headers| # …use headers somehow here
+```
+
+That's it, that's the code. You can try it out for yourself! The way this works in Roc is:
+
+* Roc has a full type inference system which means it's always able to infer the type of everything in the program, even if there are no type annotations anywhere, and it always infers the most general type that could fit there.
+  * Formally speaking, Roc does [principal](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Principal_type), [decidable](https://en.wikipedia.org/wiki/Decidability_\(logic\)#Decidability_of_a_theory), [sound](https://en.wikipedia.org/wiki/Type_safety#Definitions), [Hindley-Milner type inference](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system).
+* Because of this, you don't need to write out the whole `class CommonHeaders` definition like in Python; that type information will be inferred at compile time based on how you use the fields like `if_modified_since` and the rest.
+* Whereas many languages like Python and JavaScript represent "a group of fields" as a heap-allocated object, Roc instead represents them as a stack-allocated `struct` like you'd find in C, Go, Rust, Zig, etc.
+  * Those languages require defining the struct type ahead of time, like Python does with the class definition, but in Roc you can just use anonymous curly-brace literals (they look just like JavaScript object literals) and they compile to the equivalent of C structs at runtime.
+* Roc also has ways to implement things like HTTP header parsers (though of course not limited to that use case) using this statically-known type information.
+  * This is all done using ordinary Roc expressions and values; there isn't a separate metaprogramming language or anything like that. It's just normal Roc functions running at compile time, being automatically passed values that represent statically-known type information.
+* These parsers can be built by executing Roc code at compile time.
+  * In this case, what runs at compile time is code that receives the string names of the fields at compile time, e.g. `"if_modified_since"` and `"save_data"`, and then converts it—still at compile time—into kebab-case strings like `"if-modified-since"` and `"save-data"`.
+    * Like all heap allocations that get produced during Roc's compile time evaluation, these strings end up deduplicated in the final binary's static memory. No runtime heap allocations involved.
+  * It then builds a parser which takes the raw HTTP header string, searches case-insensitively for these kebab-case strings, and when it finds one, loads it into the appropriate `header` field.
+    * Loading the parsed HTTP value into the `header` field doesn't need to allocate, because at runtime it's just a reference to a subset of the original HTTP request string.
+      * Roc strings are semantically immutable, and are allowed to share runtime memory with other strings. The parser takes advantage of that.
+    * Rust's [slices](https://doc.rust-lang.org/std/primitive.slice.html) and [`Cow`](https://doc.rust-lang.org/std/borrow/enum.Cow.html)s do this, but they require introducing annoying lifetime parameters to structs, which is presumably why libraries like salvo don't do it this way even though it's faster at runtime.
+      * Roc doesn't have lifetime parameters, and you'd actually have to go out of your way to write a HTTP header parser that did allocations instead of sharing like this.
+
+So I wasn't kidding! This really is the one line you need, and it gets you fewer heap allocations than even the equivalent Rust version:
+
+```
+read_items = |headers| # …use headers somehow here
+```
+
+Oh, and it will early-return a [HTTP 400](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/400) response if any non-optional headers were missing from the request, based on how you used your fields; like Rust, Roc also has [sum types](https://en.wikipedia.org/wiki/Algebraic_data_type) and no [billion dollar mistake](https://en.wikipedia.org/wiki/Null_pointer).
+
+To be clear, you can absolutely build a faster-performing HTTP server in a systems language like Rust or Zig or C than you can in Roc. Automatic memory management has a cost! What I like about this example is not that it runs at absolute maximum performance, but that you're getting a lot of convenience *and* a lot of performance out of concise code that's fully type-safe.
+
+None of this is specific to HTTP headers, of course. The language features that make this possible can work the same way with JSON, image file formats, binary database query responses, and other strings or binary data you might want to parse. We had some of this functionality in the original compiler, but not the full experience.
+
+Continuing the recurring theme, compile-time execution of code we just compiled is innately memory-unsafe. As with hot code loading, we generate arbitrary machine instructions and have the CPU execute them, and on top of that, some of the memory involved in that execution is shared between the compiler and the running program—because they both need to read and write it!
 
 ## Why a Scratch-Rewrite?
 
@@ -482,15 +548,13 @@ Our project is in almost the opposite boat: `Drop` has been a pain point for us 
 
 Simply put, Rust's ecosystem is optimized for the way Bun wants to be written, whereas Zig's is designed for the way Roc wants to be written.
 
-Separately, there's the question of what relevant code we can access off the shelf. LLVM is a critical dependency for our optimizer (we do our own optimizations, but LLVM does more on top), but it's also a project that makes major breaking API changes on a regular basis. Upgrading to new LLVM versions has been a major source of pain and lost time for Roc, but we keep doing it because we want the new optimizations.
+Separately, there's the question of what relevant code we can access off the shelf. [LLVM](https://llvm.org) is a critical dependency for our optimizer (we do our own optimizations, but LLVM does more on top), but it's also a project that makes major breaking API changes on a regular basis. Upgrading to new LLVM versions has been a major source of pain and lost time for Roc, but we keep doing it because we want the new optimizations.
 
 As it turns out, LLVM actually has a stable and backwards-compatible API that can be accessed to bypass this upgrade pain: its serialized "bitcode" format. If you write your own LLVM bitcode serializer, then you can tell each new version of LLVM to consume that, and you're off to the races. 
 
 Of course, to access this strategy, you need a handwritten LLVM bitcode serializer that's decoupled from the LLVM C++ library and its breaking changes. I only know of one implementation of such a thing in the wild: Zig's compiler, which of course is written in Zig. And now there are two implementations in the wild, because Roc's new compiler is reusing that same Zig code. (Thanks for sharing it, Zig team!)
 
-Future considerations are relevant here too. Right now our final compiler executable is about 25MB of our own stuff and then over 100MB of LLVM and lld. They also both run very slowly, but today there's no viable alternative out there which does those jobs.
-
-I only know of one project that aims to replace both of those dependencies with fast, modern alternatives. Any guesses? Yeah, it's the Zig team. They want it for their own compiler, for the same reasons we do, and there's no Rust equivalent I've ever heard of being developed.
+Future considerations are relevant here too. Right now our final compiler executable is about 25MB of our own stuff and then over 100MB of LLVM and lld. They also both run very slowly, but today there's no viable alternative out there which does those jobs. I only know of one project that aims to replace both of those dependencies with fast, modern alternatives. Any guesses? Yep, it's the Zig team! They want it for their own compiler, for the same reasons we do, and there's no Rust equivalent I've ever heard of being developed.
 
 You might have noticed that the biggest source of dependencies we're interested in from the Zig ecosystem is the Zig compiler itself. This is unusual, but Roc is an unusual project with unusual needs. When I wrote the first line of code in the compiler back in 2019, I would not have guessed that the following would prove true: "In the future, the richest gold mine of reusable code for this project will be an open-source compiler written in a language you haven't heard of yet."
 
