@@ -253,7 +253,7 @@ Hitting this milestone made it possible to update [Brendan Hansknecht](https://g
 </script>
 </div>
 
-Rocci Bird's updated source code is a bit more concise than [the original](https://github.com/lukewilliamboswell/roc-wasm4/blob/a769ade51cbd4613b4fca468764c9034f9c8070c/examples/rocci-bird.roc), and `roc build --opt=size` now outputs a 31KB wasm binary. (The original compiler produced a binary more than double that size.) Rocci Bird is by no means a large code base, but getting it to run at all required landing a *lot* of features in the new compiler. Seeing those chunky purple pixels brought a smile to my face when we finally got there!
+Rocci Bird's [updated source code](https://github.com/lukewilliamboswell/roc-wasm4/blob/4ec6b695d66530bc9de41bc80b112038e3c1ea12/examples/rocci-bird.roc) is a bit more concise than [the original](https://github.com/lukewilliamboswell/roc-wasm4/blob/a769ade51cbd4613b4fca468764c9034f9c8070c/examples/rocci-bird.roc), and `roc build --opt=size` now outputs a 31KB wasm binary. (The original compiler produced a binary more than double that size.) Rocci Bird is by no means a large code base, but getting it to run at all required landing a *lot* of features in the new compiler. Seeing those chunky purple pixels brought a smile to my face when we finally got there!
 
 To be clear, this is a milestone but not a formal release. We aim to land version 0.1.0 of the new compiler later this year, which will be Roc's first-ever numbered release. You're welcome to try out a [Nightly build](https://roc-lang.org/install/) before then, but in its current state you can still expect a variety of bugs, incomplete features, and unfinished docs.
 
@@ -310,7 +310,7 @@ The HTTP request-handling logic from that video looks like this:
 
 This uses several features we introduced in the new compiler. For example, that `"/users/${id}"` syntax is not implemented with [parsing template strings at runtime](https://expressjs.com/en/guide/routing/#route-parameters), but rather with a new language feature: string interpolation inside pattern matching.
 
-Not only is this type-safe at compile time, this entire code snippet performs *zero heap allocations*. I'd expect the typical language that ships with hot code loading to average closer to 1 allocation per line of code here…but Roc is aiming high on ergonomics, type safety, *and* performance! 
+Not only is this type-safe at compile time, this entire code snippet performs *zero [heap allocations](https://nnethercote.github.io/perf-book/heap-allocations.html)*. I'd expect the typical language that ships with hot code loading to average closer to 1 allocation per line of code here…but Roc is aiming high on ergonomics, type safety, *and* performance! 
 
 You can play around with this syntax on the new [roc-lang.org](https://www.roc-lang.org) homepage - if you scroll down a bit, there's an WebAssembly build of the compiler right there on the page that you can use to try out the language.
 
@@ -516,6 +516,6 @@ I've had a very positive experience with Zig all around, and looking back I'm re
 
 We aim to land version 0.1.0 of the new compiler later this year, which will be Roc's first-ever numbered release. You're welcome to try out a [Nightly build](https://roc-lang.org/install/) before then, although in its current state you can still expect a variety of bugs, incomplete features, and unfinished docs. I have a lot of documentation to write between now and then!
 
-By the way, the [Roc Programming Language Foundation](https://roc-lang.org/foundation) is a [501(c)(3) nonprofit](https://en.wikipedia.org/wiki/501\(c\)\(3\)_organization), so [donations](https://roc-lang.org/donate) are tax-free in the US, and we use donations primarily to compensate contributors. If you know of an organization that would like to sponsor our work, financially or in other ways, please [get in touch](https://roc-lang.org/donate)! (Separately, if you know anyone at GitHub who could get us into [GH for Nonprofits](https://github.com/solutions/industry/nonprofits), that would be a huge help with our CI backlog.)
+By the way, the [Roc Programming Language Foundation](https://roc-lang.org/foundation) is a [501(c)(3) nonprofit](https://en.wikipedia.org/wiki/501\(c\)\(3\)_organization), so if you'd like to [make a donation](https://roc-lang.org/donate) it will be tax-deductible in the US, and we use donations primarily to compensate contributors. If you know of an organization that would like to sponsor our work, financially or in other ways, please [get in touch](https://roc-lang.org/donate)! (Separately, if you know anyone at GitHub who could get us into [GH for Nonprofits](https://github.com/solutions/industry/nonprofits), that would be a huge help with our CI backlog.)
 
 Thank you again to everyone who has helped the language reach this milestone. I couldn't be more excited for the next one: our first-ever numbered release! If you'd like to follow along, ask questions, or just come say hi, feel free to come chat with us on [Roc Zulip](roc.zulipchat.com/).
