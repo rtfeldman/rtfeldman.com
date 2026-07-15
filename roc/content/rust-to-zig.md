@@ -476,8 +476,8 @@ Now let's suppose we had instead chosen Rust for our rewrite, or Zig with `Relea
 
 | Tooling Choice | Memory-safety impact in practice |
 | :---- | :---- |
-| Zig with `ReleaseFast` | 2 bug reports: some error messages fail to render filenames  |
-| Zig with `ReleaseSafe` | 2 bug reports: some error messages panic instead of rendering at all |
+| Zig`ReleaseFast` | 2 bug reports: some errors fail to render filenames  |
+| Zig `ReleaseSafe` | 2 bug reports: some errors panic and don't render |
 | Rust's borrow checker | neither of these bug reports |
 
 After 18 months of development, hundreds of total bug reports, and hundreds of thousands of lines of code, my main takeaway from retrospecting on this table is that picking a different row would have made no appreciable difference to the project. So far our choice has gotten us the outcome we'd hoped for.

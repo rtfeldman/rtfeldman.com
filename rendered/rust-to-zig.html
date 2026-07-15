@@ -17,8 +17,7 @@
 <p>Hitting this milestone made it possible to update <a href="https://github.com/bhansconnect">Brendan Hansknecht</a>'s charming 2024 <a href="https://wasm4.org/">WASM-4</a> game, <a href="https://github.com/lukewilliamboswell/roc-wasm4/blob/d4161199b0a8afd55d24c30dae304b8a0358f433/examples/rocci-bird.roc">Rocci Bird</a> (with art by Luke DeVault) to use the new compiler. It's a nice example because the whole game is under a thousand lines of Roc code, and you can <a href="https://itch.io">play it on itch.io</a> or right here via <a href="https://webassembly.org/">WebAssembly</a>:</p>
 <div class="rocci-embed" style="margin:1rem 0 1.5rem;text-align:center">
 <canvas id="rocci-bird-screen" width="160" height="160" tabindex="0" style="width:min(360px,90vw);height:min(360px,90vw);image-rendering:pixelated;background:#071821;border-radius:6px;outline:none;cursor:pointer;touch-action:none"></canvas>
-<div style="font-size:.85rem;opacity:.65;margin-top:.5rem">Click the game, then press <kbd>Space</kbd> to flap (or tap it on a touchscreen).</div>
-<script>
+<div style="font-size:.85rem;opacity:.65;margin-top:.5rem">Click the game, then press <kbd>Space</kbd> to flap (or tap it on a touchscreen).</div><script>
 // Self-contained WASM-4 runtime for Rocci Bird. Drawing routines and the 8x8
 // font are ported from the reference WASM-4 web runtime; the cart is fetched
 // from /assets/rocci-bird.wasm and run entirely client-side.
@@ -26,54 +25,58 @@
   var W = 160, H = 160;
   var ADDR_PALETTE = 0x04, ADDR_DRAW_COLORS = 0x14, ADDR_GAMEPAD1 = 0x16;
   var ADDR_SYSTEM_FLAGS = 0x1f, ADDR_FRAMEBUFFER = 0xa0;
-  var SYSTEM_PRESERVE_FRAMEBUFFER = 1;<p>  function b64ToBytes(s) { return Uint8Array.from(atob(s), function (c) { return c.charCodeAt(0); }); }
-  var FONT = b64ToBytes("///////////Hx8fPz//P/5OTk///////kwGTk5MBk//vgy+D6QPv/51bN+/ZtXP/jycnjyUzgf/Pz8////////Pnz8/P5/P/n8/n5+fPn///k8cBx5P////n54Hn5//////////Pz5////+B////////////z8///fv379+/f//Hszk5OZvH/+fH5+fn54H/gznxw4cfAf+B8+fD+TmD/+PDkzMB8/P/Az8D+fk5g//Dnz8DOTmD/wE58+fPz8//hzsbh2F5g/+DOTmB+fOH///Pz//Pz////8/P/8/Pn//z58+fz+fz////Af8B////n8/n8+fPn/+DATnzx//H/4N9RVVBf4P/x5M5OQE5Of8DOTkDOTkD/8OZPz8/mcP/BzM5OTkzB/8BPz8DPz8B/wE/PwM/Pz//wZ8/MTmZwf85OTkBOTk5/4Hn5+fn54H/+fn5+fk5g/85MycPByMx/5+fn5+fn4H/OREBASk5Of85GQkBITE5/4M5OTk5OYP/Azk5OQM/P/+DOTk5ITOF/wM5OTEHIzH/hzM/g/k5g/+B5+fn5+fn/zk5OTk5OYP/OTk5EYPH7/85OSkBARE5/zkRg8eDETn/mZmZw+fn5/8B8ePHjx8B/8PPz8/Pz8P/f7/f7/f7/f+H5+fn5+eH/8eT/////////////////wHv9///////////g/mBOYH/Pz8DOTk5g////4E/Pz+B//n5gTk5OYH///+DOQE/g//x54Hn5+fn////gTk5gfmDPz8DOTk5Of/n/8fn5+eB//P/4/Pz8/OHPz8xAwcjMf/H5+fn5+eB////A0lJSUn///8DOTk5Of///4M5OTmD////Azk5Az8///+BOTmB+fn//5GPn5+f////gz+D+QP/5+eB5+fn5////zk5OTmB////mZmZw+f///9JSUlJgf///zkBxwE5////OTk5gfmD//8B48ePAf/z5+fP5+fz/+fn5+fn5+f/n8/P58/Pn////49F4///////////k5P/gykpESkpg/+DOQkRITmD//////////////////////+DESF9IRGD/4MRCX0JEYP/gxE5VRERg/+DERFVORGD////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////5//n58fHx//vgykvKYPv/8OZnwOfnwH//6Xb29ul//+ZmcOB54Hn/+fn5//n5+f/w5mH2+GZw/+T/////////8O9Zl5eZr3Dh8OTw///////yZMnk8n/////gfn5///////////////DvUZaRlq9w4P/////////79fv///////n54Hn5/+B/8fz58P/////w+fzx//////37///////////MzMzMwk/wZW1lcH19f/////Pz/////////////fP58fnw//////Hk5PH//////8nk8mTJ///vTu3rdmxff+9O7ep3btx/x271y3ZsX3/x//HnzkBg//f78eTOQE5//fvx5M5ATn/x5PHkzkBOf/Lp8eTOQE5/5P/x5M5ATn/79fHkzkBOf/BhychBych/8OZPz+Zw/fP3+8BPwM/Af/37wE/Az8B/8eTAT8DPwH/k/8BPwM/Af/v94Hn5+eB//fvgefn54H/58OB5+fngf+Z/4Hn5+eB/4eTmQmZk4f/y6cZCQEhMf/f74M5OTmD//fvgzk5OYP/x5ODOTk5g//Lp4M5OTmD/5P/gzk5OYP//7vX79e7//+DOTEpGTmD/9/vOTk5OYP/9+85OTk5g//Hk/85OTmD/5P/OTk5OYP/9++ZmcPn5/8/Azk5OQM//8OZmZOZiZP/3++D+YE5gf/374P5gTmB/8eTg/mBOYH/y6eD+YE5gf+T/4P5gTmB/+/Xg/mBOYH///+D6YEvg////4E/P4H3z9/vgzkBP4P/9++DOQE/g//Hk4M5AT+D/5P/gzkBP4P/3+//x+fngf/37//H5+eB/8eT/8fn54H/k//H5+fngf+bh2eDOTmD/8unAzk5OTn/3++DOTk5g//374M5OTmD/8eTgzk5OYP/y6eDOTk5g/+T/4M5OTmD///n/4H/5/////+DMSkZg//f7zk5OTmB//fvOTk5OYH/x5P/OTk5gf+T/zk5OTmB//fvOTk5gfmDPz8DOTkDPz+T/zk5OYH5gw==");</p>
-<p>  var memory = new WebAssembly.Memory({ initial: 1, maximum: 1 });
+  var SYSTEM_PRESERVE_FRAMEBUFFER = 1;
+
+  function b64ToBytes(s) { return Uint8Array.from(atob(s), function (c) { return c.charCodeAt(0); }); }
+  var FONT = b64ToBytes("///////////Hx8fPz//P/5OTk///////kwGTk5MBk//vgy+D6QPv/51bN+/ZtXP/jycnjyUzgf/Pz8////////Pnz8/P5/P/n8/n5+fPn///k8cBx5P////n54Hn5//////////Pz5////+B////////////z8///fv379+/f//Hszk5OZvH/+fH5+fn54H/gznxw4cfAf+B8+fD+TmD/+PDkzMB8/P/Az8D+fk5g//Dnz8DOTmD/wE58+fPz8//hzsbh2F5g/+DOTmB+fOH///Pz//Pz////8/P/8/Pn//z58+fz+fz////Af8B////n8/n8+fPn/+DATnzx//H/4N9RVVBf4P/x5M5OQE5Of8DOTkDOTkD/8OZPz8/mcP/BzM5OTkzB/8BPz8DPz8B/wE/PwM/Pz//wZ8/MTmZwf85OTkBOTk5/4Hn5+fn54H/+fn5+fk5g/85MycPByMx/5+fn5+fn4H/OREBASk5Of85GQkBITE5/4M5OTk5OYP/Azk5OQM/P/+DOTk5ITOF/wM5OTEHIzH/hzM/g/k5g/+B5+fn5+fn/zk5OTk5OYP/OTk5EYPH7/85OSkBARE5/zkRg8eDETn/mZmZw+fn5/8B8ePHjx8B/8PPz8/Pz8P/f7/f7/f7/f+H5+fn5+eH/8eT/////////////////wHv9///////////g/mBOYH/Pz8DOTk5g////4E/Pz+B//n5gTk5OYH///+DOQE/g//x54Hn5+fn////gTk5gfmDPz8DOTk5Of/n/8fn5+eB//P/4/Pz8/OHPz8xAwcjMf/H5+fn5+eB////A0lJSUn///8DOTk5Of///4M5OTmD////Azk5Az8///+BOTmB+fn//5GPn5+f////gz+D+QP/5+eB5+fn5////zk5OTmB////mZmZw+f///9JSUlJgf///zkBxwE5////OTk5gfmD//8B48ePAf/z5+fP5+fz/+fn5+fn5+f/n8/P58/Pn////49F4///////////k5P/gykpESkpg/+DOQkRITmD//////////////////////+DESF9IRGD/4MRCX0JEYP/gxE5VRERg/+DERFVORGD////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////5//n58fHx//vgykvKYPv/8OZnwOfnwH//6Xb29ul//+ZmcOB54Hn/+fn5//n5+f/w5mH2+GZw/+T/////////8O9Zl5eZr3Dh8OTw///////yZMnk8n/////gfn5///////////////DvUZaRlq9w4P/////////79fv///////n54Hn5/+B/8fz58P/////w+fzx//////37///////////MzMzMwk/wZW1lcH19f/////Pz/////////////fP58fnw//////Hk5PH//////8nk8mTJ///vTu3rdmxff+9O7ep3btx/x271y3ZsX3/x//HnzkBg//f78eTOQE5//fvx5M5ATn/x5PHkzkBOf/Lp8eTOQE5/5P/x5M5ATn/79fHkzkBOf/BhychBych/8OZPz+Zw/fP3+8BPwM/Af/37wE/Az8B/8eTAT8DPwH/k/8BPwM/Af/v94Hn5+eB//fvgefn54H/58OB5+fngf+Z/4Hn5+eB/4eTmQmZk4f/y6cZCQEhMf/f74M5OTmD//fvgzk5OYP/x5ODOTk5g//Lp4M5OTmD/5P/gzk5OYP//7vX79e7//+DOTEpGTmD/9/vOTk5OYP/9+85OTk5g//Hk/85OTmD/5P/OTk5OYP/9++ZmcPn5/8/Azk5OQM//8OZmZOZiZP/3++D+YE5gf/374P5gTmB/8eTg/mBOYH/y6eD+YE5gf+T/4P5gTmB/+/Xg/mBOYH///+D6YEvg////4E/P4H3z9/vgzkBP4P/9++DOQE/g//Hk4M5AT+D/5P/gzkBP4P/3+//x+fngf/37//H5+eB/8eT/8fn54H/k//H5+fngf+bh2eDOTmD/8unAzk5OTn/3++DOTk5g//374M5OTmD/8eTgzk5OYP/y6eDOTk5g/+T/4M5OTmD///n/4H/5/////+DMSkZg//f7zk5OTmB//fvOTk5OYH/x5P/OTk5gf+T/zk5OTmB//fvOTk5gfmDPz8DOTkDPz+T/zk5OYH5gw==");
+
+  var memory = new WebAssembly.Memory({ initial: 1, maximum: 1 });
   var u8 = new Uint8Array(memory.buffer);
   var dv = new DataView(memory.buffer);
-  var fb = new Uint8Array(memory.buffer, ADDR_FRAMEBUFFER, (W * H) &gt;&gt;&gt; 2);
-  function drawColors() { return dv.getUint16(ADDR_DRAW_COLORS, true); }</p>
-<p>  function drawPoint(color, x, y) {
-    var idx = (W * y + x) &gt;&gt;&gt; 2, shift = (x &amp; 0x3) &lt;&lt; 1, mask = 0x3 &lt;&lt; shift;
-    fb[idx] = (color &lt;&lt; shift) | (fb[idx] &amp; ~mask);
+  var fb = new Uint8Array(memory.buffer, ADDR_FRAMEBUFFER, (W * H) >>> 2);
+  function drawColors() { return dv.getUint16(ADDR_DRAW_COLORS, true); }
+
+  function drawPoint(color, x, y) {
+    var idx = (W * y + x) >>> 2, shift = (x & 0x3) << 1, mask = 0x3 << shift;
+    fb[idx] = (color << shift) | (fb[idx] & ~mask);
   }
-  function drawPointU(color, x, y) { if (x &gt;= 0 &amp;&amp; x &lt; W &amp;&amp; y &gt;= 0 &amp;&amp; y &lt; H) drawPoint(color, x, y); }
+  function drawPointU(color, x, y) { if (x >= 0 && x < W && y >= 0 && y < H) drawPoint(color, x, y); }
   function hlineFast(color, startX, y, endX) {
-    var fillEnd = endX - (endX &amp; 3), fillStart = Math.min((startX + 3) &amp; ~3, fillEnd);
-    if (fillEnd - fillStart &gt; 3) {
-      for (var xx = startX; xx &lt; fillStart; xx++) drawPoint(color, xx, y);
-      fb.fill(color * 0x55, (W * y + fillStart) &gt;&gt;&gt; 2, (W * y + fillEnd) &gt;&gt;&gt; 2);
+    var fillEnd = endX - (endX & 3), fillStart = Math.min((startX + 3) & ~3, fillEnd);
+    if (fillEnd - fillStart > 3) {
+      for (var xx = startX; xx < fillStart; xx++) drawPoint(color, xx, y);
+      fb.fill(color * 0x55, (W * y + fillStart) >>> 2, (W * y + fillEnd) >>> 2);
       startX = fillEnd;
     }
-    for (var x2 = startX; x2 &lt; endX; x2++) drawPoint(color, x2, y);
+    for (var x2 = startX; x2 < endX; x2++) drawPoint(color, x2, y);
   }
   function hlineU(color, startX, y, endX) {
-    if (y &gt;= 0 &amp;&amp; y &lt; H) { if (startX &lt; 0) startX = 0; if (endX &gt; W) endX = W; if (startX &lt; endX) hlineFast(color, startX, y, endX); }
+    if (y >= 0 && y < H) { if (startX < 0) startX = 0; if (endX > W) endX = W; if (startX < endX) hlineFast(color, startX, y, endX); }
   }
-  function drawHLine(x, y, len) { var d = drawColors() &amp; 0xf; if (d === 0) return; hlineU((d - 1) &amp; 0x3, x, y, x + len); }
+  function drawHLine(x, y, len) { var d = drawColors() & 0xf; if (d === 0) return; hlineU((d - 1) & 0x3, x, y, x + len); }
   function drawVLine(x, y, len) {
-    if (y + len &lt;= 0 || x &lt; 0 || x &gt;= W) return;
-    var d = drawColors() &amp; 0xf; if (d === 0) return;
-    var sY = Math.max(0, y), eY = Math.min(H, y + len), sc = (d - 1) &amp; 0x3;
-    for (var yy = sY; yy &lt; eY; yy++) drawPoint(sc, x, yy);
+    if (y + len <= 0 || x < 0 || x >= W) return;
+    var d = drawColors() & 0xf; if (d === 0) return;
+    var sY = Math.max(0, y), eY = Math.min(H, y + len), sc = (d - 1) & 0x3;
+    for (var yy = sY; yy < eY; yy++) drawPoint(sc, x, yy);
   }
   function drawRect(x, y, width, height) {
     var sX = Math.max(0, x), sY = Math.max(0, y), eXU = x + width, eYU = y + height;
     var eX = Math.max(0, Math.min(eXU, W)), eY = Math.max(0, Math.min(eYU, H));
-    var dcv = drawColors(), dc0 = dcv &amp; 0xf, dc1 = (dcv &gt;&gt;&gt; 4) &amp; 0xf, yy;
-    if (dc0 !== 0) { var fc = (dc0 - 1) &amp; 0x3; for (yy = sY; yy &lt; eY; ++yy) hlineFast(fc, sX, yy, eX); }
+    var dcv = drawColors(), dc0 = dcv & 0xf, dc1 = (dcv >>> 4) & 0xf, yy;
+    if (dc0 !== 0) { var fc = (dc0 - 1) & 0x3; for (yy = sY; yy < eY; ++yy) hlineFast(fc, sX, yy, eX); }
     if (dc1 !== 0) {
-      var st = (dc1 - 1) &amp; 0x3;
-      if (x &gt;= 0 &amp;&amp; x &lt; W) for (yy = sY; yy &lt; eY; ++yy) drawPoint(st, x, yy);
-      if (eXU &gt; 0 &amp;&amp; eXU &lt;= W) for (yy = sY; yy &lt; eY; ++yy) drawPoint(st, eXU - 1, yy);
-      if (y &gt;= 0 &amp;&amp; y &lt; H) hlineFast(st, sX, y, eX);
-      if (eYU &gt; 0 &amp;&amp; eYU &lt;= H) hlineFast(st, sX, eYU - 1, eX);
+      var st = (dc1 - 1) & 0x3;
+      if (x >= 0 && x < W) for (yy = sY; yy < eY; ++yy) drawPoint(st, x, yy);
+      if (eXU > 0 && eXU <= W) for (yy = sY; yy < eY; ++yy) drawPoint(st, eXU - 1, yy);
+      if (y >= 0 && y < H) hlineFast(st, sX, y, eX);
+      if (eYU > 0 && eYU <= H) hlineFast(st, sX, eYU - 1, eX);
     }
   }
   function drawOval(x, y, width, height) {
-    var dcv = drawColors(), dc0 = dcv &amp; 0xf, dc1 = (dcv &gt;&gt;&gt; 4) &amp; 0xf;
+    var dcv = drawColors(), dc0 = dcv & 0xf, dc1 = (dcv >>> 4) & 0xf;
     if (dc1 === 0xf) return;
-    var st = (dc1 - 1) &amp; 0x3, fc = (dc0 - 1) &amp; 0x3;
+    var st = (dc1 - 1) & 0x3, fc = (dc0 - 1) & 0x3;
     var a = width - 1, b = height - 1, b1 = b % 2;
     var north = y + Math.floor(height / 2), west = x, east = x + width - 1, south = north - b1;
     var a2 = a * a, b2 = b * b, dx = 4 * (1 - a) * b2, dy = 4 * (b1 + 1) * a2, err = dx + dy + b1 * a2;
@@ -81,27 +84,27 @@
     do {
       drawPointU(st, east, north); drawPointU(st, west, north); drawPointU(st, west, south); drawPointU(st, east, south);
       var start = west + 1, len = east - start;
-      if (dc0 !== 0 &amp;&amp; len &gt; 0) { hlineU(fc, start, north, east); hlineU(fc, start, south, east); }
+      if (dc0 !== 0 && len > 0) { hlineU(fc, start, north, east); hlineU(fc, start, south, east); }
       var e2 = 2 * err;
-      if (e2 &lt;= dy) { north += 1; south -= 1; dy += a; err += dy; }
-      if (e2 &gt;= dx || e2 &gt; dy) { west += 1; east -= 1; dx += b1; err += dx; }
-    } while (west &lt;= east);
-    while (north - south &lt; height) {
+      if (e2 <= dy) { north += 1; south -= 1; dy += a; err += dy; }
+      if (e2 >= dx || e2 > dy) { west += 1; east -= 1; dx += b1; err += dx; }
+    } while (west <= east);
+    while (north - south < height) {
       drawPointU(st, west - 1, north); drawPointU(st, east + 1, north); north += 1;
       drawPointU(st, west - 1, south); drawPointU(st, east + 1, south); south -= 1;
     }
   }
   function drawLine(x1, y1, x2, y2) {
-    var d = drawColors() &amp; 0xf; if (d === 0) return;
-    var sc = (d - 1) &amp; 0x3, s;
-    if (y1 &gt; y2) { s = x1; x1 = x2; x2 = s; s = y1; y1 = y2; y2 = s; }
-    var dx = Math.abs(x2 - x1), sx = x1 &lt; x2 ? 1 : -1, dy = y2 - y1, err = (dx &gt; dy ? dx : -dy) / 2, e2;
+    var d = drawColors() & 0xf; if (d === 0) return;
+    var sc = (d - 1) & 0x3, s;
+    if (y1 > y2) { s = x1; x1 = x2; x2 = s; s = y1; y1 = y2; y2 = s; }
+    var dx = Math.abs(x2 - x1), sx = x1 < x2 ? 1 : -1, dy = y2 - y1, err = (dx > dy ? dx : -dy) / 2, e2;
     for (;;) {
       drawPointU(sc, x1, y1);
-      if (x1 === x2 &amp;&amp; y1 === y2) break;
+      if (x1 === x2 && y1 === y2) break;
       e2 = err;
-      if (e2 &gt; -dx) { err -= dy; x1 += sx; }
-      if (e2 &lt; dy) { err += dx; y1++; }
+      if (e2 > -dx) { err -= dy; x1 += sx; }
+      if (e2 < dy) { err += dx; y1++; }
     }
   }
   function blit(sprite, dstX, dstY, width, height, srcX, srcY, srcStride, bpp2, flipX, flipY, rotate) {
@@ -114,47 +117,48 @@
       cXMin = Math.max(0, dstX) - dstX; cYMin = Math.max(0, dstY) - dstY;
       cXMax = Math.min(width, W - dstX); cYMax = Math.min(height, H - dstY);
     }
-    for (var y = cYMin; y &lt; cYMax; y++) {
-      for (var x = cXMin; x &lt; cXMax; x++) {
+    for (var y = cYMin; y < cYMax; y++) {
+      for (var x = cXMin; x < cXMax; x++) {
         var tx = dstX + (rotate ? y : x), ty = dstY + (rotate ? x : y);
         var sx = srcX + (flipX ? width - x - 1 : x), sy = srcY + (flipY ? height - y - 1 : y);
         var colorIdx, bitIndex = sy * srcStride + sx, byte, shift;
-        if (bpp2) { byte = sprite[bitIndex &gt;&gt;&gt; 2]; shift = 6 - ((bitIndex &amp; 0x03) &lt;&lt; 1); colorIdx = (byte &gt;&gt;&gt; shift) &amp; 0x3; }
-        else { byte = sprite[bitIndex &gt;&gt;&gt; 3]; shift = 7 - (bitIndex &amp; 0x7); colorIdx = (byte &gt;&gt;&gt; shift) &amp; 0x1; }
-        var dc = (dcv &gt;&gt;&gt; (colorIdx &lt;&lt; 2)) &amp; 0x0f;
-        if (dc !== 0) drawPoint((dc - 1) &amp; 0x03, tx, ty);
+        if (bpp2) { byte = sprite[bitIndex >>> 2]; shift = 6 - ((bitIndex & 0x03) << 1); colorIdx = (byte >>> shift) & 0x3; }
+        else { byte = sprite[bitIndex >>> 3]; shift = 7 - (bitIndex & 0x7); colorIdx = (byte >>> shift) & 0x1; }
+        var dc = (dcv >>> (colorIdx << 2)) & 0x0f;
+        if (dc !== 0) drawPoint((dc - 1) & 0x03, tx, ty);
       }
     }
   }
   function drawText(arr, x, y) {
     var cx = x;
-    for (var i = 0, len = arr.length; i &lt; len; ++i) {
+    for (var i = 0, len = arr.length; i < len; ++i) {
       var cc = arr[i];
       if (cc === 0) return;
       else if (cc === 10) { y += 8; cx = x; }
-      else if (cc &gt;= 32 &amp;&amp; cc &lt;= 255) { blit(FONT, cx, y, 8, 8, 0, (cc - 32) &lt;&lt; 3, 8, false, false, false, false); cx += 8; }
+      else if (cc >= 32 && cc <= 255) { blit(FONT, cx, y, 8, 8, 0, (cc - 32) << 3, 8, false, false, false, false); cx += 8; }
       else cx += 8;
     }
-  }</p>
-<p>  var decoder = new TextDecoder();
+  }
+
+  var decoder = new TextDecoder();
   function strZ(ptr) { var e = ptr; while (u8[e] !== 0) e++; return u8.subarray(ptr, e); }
   var DISK_KEY = "rocci-bird-disk";
   var audioCtx = null;
   function ensureAudio() {
     if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
-    if (audioCtx &amp;&amp; audioCtx.state === "suspended") audioCtx.resume();
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
   }
   function tone(frequency, duration, volume, flags) {
     if (!audioCtx) return;
     try {
-      var startFreq = frequency &amp; 0xffff, endFreq = (frequency &gt;&gt;&gt; 16) &amp; 0xffff;
-      var sustain = duration &amp; 0xff, release = (duration &gt;&gt;&gt; 8) &amp; 0xff, decay = (duration &gt;&gt;&gt; 16) &amp; 0xff, attack = (duration &gt;&gt;&gt; 24) &amp; 0xff;
-      var sustainVol = (volume &amp; 0xff) / 100, peakVol = (((volume &gt;&gt;&gt; 8) &amp; 0xff) || (volume &amp; 0xff)) / 100, channel = flags &amp; 0x3;
+      var startFreq = frequency & 0xffff, endFreq = (frequency >>> 16) & 0xffff;
+      var sustain = duration & 0xff, release = (duration >>> 8) & 0xff, decay = (duration >>> 16) & 0xff, attack = (duration >>> 24) & 0xff;
+      var sustainVol = (volume & 0xff) / 100, peakVol = (((volume >>> 8) & 0xff) || (volume & 0xff)) / 100, channel = flags & 0x3;
       var F = 1 / 60, t0 = audioCtx.currentTime, tA = t0 + attack * F, tD = tA + decay * F, tS = tD + sustain * F, tR = tS + release * F;
       var osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
       osc.type = channel === 2 ? "triangle" : channel === 3 ? "sawtooth" : "square";
       osc.frequency.setValueAtTime(startFreq, t0);
-      if (endFreq &amp;&amp; endFreq !== startFreq) osc.frequency.linearRampToValueAtTime(endFreq, tR);
+      if (endFreq && endFreq !== startFreq) osc.frequency.linearRampToValueAtTime(endFreq, tR);
       var peak = Math.max(0.0001, peakVol * 0.25), sus = Math.max(0.0001, sustainVol * 0.25);
       gain.gain.setValueAtTime(0.0001, t0);
       gain.gain.linearRampToValueAtTime(peak, tA);
@@ -164,11 +168,12 @@
       osc.connect(gain).connect(audioCtx.destination);
       osc.start(t0); osc.stop(tR + 0.02);
     } catch (e) {}
-  }</p>
-<p>  var env = {
+  }
+
+  var env = {
     memory: memory,
-    blit: function (sp, x, y, w, h, f) { blit(new Uint8Array(memory.buffer, sp), x, y, w, h, 0, 0, w, f &amp; 1, f &amp; 2, f &amp; 4, f &amp; 8); },
-    blitSub: function (sp, x, y, w, h, sx, sy, st, f) { blit(new Uint8Array(memory.buffer, sp), x, y, w, h, sx, sy, st, f &amp; 1, f &amp; 2, f &amp; 4, f &amp; 8); },
+    blit: function (sp, x, y, w, h, f) { blit(new Uint8Array(memory.buffer, sp), x, y, w, h, 0, 0, w, f & 1, f & 2, f & 4, f & 8); },
+    blitSub: function (sp, x, y, w, h, sx, sy, st, f) { blit(new Uint8Array(memory.buffer, sp), x, y, w, h, sx, sy, st, f & 1, f & 2, f & 4, f & 8); },
     line: function (a, b, c, d) { drawLine(a, b, c, d); },
     hline: function (x, y, l) { drawHLine(x, y, l); },
     vline: function (x, y, l) { drawVLine(x, y, l); },
@@ -176,7 +181,7 @@
     rect: function (x, y, w, h) { drawRect(x, y, w, h); },
     text: function (ptr, x, y) { drawText(strZ(ptr), x, y); },
     textUtf8: function (ptr, len, x, y) { drawText(u8.subarray(ptr, ptr + len), x, y); },
-    textUtf16: function (ptr, byteLen, x, y) { var a = []; for (var i = 0; i &lt; byteLen; i += 2) a.push(dv.getUint16(ptr + i, true)); drawText(a, x, y); },
+    textUtf16: function (ptr, byteLen, x, y) { var a = []; for (var i = 0; i < byteLen; i += 2) a.push(dv.getUint16(ptr + i, true)); drawText(a, x, y); },
     tone: tone,
     diskr: function (ptr, size) {
       var s = null; try { s = localStorage.getItem(DISK_KEY); } catch (e) {}
@@ -186,38 +191,42 @@
     },
     diskw: function (ptr, size) {
       var bytes = u8.slice(ptr, ptr + size), bin = "";
-      for (var i = 0; i &lt; bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
       try { localStorage.setItem(DISK_KEY, btoa(bin)); } catch (e) { return 0; }
       return size;
     },
     trace: function (ptr) { console.log(decoder.decode(strZ(ptr))); },
     traceUtf8: function (ptr, len) { console.log(decoder.decode(u8.subarray(ptr, ptr + len))); },
-    traceUtf16: function (ptr, byteLen) { var s = ""; for (var i = 0; i &lt; byteLen; i += 2) s += String.fromCharCode(dv.getUint16(ptr + i, true)); console.log(s); }
-  };</p>
-<p>  var canvas = document.getElementById("rocci-bird-screen");
+    traceUtf16: function (ptr, byteLen) { var s = ""; for (var i = 0; i < byteLen; i += 2) s += String.fromCharCode(dv.getUint16(ptr + i, true)); console.log(s); }
+  };
+
+  var canvas = document.getElementById("rocci-bird-screen");
   var ctx = canvas.getContext("2d");
   var img = ctx.createImageData(W, H);
-  var px = new Uint32Array(img.data.buffer);</p>
-<p>  var KEYMAP = { KeyX: 1, Space: 1, KeyZ: 2, KeyC: 2, ArrowLeft: 16, ArrowRight: 32, ArrowUp: 64, ArrowDown: 128 };
+  var px = new Uint32Array(img.data.buffer);
+
+  var KEYMAP = { KeyX: 1, Space: 1, KeyZ: 2, KeyC: 2, ArrowLeft: 16, ArrowRight: 32, ArrowUp: 64, ArrowDown: 128 };
   var held = {}, pointerBtn = 0;
   canvas.addEventListener("keydown", function (e) { if (e.code in KEYMAP) { held[e.code] = 1; ensureAudio(); e.preventDefault(); } });
   canvas.addEventListener("keyup", function (e) { if (e.code in KEYMAP) { held[e.code] = 0; e.preventDefault(); } });
   canvas.addEventListener("pointerdown", function (e) { canvas.focus(); ensureAudio(); pointerBtn = 1; e.preventDefault(); });
   window.addEventListener("pointerup", function () { pointerBtn = 0; });
-  function gamepad() { var b = pointerBtn; for (var k in KEYMAP) if (held[k]) b |= KEYMAP[k]; return b; }</p>
-<p>  function render() {
+  function gamepad() { var b = pointerBtn; for (var k in KEYMAP) if (held[k]) b |= KEYMAP[k]; return b; }
+
+  function render() {
     var pal = new Uint32Array(memory.buffer, ADDR_PALETTE, 4);
-    for (var i = 0; i &lt; W * H; i++) {
-      var c = pal[(fb[i &gt;&gt; 2] &gt;&gt; ((i &amp; 3) &lt;&lt; 1)) &amp; 3];
-      px[i] = 0xff000000 | ((c &amp; 0xff) &lt;&lt; 16) | (c &amp; 0xff00) | ((c &gt;&gt; 16) &amp; 0xff);
+    for (var i = 0; i < W * H; i++) {
+      var c = pal[(fb[i >> 2] >> ((i & 3) << 1)) & 3];
+      px[i] = 0xff000000 | ((c & 0xff) << 16) | (c & 0xff00) | ((c >> 16) & 0xff);
     }
     ctx.putImageData(img, 0, 0);
-  }</p>
-<p>  fetch("/assets/rocci-bird.wasm").then(function (r) { return r.arrayBuffer(); }).then(function (buf) {
+  }
+
+  fetch("/assets/rocci-bird.wasm").then(function (r) { return r.arrayBuffer(); }).then(function (buf) {
     return WebAssembly.instantiate(buf, { env: env });
   }).then(function (res) {
     var start = res.instance.exports.start, update = res.instance.exports.update;
-    new Uint32Array(memory.buffer).set([0xe0f8cf, 0x86c06c, 0x306850, 0x071821], ADDR_PALETTE &gt;&gt; 2);
+    new Uint32Array(memory.buffer).set([0xe0f8cf, 0x86c06c, 0x306850, 0x071821], ADDR_PALETTE >> 2);
     dv.setUint16(ADDR_DRAW_COLORS, 0x1203, true);
     if (typeof start === "function") start();
     render();
@@ -225,12 +234,12 @@
     function loop(now) {
       requestAnimationFrame(loop);
       acc += now - prev; prev = now;
-      if (acc &gt; 250) acc = 250;
+      if (acc > 250) acc = 250;
       var ran = false;
-      while (acc &gt;= STEP) {
+      while (acc >= STEP) {
         acc -= STEP;
         u8[ADDR_GAMEPAD1] = gamepad();
-        if (!(u8[ADDR_SYSTEM_FLAGS] &amp; SYSTEM_PRESERVE_FRAMEBUFFER)) fb.fill(0);
+        if (!(u8[ADDR_SYSTEM_FLAGS] & SYSTEM_PRESERVE_FRAMEBUFFER)) fb.fill(0);
         if (typeof update === "function") update();
         ran = true;
       }
@@ -241,7 +250,7 @@
     canvas.insertAdjacentHTML("afterend", "<div style='font-size:.85rem;color:#c0392b'>Couldn't load Rocci Bird: " + err + "</div>");
   });
 })();
-</script></p>
+</script>
 </div><p>Rocci Bird's updated source code is a bit more concise than <a href="https://github.com/lukewilliamboswell/roc-wasm4/blob/a769ade51cbd4613b4fca468764c9034f9c8070c/examples/rocci-bird.roc">the original</a>, and <code>roc build --opt=size</code> now outputs a 31KB wasm binary. (The original compiler produced a binary more than double that size.) Rocci Bird is by no means a large code base, but getting it to run at all required landing a <em>lot</em> of features in the new compiler. Seeing those chunky purple pixels brought a smile to my face when we finally got there!</p>
 <p>To be clear, this is a milestone but not a formal release. We aim to land version 0.1.0 of the new compiler later this year, which will be Roc's first-ever numbered release. You're welcome to try out a <a href="https://roc-lang.org/install/">Nightly build</a> before then, but in its current state you can still expect a variety of bugs, incomplete features, and unfinished docs.</p>
 <p>That said, this is a wonderful milestone to have reached, and I'm extremely grateful to all the people who came together to make this happen! I want to thank some in particular who have been especially helpful in getting the language and compiler to this point:</p>
@@ -467,12 +476,12 @@ async fn read_items(headers: CommonHeaders) -&gt; String {
 </tr>
 </thead>
 <tbody><tr>
-<td align="left">Zig with <code>ReleaseFast</code></td>
-<td align="left">2 bug reports: some error messages fail to render filenames</td>
+<td align="left">Zig<code>ReleaseFast</code></td>
+<td align="left">2 bug reports: some errors fail to render filenames</td>
 </tr>
 <tr>
-<td align="left">Zig with <code>ReleaseSafe</code></td>
-<td align="left">2 bug reports: some error messages panic instead of rendering at all</td>
+<td align="left">Zig <code>ReleaseSafe</code></td>
+<td align="left">2 bug reports: some errors panic and don't render</td>
 </tr>
 <tr>
 <td align="left">Rust's borrow checker</td>

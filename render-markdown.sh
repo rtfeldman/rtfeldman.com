@@ -19,20 +19,39 @@ output_dir=$(dirname "$output")
 
 mkdir -p "$output_dir"
 
+tmp_markdown=$(mktemp)
+tmp_scripts=$(mktemp)
 tmp_body=$(mktemp)
 tmp_output=$(mktemp)
 cleanup() {
-    rm -f "$tmp_body" "$tmp_output"
+    rm -f "$tmp_markdown" "$tmp_scripts" "$tmp_body" "$tmp_output"
 }
 trap cleanup EXIT
 
-npx --yes marked@18.0.6 "$input" > "$tmp_body"
-
-node - "$input" "$tmp_body" "$tmp_output" <<'NODE'
+node - "$input" "$tmp_markdown" "$tmp_scripts" <<'NODE'
 const fs = require("fs");
 
-const [inputPath, bodyPath, outputPath] = process.argv.slice(2);
+const [inputPath, markdownPath, scriptsPath] = process.argv.slice(2);
+let markdown = fs.readFileSync(inputPath, "utf8");
+const scripts = [];
+
+markdown = markdown.replace(/<script\b[\s\S]*?<\/script>/gi, (script) => {
+    const index = scripts.push(script) - 1;
+    return `\n\n@@RAW_SCRIPT_${index}@@\n\n`;
+});
+
+fs.writeFileSync(markdownPath, markdown);
+fs.writeFileSync(scriptsPath, JSON.stringify(scripts));
+NODE
+
+npx --yes marked@18.0.6 "$tmp_markdown" > "$tmp_body"
+
+node - "$input" "$tmp_scripts" "$tmp_body" "$tmp_output" <<'NODE'
+const fs = require("fs");
+
+const [inputPath, scriptsPath, bodyPath, outputPath] = process.argv.slice(2);
 const markdown = fs.readFileSync(inputPath, "utf8");
+const scripts = JSON.parse(fs.readFileSync(scriptsPath, "utf8"));
 
 const titleMatch = markdown.match(/^#\s+(.+)$/m);
 const title = (titleMatch ? titleMatch[1] : "rtfeldman.com")
@@ -48,6 +67,13 @@ let body = fs.readFileSync(bodyPath, "utf8")
     .replace(/&#39;/g, "'")
     .replace(/&#x27;/g, "'")
     .replace(/<\/pre><p/g, "</pre>\n<p");
+
+for (const [index, script] of scripts.entries()) {
+    const placeholder = `@@RAW_SCRIPT_${index}@@`;
+    body = body
+        .replace(`<p>${placeholder}</p>`, script)
+        .replace(placeholder, script);
+}
 
 const html = `<!doctype html>
 <html>
