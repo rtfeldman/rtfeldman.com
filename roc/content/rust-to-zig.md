@@ -45,7 +45,10 @@ Let's get into it\!
 
 Roc's new compiler automatically does hot code loading during development. For example, I can run `roc server.roc` to start a Web server, then change some of its code while it's running. The next time that server handles a request, it'll automatically be handled using the new code. Here it is in action, both in a server and in a simple 2D game running at 120fps:
 
-\[Screen recording will go here \- hasn't been recorded yet but this stuff all works already\]
+<video class="inline-video" controls preload="metadata" playsinline>
+    <source src="/assets/hot-loading.mp4" type="video/mp4">
+    <a href="/assets/hot-loading.mp4">Download the hot-loading demo video.</a>
+</video>
 
 Hot loading is standard behavior for interpreted languages like Python, but not so much for high-performance compiled languages like Roc.
 

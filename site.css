@@ -238,6 +238,15 @@ pre > code {
     color: var(--code-color);
 }
 
+video.inline-video {
+    display: block;
+    width: 100%;
+    max-width: var(--body-max-width);
+    height: auto;
+    margin: 1rem 0 1.5rem;
+    background-color: var(--dark-code-bg);
+}
+
 /* Tables */
 
 table {

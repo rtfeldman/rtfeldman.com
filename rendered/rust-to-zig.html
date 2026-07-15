@@ -37,7 +37,10 @@
 <p>Let&#39;s get into it!</p>
 <h2>Hot Code Loading + Cross-Compiled Binaries</h2>
 <p>Roc&#39;s new compiler automatically does hot code loading during development. For example, I can run <code>roc server.roc</code> to start a Web server, then change some of its code while it&#39;s running. The next time that server handles a request, it&#39;ll automatically be handled using the new code. Here it is in action, both in a server and in a simple 2D game running at 120fps:</p>
-<p>[Screen recording will go here - hasn&#39;t been recorded yet but this stuff all works already]</p>
+<video class="inline-video" controls preload="metadata" playsinline>
+    <source src="/assets/hot-loading.mp4" type="video/mp4">
+    <a href="/assets/hot-loading.mp4">Download the hot-loading demo video.</a>
+</video>
 <p>Hot loading is standard behavior for interpreted languages like Python, but not so much for high-performance compiled languages like Roc.</p>
 <p>When I&#39;m ready to deploy, <code>roc build server.roc</code> gets me an LLVM-optimized, self-contained executable that I can drop onto a machine and run. It also cross-compiles; no matter whether you&#39;re running macOS, Linux, or Windows, all of the following commands work, and output reproducible binaries (meaning the same input source bytes always produce the same output executable bytes—which <a href="https://xeiaso.net/notes/2026/anubis-wasm-vendor-binary/">not all compilers do</a>) that will run on the target system:</p>
 <table>

@@ -4,6 +4,7 @@ rm -rf build
 
 cp -r rendered build
 cp -r fonts build
+cp -r assets build
 cp *.css build
 
 # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
