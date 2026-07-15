@@ -287,18 +287,7 @@ Roc's new compiler automatically does hot code loading during development. For e
     <a href="/assets/hot-loading.mp4">Download the hot-loading demo video.</a>
 </video>
 
-Hot loading is standard behavior for interpreted languages like Python, but not so much for high-performance compiled languages like Roc.
-
-When I'm ready to deploy, `roc build server.roc` gets me an LLVM-optimized, self-contained executable that I can drop onto a machine and run. It also cross-compiles; no matter whether you're running macOS, Linux, or Windows, all of the following commands work, and output reproducible binaries (meaning the same input source bytes always produce the same output executable bytes—which [not all compilers do](https://xeiaso.net/notes/2026/anubis-wasm-vendor-binary/)) that will run on the target system:
-
-| Command | Output binary runs on |
-| :---- | :---- |
-| `roc build --target=wasm32` | WebAssembly |
-| `roc build --target=arm64mac` | macOS Apple Silicon (use `x64mac` for Intel) |
-| `roc build --target=x64win` | x64 Windows (`arm64win` for 64-bit ARM) |
-| `roc build --target=x64glibc` | normal Linux distros (ones with [glibc](https://www.gnu.org/software/libc/)) |
-| `roc build --target=x64musl` | Linux distros without glibc (e.g. [Alpine](https://www.alpinelinux.org/about/)) |
-| `roc build` | (whatever the current system is) |
+Hot loading is standard behavior for interpreted languages like Python, but not so much for high-performance compiled languages like Roc. When I'm ready to deploy, `roc build server.roc` gets me an LLVM-optimized, self-contained binary that I can drop onto a machine and run. Roc also cross-compiles; building a static binary that runs on Alpine Linux is as simple as `roc build --target=x64musl`, and that command will produce the same output bytes (for the same input source code bytes) when run on a Mac or any other system—which [not all compilers guarantee](https://xeiaso.net/notes/2026/anubis-wasm-vendor-binary/).
 
 ## Pattern Matching with String Interpolation
 
@@ -314,7 +303,7 @@ The HTTP request-handling logic from that video looks like this:
 
     <span class="punctuation section">(</span><span class="string">"GET"</span><span class="punctuation separator">,</span> <span class="string">"/users/</span><span class="kw">${</span>id<span class="kw">}</span><span class="string">"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> ok<span class="punctuation section">(</span>id<span class="punctuation section">)</span>
 
-    <span class="punctuation section">(</span><span class="string">"POST"</span><span class="punctuation separator">,</span> <span class="string">"/posts/new"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> created<span class="punctuation section">(</span>with_default<span class="punctuation section">(</span>auth_token<span class="punctuation separator">,</span> body<span class="punctuation section">)</span><span class="punctuation section">)</span>
+    <span class="punctuation section">(</span><span class="string">"POST"</span><span class="punctuation separator">,</span> <span class="string">"/posts/new"</span><span class="punctuation section">)</span> <span class="kw">=&gt;</span> created<span class="punctuation section">(</span>with_default<span class="punctuation section">(…)</span><span class="punctuation section">)</span>
 
     _ <span class="kw">=&gt;</span> not_found
 <span class="punctuation section">}</span></samp></pre>
@@ -323,7 +312,9 @@ This uses several features we introduced in the new compiler. For example, that 
 
 Not only is this type-safe at compile time, this entire code snippet performs *zero heap allocations*. I'd expect the typical language that ships with hot code loading to average closer to 1 allocation per line of code here…but Roc is aiming high on ergonomics, type safety, *and* performance! 
 
-> By the way, if you're interested in a post on the technical details of how we used the new compiler's compile-time execution of pure functions to get this down to zero allocations, let me know on [Roc Zulip](https://roc.zulipchat.com/).
+You can play around with this syntax on the new [roc-lang.org](https://www.roc-lang.org) homepage - if you scroll down a bit, there's an WebAssembly build of the compiler right there on the page that you can use to try out the language.
+
+> By the way, if you're interested in a post on the technical details of how we used the new compiler's compile-time execution of pure functions to get HTTP request routing down to zero allocations, let me know on [Roc Zulip](https://roc.zulipchat.com/).
 
 ## Why a Scratch-Rewrite?
 

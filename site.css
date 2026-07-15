@@ -180,6 +180,22 @@ h2:hover a {
     text-decoration: none;
 }
 
+h1 > a.heading-link,
+h2 > a.heading-link,
+h3 > a.heading-link,
+h4 > a.heading-link,
+h5 > a.heading-link,
+h6 > a.heading-link,
+h1:hover > a.heading-link,
+h2:hover > a.heading-link,
+h3:hover > a.heading-link,
+h4:hover > a.heading-link,
+h5:hover > a.heading-link,
+h6:hover > a.heading-link {
+    color: inherit;
+    text-decoration: none;
+}
+
 main {
     max-width: var(--body-max-width);
     margin: auto;

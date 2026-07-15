@@ -75,6 +75,32 @@ for (const [index, script] of scripts.entries()) {
         .replace(placeholder, script);
 }
 
+const headingIds = new Map();
+const decodeHtml = (text) => text
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)))
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, "\"");
+
+const slugify = (headingHtml) => {
+    const text = decodeHtml(headingHtml.replace(/<[^>]*>/g, ""));
+    const base = text
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "heading";
+    const count = headingIds.get(base) || 0;
+    headingIds.set(base, count + 1);
+    return count === 0 ? base : `${base}-${count + 1}`;
+};
+
+body = body.replace(/<h([1-6])>([\s\S]*?)<\/h\1>/g, (_, level, headingHtml) => {
+    const id = slugify(headingHtml);
+    return `<h${level} id="${id}"><a class="heading-link" href="#${id}">${headingHtml}</a></h${level}>`;
+});
+
 const html = `<!doctype html>
 <html>
     <head>
