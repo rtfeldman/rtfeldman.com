@@ -280,7 +280,7 @@ Let's get into it!
 
 ## Hot Code Loading + Cross-Compiled Binaries
 
-Roc's new compiler automatically does hot code loading during development. For example, I can run `roc server.roc` to start a Web server, then change some of its code while it's running. The next time that server handles a request, it'll automatically be handled using the new code. Here it is in action, both in a server and in a simple 2D game running at 120fps:
+Roc's new compiler automatically does hot code loading during development. For example, I can run `roc server.roc` to start a Web server, then change some of its code while it's running. The next time that server handles a request, it'll automatically be handled using the new code. Here it is in action, both in a server and in a simple 2D game:
 
 <video class="inline-video" controls preload="metadata" playsinline>
     <source src="/assets/hot-loading.mp4" type="video/mp4">
@@ -321,84 +321,9 @@ The HTTP request-handling logic from that video looks like this:
 
 This uses several features we introduced in the new compiler. For example, that `"/users/${id}"` syntax is not implemented with [parsing template strings at runtime](https://expressjs.com/en/guide/routing/#route-parameters), but rather with a new language feature: string interpolation inside pattern matching.
 
-Not only is this type-safe at compile time, this entire code snippet performs *zero heap allocations*. (We even have a regression test which sends various requests to a HTTP server running this code, and the test fails if the server attempts a single heap allocation at any time.) I'd expect the typical language that ships with hot code loading to average closer to 1 allocation per line of code here…but Roc is aiming high on ergonomics, type safety, *and* performance!
+Not only is this type-safe at compile time, this entire code snippet performs *zero heap allocations*. I'd expect the typical language that ships with hot code loading to average closer to 1 allocation per line of code here…but Roc is aiming high on ergonomics, type safety, *and* performance! 
 
-## Compile-Time Evaluation of Pure Functions
-
-We didn't get zero heap allocations in this common use case by chance; we got it by designing and implementing the new compiler to aggressively avoid doing unnecessary work at runtime. One of the strategies which avoids runtime allocations in this specific example is doing work at compile time instead of runtime.
-
-As an example, Python's popular FastAPI server framework lets you parse HTTP headers directly into Python objects based on the field names defined in the object's class. Here's a simplified [example from FastAPI's docs](https://fastapi.tiangolo.com/tutorial/header-param-models/#check-the-docs):
-
-```
-class CommonHeaders(BaseModel):
-    host: str
-    save_data: bool
-    if_modified_since: str | None = None
-
-@app.get("/items/")
-async def read_items(headers: Annotated[CommonHeaders, Header()]):
-    # …use headers somehow here
-```
-
-Presumably you'd go on to use `headers` somehow in the body of `read_items`. By default, FastAPI will look for a HTTP header named `if-modified-since` (case-insensitive) to parse into the field named `if_modified_since`, because Python uses [snake_case](https://en.wikipedia.org/wiki/Snake_case) whereas HTTP headers use [kebab-case](https://en.wikipedia.org/wiki/Letter_case#Kebab_case). This is done automatically based on the field name at runtime, at the cost of one heap allocation per field.
-
-If you ported this example to Rust with [salvo](https://docs.rs/salvo/latest/salvo/extract/index.html), you'd get about the same level of convenience—but with full type safety and fewer runtime allocations:
-
-```
-#[derive(Deserialize, Extractible, Debug)]
-#[serde(rename_all = "kebab-case")]
-#[salvo(extract(default_source(from = "header")))]
-struct CommonHeaders {
-    host: String,
-    save_data: bool,
-    if_modified_since: Option<String>,
-}
-
-#[handler]
-async fn read_items(headers: CommonHeaders) -> String {
-    // …use headers somehow here
-}
-```
-
-You'd still have some runtime allocations though, because all of those fields except `save_data` have types involving heap allocations.
-
-Roc's equivalent is also fully type-safe, but it performs no runtime heap allocations at all, and is a one-liner with no type declarations or annotations of any kind:
-
-```
-read_items = |headers| # …use headers somehow here
-```
-
-That's it, that's the code. You can try it out for yourself! The way this works in Roc is:
-
-* Roc has a full type inference system which means it's always able to infer the type of everything in the program, even if there are no type annotations anywhere, and it always infers the most general type that could fit there.
-  * Formally speaking, Roc does [principal](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Principal_type), [decidable](https://en.wikipedia.org/wiki/Decidability_\(logic\)#Decidability_of_a_theory), [sound](https://en.wikipedia.org/wiki/Type_safety#Definitions), [Hindley-Milner type inference](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system).
-* Because of this, you don't need to write out the whole `class CommonHeaders` definition like in Python; that type information will be inferred at compile time based on how you use the fields like `if_modified_since` and the rest.
-* Whereas many languages like Python and JavaScript represent "a group of fields" as a heap-allocated object, Roc instead represents them as a stack-allocated `struct` like you'd find in C, Go, Rust, Zig, etc.
-  * Those languages require defining the struct type ahead of time, like Python does with the class definition, but in Roc you can just use anonymous curly-brace literals (they look just like JavaScript object literals) and they compile to the equivalent of C structs at runtime.
-* Roc also has ways to implement things like HTTP header parsers (though of course not limited to that use case) using this statically-known type information.
-  * This is all done using ordinary Roc expressions and values; there isn't a separate metaprogramming language or anything like that. It's just normal Roc functions running at compile time, being automatically passed values that represent statically-known type information.
-* These parsers can be built by executing Roc code at compile time.
-  * In this case, what runs at compile time is code that receives the string names of the fields at compile time, e.g. `"if_modified_since"` and `"save_data"`, and then converts it—still at compile time—into kebab-case strings like `"if-modified-since"` and `"save-data"`.
-    * Like all heap allocations that get produced during Roc's compile time evaluation, these strings end up deduplicated in the final binary's static memory. No runtime heap allocations involved.
-  * It then builds a parser which takes the raw HTTP header string, searches case-insensitively for these kebab-case strings, and when it finds one, loads it into the appropriate `header` field.
-    * Loading the parsed HTTP value into the `header` field doesn't need to allocate, because at runtime it's just a reference to a subset of the original HTTP request string.
-      * Roc strings are semantically immutable, and are allowed to share runtime memory with other strings. The parser takes advantage of that.
-    * Rust's [slices](https://doc.rust-lang.org/std/primitive.slice.html) and [`Cow`](https://doc.rust-lang.org/std/borrow/enum.Cow.html)s do this, but they require introducing annoying lifetime parameters to structs, which is presumably why libraries like salvo don't do it this way even though it's faster at runtime.
-      * Roc doesn't have lifetime parameters, and you'd actually have to go out of your way to write a HTTP header parser that did allocations instead of sharing like this.
-
-So I wasn't kidding! This really is the one line you need, and it gets you fewer heap allocations than even the equivalent Rust version:
-
-```
-read_items = |headers| # …use headers somehow here
-```
-
-Oh, and it will early-return a [HTTP 400](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/400) response if any non-optional headers were missing from the request, based on how you used your fields; like Rust, Roc also has [sum types](https://en.wikipedia.org/wiki/Algebraic_data_type) and no [billion dollar mistake](https://en.wikipedia.org/wiki/Null_pointer).
-
-To be clear, you can absolutely build a faster-performing HTTP server in a systems language like Rust or Zig or C than you can in Roc. Automatic memory management has a cost! What I like about this example is not that it runs at absolute maximum performance, but that you're getting a lot of convenience *and* a lot of performance out of concise code that's fully type-safe.
-
-None of this is specific to HTTP headers, of course. The language features that make this possible can work the same way with JSON, image file formats, binary database query responses, and other strings or binary data you might want to parse. We had some of this functionality in the original compiler, but not the full experience.
-
-Continuing the recurring theme, compile-time execution of code we just compiled is innately memory-unsafe. As with hot code loading, we generate arbitrary machine instructions and have the CPU execute them, and on top of that, some of the memory involved in that execution is shared between the compiler and the running program—because they both need to read and write it!
+> By the way, if you're interested in a post on the technical details of how we used the new compiler's compile-time execution of pure functions to get this down to zero allocations, let me know on [Roc Zulip](https://roc.zulipchat.com/).
 
 ## Why a Scratch-Rewrite?
 
