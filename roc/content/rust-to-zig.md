@@ -287,7 +287,9 @@ Roc's new compiler automatically does hot code loading during development. For e
     <a href="/assets/hot-loading.mp4">Download the hot-loading demo video.</a>
 </video>
 
-Hot loading is standard behavior for interpreted languages like Python, but not so much for high-performance compiled languages like Roc. When I'm ready to deploy, `roc build server.roc` gets me an LLVM-optimized, self-contained binary that I can drop onto a machine and run. Roc also cross-compiles; building a static binary that runs on Alpine Linux is as simple as `roc build --target=x64musl`, and that command will produce the same output bytes (for the same input source code bytes) when run on a Mac or any other system—which [not all compilers guarantee](https://xeiaso.net/notes/2026/anubis-wasm-vendor-binary/).
+Hot loading is standard behavior for interpreted languages like Python, but not so much for high-performance compiled languages like Roc. When I'm ready to deploy, `roc build server.roc` gets me an LLVM-optimized, self-contained binary that I can drop onto a machine and run. 
+
+Roc also cross-compiles; building a static binary that runs on Alpine Linux is as simple as `roc build --target=x64musl`, and that command will produce the same output bytes (for the same input source code bytes) when run on a Mac or any other system—which [not all compilers guarantee](https://xeiaso.net/notes/2026/anubis-wasm-vendor-binary/).
 
 ## Pattern Matching with String Interpolation
 
