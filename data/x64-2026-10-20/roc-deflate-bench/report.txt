@@ -1,0 +1,231 @@
+roc-deflate 0.4.0 vs libdeflate: full compression timing report
+Run date: 2026-10-20; timezone: America/New_York (UTC-04:00).
+
+RESULT
+Full repro-deflate.sh run completed successfully with exit status 0.
+All 3,672 expected timed samples are present, with no duplicates or missing samples.
+All 396 interleaved round pairs produced byte-identical compressed output.
+Both harnesses verified an untimed compression/decompression round trip before timing in every invocation.
+Libdeflate had higher median throughput in 139/144 level/file cases; roc-deflate in 5/144.
+Across the 144 cases, median libdeflate throughput advantage: 19.7%.
+Largest libdeflate advantage: level 10, x-ray, 46.5%.
+Smallest libdeflate advantage: level 12, reymont, -6.8% (negative means roc-deflate faster).
+
+PER-LEVEL RESULTS
+Throughput is decimal MB/s over uncompressed input bytes.
+Engine columns: median across the 12 per-file median throughputs.
+Gap column: median across the 12 per-file (libdeflate/Roc - 1) throughput percentages.
+The gap is not the ratio of the two engine columns; those medians can rank files differently.
+ L   libdeflate   roc-deflate    median gap    files faster (lib/Roc)
+ 1        229.2         183.8       +30.4%      12/0
+ 2        157.5         128.1       +29.3%      12/0
+ 3        136.8         109.5       +25.0%      12/0
+ 4        124.8         104.6       +22.3%      12/0
+ 5        107.8          89.5       +25.1%      12/0
+ 6         93.2          75.0       +24.7%      12/0
+ 7         73.6          61.3       +18.3%      12/0
+ 8         49.0          42.5       +16.7%      12/0
+ 9         43.3          37.6       +13.2%      12/0
+10         14.8          12.7       +15.4%      12/0
+11          9.2           8.6        +9.5%      10/2
+12          6.6           6.8        +6.3%       9/3
+
+METHOD
+Command: CMAKE_GENERATOR=Ninja bash repro-deflate.sh
+All default levels (1-12) and all 12 Silesia files were used.
+Levels 1-9: three rounds, five timed repetitions per engine per round (15 samples per engine/file/level).
+Levels 10-12: two rounds, three timed repetitions per engine per round (6 samples per engine/file/level).
+For each level/file/round, libdeflate ran first, then roc-deflate. Every timed repetition was retained.
+Both engines used the same mimalloc shared library via LD_PRELOAD.
+C: cc -O3; Roc compiler: ReleaseFast; Roc harness: roc build --opt=speed.
+Corpus reads, initial compression, verification, and output writes are outside the timed interval.
+C reuses one compressor and a caller-allocated output buffer across repetitions.
+Roc calls Deflate.compress for each repetition; the measured API includes its allocation/cleanup behavior.
+The timing is compression-only; it is not a decompression benchmark.
+Timing pass began: 2026-10-20 17:48:08.600421963 -0400
+Timing pass ended: 2026-10-20T18:24:59.603156-04:00
+Timing pass duration: approximately 36 minutes 51 seconds.
+Build-and-run attempt began at 17:31:02 EDT; completion was at 18:24:59 EDT (about 54 minutes).
+
+ENVIRONMENT AND PROVENANCE
+CPU: AMD Ryzen 9 3900X, 12 cores / 24 logical CPUs; boost enabled.
+RAM: 60 GiB reported by free -h.
+OS: Linux x86_64, kernel 7.0.0-38-generic.
+CPU frequency governor observed during run: schedutil.
+Zig: 0.17.0.
+C compiler: cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0.
+Roc: 319cdae7c1492c5d77f071de050653b0e2f1d505 (reported release-fast-319cdae7).
+libdeflate: b122c8be1d78b19f6d0a6efc5bb79bfcbb30dd51.
+roc-deflate: tag 0.4.0, 1743c1e744abe732a61e047871d1509c05f09e0f.
+mimalloc: tag v2.1.7, 8c532c32c3c96e5ba1f2283e032f69ead8add00f.
+CMake 3.31.6 and Ninja 1.12.1 were installed in ~/.local; mimalloc was built by the script.
+Initial setup attempts stopped because CMake, then a build tool, were absent. These were installed and the full script was rerun.
+No compiler source modifications, MiniCI, or eval suites were needed.
+
+INTERPRETATION AND LIMITS
+The median per-file advantage generally narrows at higher compression levels, from 30.4% at level 1 to 6.3% at level 12.
+At level 12, the median Roc throughput across files exceeds the median C throughput, while the median per-file ratio favors C.
+This is consistent with different files occupying the middle of the two independent throughput distributions.
+These are end-to-end timings of the two compression APIs with their respective allocation strategies.
+CPU scheduling and frequency were left at system defaults; engines were interleaved in a fixed C-then-Roc order.
+This is one complete run on this machine; no statistical confidence interval or cross-machine claim is made.
+
+DATA VALIDATION
+Checked exact expected engine/level/file/round/repetition keys, including every repetition number.
+Checked raw TSV against CSV row for row, including rounded MB/s values.
+Checked positive elapsed times, corpus byte counts, and consistent compressed sizes across both engines and all repetitions.
+Checked that differ.txt is empty. The script also exited successfully after all round-trip verifications.
+
+ARTIFACTS
+roc-deflate-0.4-compression-timings.csv: all 3,672 timed observations, including nanoseconds and compressed sizes.
+raw.tsv: original unrounded timing rows.
+per-file-summary.csv: all 144 level/file comparisons, medians, min/max times, compressed sizes, and throughput gaps.
+per-level-summary.csv: level medians, win counts, and whole-corpus throughputs calculated from per-file median times.
+differ.txt: empty output-difference log.
+
+PER-FILE MEDIAN THROUGHPUTS (MB/s)
+ L  corpus       libdeflate  roc-deflate   lib advantage
+ 1  dickens         207.57       158.04       +31.34%
+ 1  mozilla         241.20       173.18       +39.28%
+ 1  mr              245.68       189.72       +29.50%
+ 1  nci             384.01       344.78       +11.38%
+ 1  ooffice         169.14       124.67       +35.67%
+ 1  osdb            253.84       182.19       +39.33%
+ 1  reymont         217.13       187.09       +16.05%
+ 1  samba           282.26       219.71       +28.47%
+ 1  sao             159.37       110.61       +44.08%
+ 1  webster         212.80       185.39       +14.79%
+ 1  x-ray           146.83       105.72       +38.88%
+ 1  xml             336.29       282.88       +18.88%
+ 2  dickens         136.48       106.81       +27.78%
+ 2  mozilla         167.95       117.46       +42.99%
+ 2  mr              156.59       128.31       +22.04%
+ 2  nci             270.29       250.39        +7.95%
+ 2  ooffice         123.17        92.38       +33.33%
+ 2  osdb            183.38       138.60       +32.30%
+ 2  reymont         158.41       127.92       +23.84%
+ 2  samba           206.99       149.52       +38.43%
+ 2  sao             106.41        85.08       +25.07%
+ 2  webster         152.81       136.41       +12.02%
+ 2  x-ray           112.18        84.00       +33.56%
+ 2  xml             258.75       197.80       +30.81%
+ 3  dickens         115.21        92.82       +24.13%
+ 3  mozilla         156.82       107.75       +45.53%
+ 3  mr              132.68       110.67       +19.89%
+ 3  nci             276.37       235.80       +17.20%
+ 3  ooffice         115.76        85.31       +35.70%
+ 3  osdb            164.70       130.80       +25.92%
+ 3  reymont         132.85       108.35       +22.61%
+ 3  samba           194.95       137.12       +42.17%
+ 3  sao              96.50        76.35       +26.39%
+ 3  webster         140.79       118.18       +19.13%
+ 3  x-ray           111.57        84.11       +32.66%
+ 3  xml             197.14       187.00        +5.42%
+ 4  dickens         107.58        87.91       +22.38%
+ 4  mozilla         142.31       106.31       +33.86%
+ 4  mr              122.27       102.83       +18.91%
+ 4  nci             246.32       229.78        +7.20%
+ 4  ooffice         112.66        84.75       +32.93%
+ 4  osdb            155.70       122.05       +27.58%
+ 4  reymont         119.98       100.54       +19.34%
+ 4  samba           180.79       131.51       +37.47%
+ 4  sao              91.64        74.95       +22.27%
+ 4  webster         127.29       110.36       +15.34%
+ 4  x-ray           111.74        84.20       +32.71%
+ 4  xml             189.91       176.82        +7.40%
+ 5  dickens          82.60        68.22       +21.07%
+ 5  mozilla         124.29        94.73       +31.20%
+ 5  mr              104.28        86.68       +20.30%
+ 5  nci             252.10       202.92       +24.24%
+ 5  ooffice          91.01        70.99       +28.20%
+ 5  osdb            130.03       103.60       +25.52%
+ 5  reymont          97.82        79.03       +23.77%
+ 5  samba           154.35       118.21       +30.57%
+ 5  sao              76.94        61.72       +24.66%
+ 5  webster         111.25        92.27       +20.57%
+ 5  x-ray            96.03        75.31       +27.51%
+ 5  xml             210.72       156.93       +34.27%
+ 6  dickens          66.74        54.13       +23.29%
+ 6  mozilla         103.46        82.81       +24.93%
+ 6  mr               84.69        71.36       +18.69%
+ 6  nci             206.78       165.02       +25.31%
+ 6  ooffice          82.58        65.74       +25.62%
+ 6  osdb            119.01        96.35       +23.52%
+ 6  reymont          71.00        57.09       +24.38%
+ 6  samba           120.74        92.55       +30.46%
+ 6  sao              64.97        54.40       +19.44%
+ 6  webster          91.32        74.30       +22.91%
+ 6  x-ray            95.16        75.70       +25.71%
+ 6  xml             173.03       132.87       +30.23%
+ 7  dickens          49.95        43.17       +15.69%
+ 7  mozilla          76.51        63.24       +20.99%
+ 7  mr               58.21        49.97       +16.49%
+ 7  nci             143.36       127.58       +12.38%
+ 7  ooffice          70.68        58.86       +20.08%
+ 7  osdb            118.80        94.89       +25.21%
+ 7  reymont          41.52        36.16       +14.82%
+ 7  samba            88.77        72.49       +22.45%
+ 7  sao              57.18        49.97       +14.42%
+ 7  webster          68.56        59.26       +15.69%
+ 7  x-ray            96.62        76.62       +26.09%
+ 7  xml             120.83        99.97       +20.88%
+ 8  dickens          33.61        28.75       +16.92%
+ 8  mozilla          42.58        35.97       +18.38%
+ 8  mr               36.62        32.46       +12.81%
+ 8  nci              82.09        69.25       +18.54%
+ 8  ooffice          50.59        43.40       +16.57%
+ 8  osdb             97.93        82.33       +18.95%
+ 8  reymont          20.63        19.08        +8.12%
+ 8  samba            53.74        47.18       +13.89%
+ 8  sao              47.33        41.53       +13.96%
+ 8  webster          41.08        36.48       +12.63%
+ 8  x-ray            82.03        64.77       +26.65%
+ 8  xml              73.84        63.02       +17.18%
+ 9  dickens          28.91        26.24       +10.14%
+ 9  mozilla          30.08        26.55       +13.30%
+ 9  mr               33.59        29.71       +13.07%
+ 9  nci              58.93        52.14       +13.03%
+ 9  ooffice          44.66        38.37       +16.40%
+ 9  osdb             99.13        81.94       +20.98%
+ 9  reymont          16.91        16.14        +4.79%
+ 9  samba            41.88        36.83       +13.71%
+ 9  sao              46.32        40.07       +15.58%
+ 9  webster          34.96        31.54       +10.86%
+ 9  x-ray            82.82        65.59       +26.27%
+ 9  xml              59.09        53.06       +11.36%
+10  dickens          12.41        11.58        +7.14%
+10  mozilla          15.24        12.77       +19.36%
+10  mr               16.43        14.19       +15.78%
+10  nci               7.65         6.66       +14.98%
+10  ooffice          18.40        15.08       +22.02%
+10  osdb             16.21        13.89       +16.76%
+10  reymont           8.88         8.48        +4.77%
+10  samba            14.28        12.56       +13.69%
+10  sao              23.90        18.19       +31.40%
+10  webster          10.26         9.57        +7.30%
+10  x-ray            36.03        24.59       +46.52%
+10  xml              10.97         9.60       +14.27%
+11  dickens           9.19         8.99        +2.23%
+11  mozilla          10.60         9.35       +13.44%
+11  mr                9.20         8.29       +11.01%
+11  nci               4.76         4.40        +8.30%
+11  ooffice          14.04        12.03       +16.76%
+11  osdb             12.20        11.27        +8.27%
+11  reymont           6.61         6.94        -4.66%
+11  samba             8.50         7.85        +8.29%
+11  sao              19.53        15.22       +28.34%
+11  webster           6.70         6.96        -3.66%
+11  x-ray            27.02        20.23       +33.58%
+11  xml               6.29         5.69       +10.68%
+12  dickens           7.34         7.49        -2.04%
+12  mozilla           8.16         7.38       +10.48%
+12  mr                4.83         4.10       +17.92%
+12  nci               3.50         3.32        +5.39%
+12  ooffice          11.81         9.98       +18.29%
+12  osdb             10.94        10.34        +5.81%
+12  reymont           5.58         5.99        -6.77%
+12  samba             5.90         5.53        +6.78%
+12  sao              18.22        14.10       +29.18%
+12  webster           5.87         6.13        -4.19%
+12  x-ray            24.17        18.22       +32.66%
+12  xml               4.07         3.86        +5.44%
