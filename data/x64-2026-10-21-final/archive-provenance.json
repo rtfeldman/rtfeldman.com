@@ -1,0 +1,16 @@
+{
+  "archive": "roc-deflate-results-2026-10-21-final.tar.gz",
+  "sha256": "726b780deeff695296408e0f9f18aaa668ae04c5fd4cb3d2e32ecb051249b978",
+  "procedure": "https://gist.github.com/rtfeldman/7b6830809149867b79761ffb8e0456c3",
+  "sources": {
+    "roc": "5e62c0e13ae779c28f7904dcdd2849ba13240beb",
+    "roc-deflate": "16578ed0f16f83a1eb7491568c983446f622fd4a",
+    "libdeflate": "b122c8be1d78b19f6d0a6efc5bb79bfcbb30dd51",
+    "mimalloc": "8c532c32c3c96e5ba1f2283e032f69ead8add00f"
+  },
+  "omitted_files": [
+    "comparison-vs-baseline.txt",
+    "comparison-vs-run3.txt"
+  ],
+  "omission_reason": "Comparisons with superseded runs; current summaries are regenerated from this archive's raw timings."
+}

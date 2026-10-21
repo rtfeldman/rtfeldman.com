@@ -1,0 +1,66 @@
+zig: /home/rtfeldman/.local/bin/zig (0.17.0)
+
+== fetching sources
+
+== building mimalloc v2.1.7
+mimalloc: /home/rtfeldman/code/deflate-bench/final-run-4/mimalloc/build/libmimalloc.so
+Roc compiler version release-fast-5e62c0e1
+
+== building harnesses
+── ● kept temporary directory ──────────────────────────────────────────────────
+
+Kept temporary directory:
+../roc-cache/compat-8bd29587b279f594ec15879aeb02e24240b9a1f6375202d9c0f17bb39f1d
+09de/tmp/9dFKetXy6mwbgQE1ec6WCbBhaBdxOHUh.
+
+0 errors and 0 warnings found in 10.2s while successfully building:
+
+    ../bin/ctime_raw
+
+== relinking the Roc harness with mimalloc
+Roc harness: malloc and free resolve to mimalloc
+
+== fetching the Silesia corpus
+  dickens: downloading
+  mozilla: downloading
+  mr: downloading
+  nci: downloading
+  ooffice: downloading
+  osdb: downloading
+  reymont: downloading
+  samba: downloading
+  sao: downloading
+  webster: downloading
+  x-ray: downloading
+  xml: downloading
+corpus ready in /home/rtfeldman/code/deflate-bench/final-run-4/corpus
+
+== timing (started 16:03)
+level 1 done 16:04
+level 2 done 16:04
+level 3 done 16:05
+level 4 done 16:06
+level 5 done 16:07
+level 6 done 16:09
+level 7 done 16:11
+level 8 done 16:13
+level 9 done 16:17
+level 10 done 16:22
+level 11 done 16:29
+level 12 done 16:38
+level  libdeflate  roc-deflate  median gap (libdeflate faster by)
+    1       233.0        214.5    +9.2%
+    2       161.9        150.9   +10.1%
+    3       138.9        130.9   +12.5%
+    4       127.5        121.2    +8.0%
+    5       108.5         99.4   +12.0%
+    6        95.8         87.1   +11.1%
+    7        74.7         65.8    +9.2%
+    8        50.0         46.4    +8.2%
+    9        44.4         42.0    +7.1%
+   10        14.9         13.7    +9.5%
+   11         9.3          9.1    +4.0%
+   12         6.7          7.1    +3.6%
+all outputs byte-identical to libdeflate's
+CSV: /home/rtfeldman/code/deflate-bench/final-run-4/roc-deflate-compression-timings.csv
+exit=0

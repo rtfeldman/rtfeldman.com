@@ -1,0 +1,93 @@
+{
+  "machine": "Apple M1 Pro",
+  "architecture": "arm64",
+  "os": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83",
+  "c_compiler": "Apple clang version 17.0.0 (clang-1700.6.4.2)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin",
+  "zig_version": "0.17.0",
+  "sources": {
+    "roc": "5e62c0e13ae779c28f7904dcdd2849ba13240beb",
+    "roc-deflate": "16578ed0f16f83a1eb7491568c983446f622fd4a",
+    "libdeflate": "b122c8be1d78b19f6d0a6efc5bb79bfcbb30dd51",
+    "mimalloc": "8c532c32c3c96e5ba1f2283e032f69ead8add00f"
+  },
+  "procedure": "https://gist.github.com/rtfeldman/7b6830809149867b79761ffb8e0456c3",
+  "build_changes": [
+    "zig build -j2",
+    "cmake --build -j2"
+  ],
+  "run_command": "PATH=\"/usr/bin:$PATH\" bash data/macos-aarch64-2026-10-21/repro-deflate-mimalloc.sh /private/tmp/roc-deflate-macos-2026-10-21",
+  "environment_note": "Run on the user's active desktop; no CPU affinity or frequency controls. Background desktop activity was present during setup.",
+  "recorded_at": "2026-10-21T17:09:58.386989-04:00",
+  "completed_at": "2026-10-21T17:56:47.143297-04:00",
+  "exit_status": 0,
+  "allocator_checks": {
+    "cbench_raw": {
+      "exit_code": 0,
+      "stderr_lines": 411,
+      "mimalloc_output": true,
+      "interpose_lines": [
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_malloc' to replacing binds to 0x188E75CE8 with 0x1040F8F88",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_calloc' to replacing binds to 0x188E7788C with 0x104109758",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_realloc' to replacing binds to 0x188E77888 with 0x1040F8FF4",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_strdup' to replacing binds to 0x188F12558 with 0x1040F9024",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_strndup' to replacing binds to 0x188F1E634 with 0x1040F90F8",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_realpath$DARWIN_EXTSN' to replacing binds to 0x188F238A0 with 0x1040F91CC",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_posix_memalign' to replacing binds to 0x188E7E034 with 0x1040FAC58",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_reallocf' to replacing binds to 0x188EAFF4C with 0x1040F91F4",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_valloc' to replacing binds to 0x188E7DF70 with 0x1040FACE0",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_malloc_size' to replacing binds to 0x188E7C034 with 0x1041096C0",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_malloc_good_size' to replacing binds to 0x188E7BFA4 with 0x1040FAC20",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_aligned_alloc' to replacing binds to 0x188EAFCAC with 0x1040FAD74",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_free' to replacing binds to 0x188E766B8 with 0x1041097F4",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_vfree' to replacing binds to 0x188EAFFA8 with 0x1041097F4",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_malloc_create_zone' to replacing binds to 0x188E7F43C with 0x1041093C4",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_malloc_default_purgeable_zone' to replacing binds to 0x188E80890 with 0x1041093F8",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_malloc_default_zone' to replacing binds to 0x188E77B88 with 0x10410942C",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_malloc_destroy_zone' to replacing binds to 0x188E85DA0 with 0x104109460",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_malloc_get_all_zones' to replacing binds to 0x188EB0784 with 0x104109464",
+        "dyld[60651]: libmimalloc.2.1.dylib has interposed '_malloc_get_zone_name' to replacing binds to 0x188EAF9B4 with 0x10410947C"
+      ]
+    },
+    "ctime_raw": {
+      "exit_code": 0,
+      "stderr_lines": 430,
+      "mimalloc_output": true,
+      "interpose_lines": [
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_malloc' to replacing binds to 0x188E75CE8 with 0x1047A0F88",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_calloc' to replacing binds to 0x188E7788C with 0x1047B1758",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_realloc' to replacing binds to 0x188E77888 with 0x1047A0FF4",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_strdup' to replacing binds to 0x188F12558 with 0x1047A1024",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_strndup' to replacing binds to 0x188F1E634 with 0x1047A10F8",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_realpath$DARWIN_EXTSN' to replacing binds to 0x188F238A0 with 0x1047A11CC",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_posix_memalign' to replacing binds to 0x188E7E034 with 0x1047A2C58",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_reallocf' to replacing binds to 0x188EAFF4C with 0x1047A11F4",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_valloc' to replacing binds to 0x188E7DF70 with 0x1047A2CE0",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_malloc_size' to replacing binds to 0x188E7C034 with 0x1047B16C0",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_malloc_good_size' to replacing binds to 0x188E7BFA4 with 0x1047A2C20",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_aligned_alloc' to replacing binds to 0x188EAFCAC with 0x1047A2D74",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_free' to replacing binds to 0x188E766B8 with 0x1047B17F4",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_vfree' to replacing binds to 0x188EAFFA8 with 0x1047B17F4",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_malloc_create_zone' to replacing binds to 0x188E7F43C with 0x1047B13C4",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_malloc_default_purgeable_zone' to replacing binds to 0x188E80890 with 0x1047B13F8",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_malloc_default_zone' to replacing binds to 0x188E77B88 with 0x1047B142C",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_malloc_destroy_zone' to replacing binds to 0x188E85DA0 with 0x1047B1460",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_malloc_get_all_zones' to replacing binds to 0x188EB0784 with 0x1047B1464",
+        "dyld[60652]: libmimalloc.2.1.dylib has interposed '_malloc_get_zone_name' to replacing binds to 0x188EAF9B4 with 0x1047B147C"
+      ]
+    }
+  },
+  "corpus_sha256": {
+    "dickens": "b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a",
+    "mozilla": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b",
+    "mr": "68637ed52e3e4860174ed2dc0840ac77d5f1a60abbcb13770d5754e3774d53e6",
+    "nci": "fc63a31770947b8c2062d3b19ca94c00485a232bb91b502021948fee983e1635",
+    "ooffice": "e7ee013880d34dd5208283d0d3d91b07f442e067454276095ded14f322a656eb",
+    "osdb": "60f027179302ca3ad87c58ac90b6be72ec23588aaa7a3b7fe8ecc0f11def3fa3",
+    "reymont": "0eac0114a3dfe6e2ee1f345a0f79d653cb26c3bc9f0ed79238af4933422b7578",
+    "samba": "93ba07bc44d8267789c1d911992f40b089ffa2140b4a160fac11ccae9a40e7b2",
+    "sao": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc",
+    "webster": "6a68f69b26daf09f9dd84f7470368553194a0b294fcfa80f1604efb11143a383",
+    "x-ray": "7de9fce1405dc44ae5e6813ed21cd5751e761bd4265655a005d39b9685d1c9ad",
+    "xml": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c"
+  }
+}
