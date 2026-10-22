@@ -55,7 +55,7 @@ Most of the optimizations that improved roc-deflate's numbers came from general 
 
 ### Avoid Unnecessary Sharing
 
-Roc's most critical optimization is _opportunistic mutation_ (which [Koka](https://koka-lang.github.io/koka/doc/book.html#why-perceus) calls ["Functional but In-Place"](https://koka-lang.github.io/koka/doc/book.html#sec-fbip)). You can learn how it works in Roc's [docs on opportunistic mutation](https://www.roc-lang.org/docs/main/langref/expressions/#opportunistic-mutation), but from a performance optimization perspective, it's critically important to avoid unnecessary sharing so that values remain unique and therefore eligible for in-place mutation.
+One of Roc's most effective optimizations is _opportunistic mutation_ (which [Koka](https://koka-lang.github.io/koka/doc/book.html#why-perceus) calls ["Functional but In-Place"](https://koka-lang.github.io/koka/doc/book.html#sec-fbip)). You can learn how it works in Roc's [docs on opportunistic mutation](https://www.roc-lang.org/docs/main/langref/expressions/#opportunistic-mutation), but from a performance optimization perspective, it's critically important to avoid unnecessary sharing so that values remain unique and therefore eligible for in-place mutation.
 
 ### Hoist Bounds Checks
 
