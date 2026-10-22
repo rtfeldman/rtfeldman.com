@@ -51,27 +51,28 @@ That answer can legitimately vary by use case—Roc's own compiler, for example,
 
 ## Roc-Specific Optimizations
 
-Most of the optimizations that improved roc-deflate's numbers came from general optimization techniques that are widely beneficial across languages. (I always recommend [Casey Muratori's Performance-Aware Programming Series](https://www.computerenhance.com/p/table-of-contents), which I paid for and learned a lot from.) Some of the optimization techniques were Roc-specific, though, and I wanted to mention them here as a reference for others.
+Most of the optimizations that improved roc-deflate's numbers came from general optimization techniques that are widely beneficial across languages. (I always recommend [Casey Muratori's Performance-Aware Programming Series](https://www.computerenhance.com/p/table-of-contents), which I paid for and learned a lot from.) Some of the optimization techniques were Roc-specific, though, and I wanted to mention them here as a reference for others. Even if you're not writing Roc code, this can also give you an idea of [how Roc achieves its performance](https://youtu.be/vzfy4EKwG_Y?si=oYa6k2pFdsRJcQW7).
 
 ### Avoid Unnecessary Sharing
 
-These are copies for stack allocated things, and defeats in-place mutation for heap allocated things.
+Roc's most critical optimization is _opportunistic mutation_ (which [Koka](https://koka-lang.github.io/koka/doc/book.html#why-perceus) calls ["Functional but In-Place"](https://koka-lang.github.io/koka/doc/book.html#sec-fbip)). You can learn how it works in Roc's [docs on opportunistic mutation](https://www.roc-lang.org/docs/main/langref/expressions/#opportunistic-mutation), but from a performance optimization perspective, it's critically important to avoid unnecessary sharing so that values remain unique and therefore eligible for in-place mutation.
 
-### Hoisting bounds checks
-- our optimizer can infer when bounds checks can be elided
-- the more inputs there are into a given number, the more likely it is that some edge case path emerges which makes the check no longer safe to elide. (Also, without inlining or specialization.)
-- the place where these really hurt is inside loops, not just because they run a lot, but because they block other optimizations
-- if we can to the bounds check outside the loop, once, it'll be cheap (although not free like in C), and the odds get way higher that inside the loop the optimizer can know it's safe to elide
-- I wouldn't write this code this way from the outset. This is a good example of the difference between optimization and non pessimization. This might be a waste of time that actually makes the program slightly slower if it doesn't unlock bounds check elision, so it only makes sense to do it after you're actually measuring things, disassembling, etc.
+### Hoist Bounds Checks
 
-This is also a good example of how we can get so close to C levels of perf. Yes, we do have an additional check at runtime that C doesn't. No, we can't safely get rid of it. But for that to matter, you have to be working in a domain where decompression being slower by even a single-digit percentage is not worth all the benefits Roc is bringing in comparison to C. That's some projects but obviously not all projects!
+You can't opt out of bounds checks (e.g. getting a value out of a dynamically-sized collection) in Roc like you can in C, Zig, and Rust, but Roc's compiler can optimize them away if it knows they'd be guaranteed to pass. Bounds checks are most costly inside loops, so you can get a lot of mileage out of adding something like `if collection.len() <= highest_index_used_in_loop { return 0 }` before the loop starts. This adds an additional check that looks redundant, but it can allow the optimizer to safely delete costlier checks inside the loop, once it can tell that failures would not be reachable after that early return.
 
-Also remember that this is a library that's intended to be widely used. I wouldn't bother to do this level of performance optimization on a SaaS backend where any gains at this level would be a rounding error compared to adding or removing a single database index.
+### Build Lookup Tables at Compile Time
+
+[Roc's compile-time evaluation](https://www.roc-lang.org/docs/main/langref/compile-time/) can be used to assemble lookup tables at compile time as long as nothing depends on runtime inputs. Even better, since their lengths are known at compile time, you can do things like `Ok(entry) = lookup_table.get(5)` to do an [exhaustive pattern match](https://www.roc-lang.org/docs/main/langref/pattern-matching/#exhaustiveness) that Roc's compiler will know is valid thanks to compile-time evaluation. This skips the runtime bounds check that non-constant tables would otherwise need to pay for.
+
+### Consider Wrapping Arithmetic
+
+In Roc, `a + b` desugars to `a.plus(b)`. For an integer like [`U64`](https://www.roc-lang.org/docs/main/Num/#U64), [`U64.plus`](https://www.roc-lang.org/docs/main/Num/#U64.plus) includes an overflow check, whereas [`plus_wrap`](https://www.roc-lang.org/docs/main/Num/#U64.plus_wrap) does not. Although `plus` is the safer default, [overflow checks have a runtime cost](https://danluu.com/integer-overflow), as CPUs can do wrapping integer arithmetic in a single instruction. When Roc's compiler can prove that overflow won't occur, both `plus` and `plus_wrap` will optimize to the same instructions, but when it can't tell for sure, you can get a speedup by explicitly choosing `plus_wrap`.
 
 ## Room for Improvement
 
 I'm sure there are still opportunities to improve roc-deflate's performance—especially on x64 CPUs—as well as the optimization pipeline in Roc's compiler itself.
 
-At this point I feel reasonably confident that all the low-hanging fruit has been picked, but if anyone wants to try it out for themselves, [here's the script I ran to set up and run the benchmark suite on Linux](https://gist.github.com/rtfeldman/7b6830809149867b79761ffb8e0456c3). (Note that Claude Opus 5.5 generated this script, and I haven't vetted it for security; run it outside a sandbox at your own risk.)
+At this point I feel reasonably confident that all the low-hanging fruit has been picked, but if anyone wants to try it out for themselves, [here's the script I ran to set up and run the benchmark suite on Linux](https://gist.github.com/rtfeldman/7b6830809149867b79761ffb8e0456c3). (Note that Claude Opus 5.5 generated this script, and I haven't vetted it for security; run it outside a sandbox at your own risk.) It pins both Roc compiler revisions and roc-deflate versions, so you'll want to adjust those commits if you're trying out potential improvements.
 
 For my part, I'll be focusing on the upcoming Roc 0.1.0 release from now until it's out. It's been eight years in the making, so I'll be very happy for us to finally have a numbered release!
