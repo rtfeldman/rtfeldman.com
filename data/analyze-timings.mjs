@@ -24,14 +24,17 @@ function csv(file, rows) {
   fs.writeFileSync(file, [names.join(','), ...rows.map(r => names.map(n => escape(r[n])).join(','))].join('\n') + '\n');
 }
 
-const expected = new Set();
-for (let level = 1; level <= 12; level++) for (const corpus of corpora) for (const engine of engines) {
-  for (let round = 1; round <= (level <= 9 ? 3 : 2); round++) {
-    for (let rep = 1; rep <= (level <= 9 ? 5 : 3); rep++) expected.add(key({ engine, level, corpus, round, rep }));
-  }
-}
+const referenceSampling = level => ({ rounds: level <= 9 ? 3 : 2, reps: level <= 9 ? 5 : 3 });
 
-export function analyze(directory, machine) {
+export function analyze(directory, machine, sampling = referenceSampling) {
+  const expected = new Set();
+  for (let level = 1; level <= 12; level++) for (const corpus of corpora) for (const engine of engines) {
+    const { rounds, reps } = sampling(level);
+    assert.ok(Number.isInteger(rounds) && rounds > 0 && Number.isInteger(reps) && reps > 0);
+    for (let round = 1; round <= rounds; round++) {
+      for (let rep = 1; rep <= reps; rep++) expected.add(key({ engine, level, corpus, round, rep }));
+    }
+  }
   const dir = path.join(root, directory);
   const lines = fs.readFileSync(path.join(dir, 'roc-deflate-compression-timings.csv'), 'utf8').trim().split(/\r?\n/);
   assert.equal(lines.shift(), columns.join(','));
@@ -131,12 +134,12 @@ export function writeReferenceReports() {
     assert.equal(r.input_bytes, other.get(key(r)).input_bytes, `cross-system input size: ${key(r)}`);
     assert.equal(r.compressed_bytes, other.get(key(r)).compressed_bytes, `cross-system output size: ${key(r)}`);
   }
-  csv(path.join(root, 'comparison-summary.csv'), systems.map(s => s.summary));
+  csv(path.join(root, 'reference-comparison-summary.csv'), systems.map(s => s.summary));
   const fmt = n => n.toFixed(2);
   const report = [
     'Roc versus libdeflate compression timings — matched-version reference, 2026-10-21',
     '',
-    'Latest macOS optimizations: macos-optimization-2026-10-21/report.txt.',
+    'Latest macOS optimizations: macos-optimization-2026-10-22/report.txt.',
     'This report preserves the same-source Linux/Mac comparison; subsequent optimized',
     'macOS sources have not been benchmarked on Linux. See README.md for dataset roles.',
     '',
@@ -224,7 +227,7 @@ export function writeReferenceReports() {
     }
     report.push('');
   }
-  fs.writeFileSync(path.join(root, 'report.txt'), report.join('\n').trimEnd() + '\n');
+  fs.writeFileSync(path.join(root, 'reference-report.txt'), report.join('\n').trimEnd() + '\n');
   for (const s of systems) console.log(JSON.stringify(s.summary, null, 2));
   console.log('Validated exact sample keys, raw TSV/CSV, throughputs, output-size consistency, empty mismatch logs, and cross-system input/output sizes.');
 }

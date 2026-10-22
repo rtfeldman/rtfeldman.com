@@ -1,0 +1,187 @@
+Roc versus libdeflate compression timings — matched-version reference, 2026-10-21
+
+Latest macOS optimizations: macos-optimization-2026-10-22/report.txt.
+This report preserves the same-source Linux/Mac comparison; subsequent optimized
+macOS sources have not been benchmarked on Linux. See README.md for dataset roles.
+
+Sources: roc 5e62c0e13ae779c28f7904dcdd2849ba13240beb (PR #12501);
+roc-deflate 16578ed0f16f83a1eb7491568c983446f622fd4a (PR #6);
+libdeflate b122c8be1d78b19f6d0a6efc5bb79bfcbb30dd51;
+mimalloc 8c532c32c3c96e5ba1f2283e032f69ead8add00f (v2.1.7); Zig 0.17.0.
+Procedure: https://gist.github.com/rtfeldman/7b6830809149867b79761ffb8e0456c3
+
+HOW TO READ THE NUMBERS
+Each case is one file at one compression level. Each engine has 15 samples
+per case at levels 1–9 and 6 samples at levels 10–12, across 3 or 2 rounds.
+The primary gap is (median Roc ns / median C ns - 1) * 100.
+Positive means Roc takes more time; negative means Roc takes less time.
+Overall median, mean, geometric mean, and quantiles weight all 144 cases equally.
+Whole-workload time sums the per-case median times: compress each of the
+12 files once at each of the 12 levels. This weights expensive cases more.
+Throughput uses decimal MB/s over uncompressed bytes.
+Per-level throughput columns are independent medians across files; their ratio
+does not in general equal the median of the per-file ratios.
+The procedure computes median sample throughput before taking ratios. That
+can differ slightly from ratios of median times for the even sample counts
+at levels 10–12. Both definitions are retained in the summary CSVs.
+
+VALIDATION
+Both datasets have all 3,672 unique expected samples, no missing or extra keys.
+Raw TSV and CSV agree row for row; positive timings and rounded MB/s checked.
+Each file/level has one input size and one output size across both engines.
+All corresponding input and compressed-output sizes match across systems.
+Both output-mismatch logs are empty; both completed runs report byte-identical outputs.
+File sizes alone are not hashes; cross-system byte identity is not established
+by the CSV. Within-run cmp checks provide the byte-identity evidence.
+
+METHOD AND LIMITS
+Compression only; reads, warmup/round-trip verification, output writes, and
+per-repetition logging are outside the measured interval. C reuses a compressor
+and output buffer; Roc measures Deflate.compress_into with a reused output buffer
+and includes allocation/cleanup of its internal compression work structures.
+C is built with cc -O3, Roc compiler with ReleaseFast, Roc app with --opt=speed.
+Both engines use mimalloc 2.1.7: Linux preloads C and statically links Roc;
+macOS preloads both. Engines run in fixed C-then-Roc order within each round.
+Post-run macOS dyld diagnostics confirm that mimalloc interposed malloc and
+free in both actual executables; those diagnostic invocations are separate
+from the timed dataset. Their logs are retained beside the Mac data.
+These replace earlier results after compiler loop/vectorization and bounds-check
+changes, compressor hot-loop changes, and the Linux static-Roc allocator fix.
+The earlier Linux and Mac numbers are not retained as current benchmark results.
+One full run per system; no confidence intervals or claim that CPU architecture
+alone caused the difference. CPU, OS, C compiler, libc, and system load differ.
+The Mac was an active user desktop without CPU affinity or frequency controls.
+
+AMD RYZEN 9 3900X / LINUX X86-64
+Samples: 3672; cases: 144; Roc faster: 15; C faster: 129; ties: 0.
+Median gap: 8.39%; mean: 8.09%; geometric mean: 7.79%.
+Gap distribution: p10 -0.31%; p25 4.98%; p75 12.39%; p90 16.17%.
+Cases within +/-5%: 26; +/-10%: 81; +/-15%: 124; +/-20%: 139.
+Fastest relative case: L1 nci, -21.69%.
+Slowest relative case: L10 x-ray, 31.89%.
+Whole workload: C 100.12 s; Roc 103.76 s; gap 3.63%.
+Whole workload throughput: C 25.40 MB/s; Roc 24.51 MB/s.
+Median per-case timing IQR / median: C 3.02%; Roc 2.93%.
+
+PER LEVEL: level | C MB/s | Roc MB/s | median time gap % | Roc wins / 12
+1 | 233.05 | 214.50 | 9.20 | 3
+2 | 161.86 | 150.86 | 10.11 | 2
+3 | 138.88 | 130.86 | 12.55 | 1
+4 | 127.48 | 121.23 | 7.98 | 2
+5 | 108.50 | 99.42 | 12.00 | 0
+6 | 95.84 | 87.08 | 11.12 | 0
+7 | 74.67 | 65.84 | 9.16 | 0
+8 | 49.96 | 46.37 | 8.22 | 0
+9 | 44.44 | 42.03 | 7.10 | 0
+10 | 14.85 | 13.71 | 9.45 | 1
+11 | 9.27 | 9.09 | 3.99 | 3
+12 | 6.73 | 7.11 | 3.54 | 3
+
+PER CORPUS: file | median time gap across levels % | Roc wins / 12
+dickens | 8.28 | 2
+mozilla | 12.77 | 0
+mr | 7.85 | 0
+nci | 3.15 | 3
+ooffice | 11.76 | 0
+osdb | 7.24 | 0
+reymont | 7.05 | 3
+samba | 8.75 | 0
+sao | 12.79 | 0
+webster | 5.08 | 3
+x-ray | 13.32 | 0
+xml | 7.25 | 4
+
+GROUPED LEVELS: levels | median time gap % | Roc wins / cases
+1–9 | 9.35 | 8/108
+10–12 | 5.19 | 7/36
+
+TEN LOWEST GAPS: level | file | time gap % | C MB/s | Roc MB/s
+1 | nci | -21.69 | 371.88 | 474.87
+1 | xml | -19.34 | 293.08 | 363.35
+12 | reymont | -12.05 | 5.59 | 6.36
+2 | xml | -11.12 | 213.90 | 240.66
+12 | dickens | -11.02 | 7.38 | 8.29
+12 | webster | -7.49 | 5.91 | 6.38
+11 | webster | -7.29 | 6.72 | 7.25
+4 | xml | -6.79 | 189.73 | 203.55
+11 | reymont | -6.74 | 6.75 | 7.24
+2 | nci | -6.53 | 266.96 | 285.61
+
+TEN HIGHEST GAPS: level | file | time gap % | C MB/s | Roc MB/s
+10 | x-ray | 31.89 | 36.82 | 27.92
+11 | x-ray | 29.33 | 27.57 | 21.32
+12 | x-ray | 28.06 | 24.90 | 19.45
+11 | sao | 24.25 | 19.91 | 16.03
+10 | sao | 19.89 | 23.45 | 19.56
+12 | sao | 19.46 | 17.62 | 14.75
+4 | x-ray | 18.54 | 116.52 | 98.29
+3 | ooffice | 18.45 | 116.65 | 98.48
+6 | dickens | 18.09 | 68.74 | 58.21
+2 | x-ray | 17.77 | 115.44 | 98.02
+
+APPLE M1 PRO / MACOS AARCH64
+Samples: 3672; cases: 144; Roc faster: 21; C faster: 123; ties: 0.
+Median gap: 5.64%; mean: 5.34%; geometric mean: 5.11%.
+Gap distribution: p10 -1.81%; p25 3.04%; p75 9.23%; p90 12.50%.
+Cases within +/-5%: 52; +/-10%: 108; +/-15%: 132; +/-20%: 144.
+Fastest relative case: L12 reymont, -19.10%.
+Slowest relative case: L2 nci, 18.63%.
+Whole workload: C 99.04 s; Roc 97.36 s; gap -1.69%.
+Whole workload throughput: C 25.68 MB/s; Roc 26.12 MB/s.
+Median per-case timing IQR / median: C 0.49%; Roc 0.53%.
+
+PER LEVEL: level | C MB/s | Roc MB/s | median time gap % | Roc wins / 12
+1 | 271.99 | 239.19 | 10.83 | 0
+2 | 198.09 | 176.29 | 10.95 | 0
+3 | 169.64 | 152.37 | 9.12 | 0
+4 | 155.00 | 141.43 | 9.36 | 0
+5 | 125.76 | 118.70 | 6.00 | 1
+6 | 99.13 | 93.07 | 3.28 | 2
+7 | 73.08 | 70.05 | 4.57 | 0
+8 | 51.53 | 48.80 | 5.60 | 0
+9 | 45.30 | 42.72 | 5.99 | 0
+10 | 14.86 | 14.55 | 2.90 | 3
+11 | 8.83 | 9.28 | -1.77 | 7
+12 | 6.67 | 7.71 | -1.54 | 8
+
+PER CORPUS: file | median time gap across levels % | Roc wins / 12
+dickens | 4.99 | 3
+mozilla | 5.44 | 2
+mr | 7.88 | 0
+nci | 5.33 | 2
+ooffice | 5.93 | 2
+osdb | 6.14 | 2
+reymont | 5.37 | 3
+samba | 4.42 | 2
+sao | 5.46 | 0
+webster | 4.06 | 3
+x-ray | 8.47 | 0
+xml | 4.81 | 2
+
+GROUPED LEVELS: levels | median time gap % | Roc wins / cases
+1–9 | 6.98 | 3/108
+10–12 | -0.21 | 18/36
+
+TEN LOWEST GAPS: level | file | time gap % | C MB/s | Roc MB/s
+12 | reymont | -19.10 | 5.59 | 6.92
+12 | webster | -18.47 | 5.84 | 7.16
+11 | webster | -16.41 | 6.77 | 8.10
+11 | reymont | -15.82 | 6.51 | 7.73
+12 | dickens | -13.53 | 7.37 | 8.52
+11 | dickens | -10.43 | 8.85 | 9.89
+10 | reymont | -9.90 | 8.67 | 9.62
+10 | webster | -8.84 | 10.13 | 11.11
+12 | osdb | -4.63 | 11.51 | 12.07
+10 | dickens | -4.42 | 12.07 | 12.63
+
+TEN HIGHEST GAPS: level | file | time gap % | C MB/s | Roc MB/s
+2 | nci | 18.63 | 442.97 | 373.40
+3 | nci | 18.49 | 408.18 | 344.50
+4 | nci | 16.74 | 370.65 | 317.51
+1 | mr | 16.61 | 312.10 | 267.65
+2 | mr | 15.33 | 202.23 | 175.36
+2 | xml | 15.22 | 349.09 | 302.98
+1 | dickens | 15.09 | 229.92 | 199.77
+4 | xml | 15.08 | 293.12 | 254.70
+3 | xml | 14.80 | 322.14 | 280.60
+1 | reymont | 14.68 | 277.95 | 242.37

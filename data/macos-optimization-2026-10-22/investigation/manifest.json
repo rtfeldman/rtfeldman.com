@@ -1,0 +1,335 @@
+{
+  "wide": {
+    "original_label": "guard-batch-hcwide-allwide",
+    "driver_protocol": "per-file-batch-v1",
+    "samples": 2400,
+    "rounds": 4,
+    "engines": [
+      "C",
+      "allwide",
+      "guard-batch",
+      "hcwide"
+    ],
+    "corpora": [
+      "dickens",
+      "mr",
+      "nci",
+      "reymont",
+      "xml"
+    ],
+    "levels": [
+      1,
+      2,
+      3,
+      4,
+      8,
+      9
+    ],
+    "csv_sha256": "23fbde6e834fd93e57c073fc8e6cf2c67347b53f5c6afa46a7ca6964a5eda53e"
+  },
+  "batching": {
+    "original_label": "guard-batch-guard-d99-smallbias-batch2-batch4-vector4-linear-earlyload-vector2",
+    "driver_protocol": "per-file-batch-v1",
+    "samples": 4500,
+    "rounds": 3,
+    "engines": [
+      "C",
+      "batch2",
+      "batch4",
+      "earlyload",
+      "guard-batch",
+      "guard-d99",
+      "linear",
+      "smallbias",
+      "vector2",
+      "vector4"
+    ],
+    "corpora": [
+      "dickens",
+      "mr",
+      "nci",
+      "reymont",
+      "xml"
+    ],
+    "levels": [
+      1,
+      2,
+      3,
+      4,
+      8,
+      9
+    ],
+    "csv_sha256": "327a1abc2ef0f6872e620a0afbc75be5f396311843b80b569e394f56c1c55701"
+  },
+  "greedy": {
+    "original_label": "guard-d99-split-greedy-greedy-v0-greedy-v8-greedy-v16-greedy-fast-v",
+    "driver_protocol": "per-file-batch-v1",
+    "samples": 3150,
+    "rounds": 3,
+    "engines": [
+      "C",
+      "greedy-fast-v",
+      "greedy-v0",
+      "greedy-v16",
+      "greedy-v8",
+      "guard-d99",
+      "split-greedy"
+    ],
+    "corpora": [
+      "dickens",
+      "mr",
+      "nci",
+      "reymont",
+      "xml"
+    ],
+    "levels": [
+      1,
+      2,
+      3,
+      4,
+      8,
+      9
+    ],
+    "csv_sha256": "a515bc0fb89d6eafeaa8f0079e9dd26049444f98483758bc381b009ea9c75f45"
+  },
+  "fresh-process": {
+    "original_label": "case-29bd-case-d99-case-split-case-pair-case-both",
+    "driver_protocol": "per-case-process-v1",
+    "samples": 3240,
+    "rounds": 6,
+    "engines": [
+      "C",
+      "case-29bd",
+      "case-both",
+      "case-d99",
+      "case-pair",
+      "case-split"
+    ],
+    "corpora": [
+      "dickens",
+      "mr",
+      "nci",
+      "reymont",
+      "xml"
+    ],
+    "levels": [
+      1,
+      2,
+      3,
+      4,
+      8,
+      9
+    ],
+    "csv_sha256": "ecf8bc518147f5f2aba9f68ab1d0325b78e7c556f8a90839a78f72406cabc131"
+  },
+  "prefetch": {
+    "original_label": "prefetch-base-no-prefetch",
+    "driver_protocol": "per-case-process-v1",
+    "samples": 1350,
+    "rounds": 3,
+    "engines": [
+      "C",
+      "no-prefetch",
+      "prefetch-base"
+    ],
+    "corpora": [
+      "dickens",
+      "mr",
+      "nci",
+      "reymont",
+      "xml"
+    ],
+    "levels": [
+      1,
+      2,
+      3,
+      4,
+      8,
+      9
+    ],
+    "csv_sha256": "96b74c8e65c8e4a96843c0391fb2f5570fb95a6c85d9e9056ffbd3a387be7c27"
+  },
+  "lazy": {
+    "original_label": "lazy-base-lazy-split",
+    "driver_protocol": "per-case-process-v1",
+    "samples": 2025,
+    "rounds": 3,
+    "engines": [
+      "C",
+      "lazy-base",
+      "lazy-split"
+    ],
+    "corpora": [
+      "dickens",
+      "mr",
+      "nci",
+      "reymont",
+      "xml"
+    ],
+    "levels": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "csv_sha256": "14fc49ea1ae664d623842a71b9fa702fa3d683e89b9f1cbe04d1f8aadc960684"
+  },
+  "lazy-followup": {
+    "original_label": "lazy-base-lazy-split-lazy-only",
+    "driver_protocol": "per-case-process-v1",
+    "samples": 3600,
+    "rounds": 4,
+    "engines": [
+      "C",
+      "lazy-base",
+      "lazy-only",
+      "lazy-split"
+    ],
+    "corpora": [
+      "dickens",
+      "mr",
+      "nci",
+      "reymont",
+      "xml"
+    ],
+    "levels": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "csv_sha256": "c921bb2294d71425080d89592c9bb765ea04b161e3050073342c7f9abf12ab64"
+  },
+  "walk": {
+    "original_label": "lazy-base-walk-base-walk-all-walk-all-vector",
+    "driver_protocol": "per-case-process-v1",
+    "samples": 5625,
+    "rounds": 5,
+    "engines": [
+      "C",
+      "lazy-base",
+      "walk-all",
+      "walk-all-vector",
+      "walk-base"
+    ],
+    "corpora": [
+      "dickens",
+      "mr",
+      "nci",
+      "reymont",
+      "xml"
+    ],
+    "levels": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "csv_sha256": "343241eddbf110e6f9a2a0ac33dbbe75d735fcb4946e16a4fbf65b63936af6e1"
+  },
+  "optimal": {
+    "original_label": "bt-base-bt-direct-bt-unpacked-bt-both-bt-indexed-fixed",
+    "driver_protocol": "per-case-process-v1",
+    "samples": 648,
+    "rounds": 3,
+    "engines": [
+      "C",
+      "bt-base",
+      "bt-both",
+      "bt-direct",
+      "bt-indexed-fixed",
+      "bt-unpacked"
+    ],
+    "corpora": [
+      "mr",
+      "nci",
+      "reymont",
+      "x-ray"
+    ],
+    "levels": [
+      10,
+      11,
+      12
+    ],
+    "csv_sha256": "dab817f64a55b5a0c3748f8fe41bee95ea160766f81968758d639d5706ced458"
+  },
+  "fast-distance": {
+    "original_label": "walk-all-fast-base-fast-arithmetic",
+    "driver_protocol": "per-case-process-v1",
+    "samples": 3600,
+    "rounds": 4,
+    "engines": [
+      "C",
+      "fast-arithmetic",
+      "fast-base",
+      "walk-all"
+    ],
+    "corpora": [
+      "dickens",
+      "mr",
+      "nci",
+      "reymont",
+      "xml"
+    ],
+    "levels": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "csv_sha256": "1ce9c3eb80eaca9959ce7610d704ecbdf901877f01dd0621e61615906aa9a80b"
+  },
+  "integration-layout": {
+    "original_label": "walk-all-fast-base-layout-packed-tables-packed-tables-unpacked",
+    "driver_protocol": "per-case-process-v1",
+    "samples": 8100,
+    "rounds": 6,
+    "engines": [
+      "C",
+      "fast-base",
+      "layout-packed",
+      "tables-packed",
+      "tables-unpacked",
+      "walk-all"
+    ],
+    "corpora": [
+      "dickens",
+      "mr",
+      "nci",
+      "reymont",
+      "xml"
+    ],
+    "levels": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "csv_sha256": "a3addf9892226192385aa81773374841cea8a74bc49c072867672d8febab4aa5"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "source_csv": "final-before-final-after-comparison.csv",
+  "source_csv_sha256": "74fac89c49a9d4d6bddfb3e77ad9f17ee3508a510f18e420646448321a4e902a",
+  "source_build": "final-after",
+  "common_c_build": "final-before",
+  "import_script_sha256": "dc89027c5e88b641401785293b5a17347c1ede8b53f46877225ee525a506144d",
+  "samples": 4320,
+  "input_bytes": {
+    "dickens": 10192446,
+    "mozilla": 51220480,
+    "mr": 9970564,
+    "nci": 33553445,
+    "ooffice": 6152192,
+    "osdb": 10085684,
+    "reymont": 6627202,
+    "samba": 21606400,
+    "sao": 7251944,
+    "webster": 41458703,
+    "x-ray": 8474240,
+    "xml": 5345280
+  }
+}

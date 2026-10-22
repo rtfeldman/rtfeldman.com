@@ -1,0 +1,105 @@
+{
+  "roc": "/private/tmp/roc-deflate-compiler-latest-2026-10-22/install-d99/bin/roc",
+  "roc_sha256": "f71830c482abe5beb171ef80c5becbff068fdd3e112da1063e8166b169ef191f",
+  "roc_version": "Roc compiler version release-fast-d99c7b83",
+  "staging_directory": "/Users/rtfeldman/code/worktrees/roc-deflate/macos-deflate-gap/roc-deflate/benchmark/echo-clock/.build/measurement",
+  "package_sha256": {
+    "package/BlockOut.roc": "a508a34605a4910feefbefe87a6c3d780eee3a7384124d146fdfdb61e20884e9",
+    "package/BtMatchfinder.roc": "566c9afccf4e0dc39a041350ff5a33baf741206e398aab74af89627674fa1a69",
+    "package/CompressFast.roc": "03df18d51b7014aa3f41770a8a79809bfd16178f765f212c6a7d2256aef3bdf1",
+    "package/CompressLazy.roc": "e64b5f95bc455d0ecfc54efe1aae4f0e53b98e47a7c4ed47f1cf7da64a962095",
+    "package/CompressOptimal.roc": "021215dab29bdad94be884b15928f4a800fcda2221c2e8dee4733532a9ebffd7",
+    "package/Deflate.roc": "37dc76638190df2af21dc4a7bee33a79a525bfec796045ce09086ae7ba956c51",
+    "package/DeflateTables.roc": "34683f82623b438f71e7048ee8d8e402ea8e0121e3fd6b97d1c351db5b05368b",
+    "package/HcGreedyMatchfinder.roc": "ea8aedb59984097281e8dbb5c78e10be3304b61820b83ba5bfb3ff7045245411",
+    "package/HcMatchfinder.roc": "7e65573bd05f37fd57aa6268d4db25aaa4264f97981de31712688a461560f335",
+    "package/HtMatchfinder.roc": "6ad20f55f3185fc46b6b46ff15ffdfdbd987a7d74d9f804f3eb369aa0652d983",
+    "package/HuffmanEncode.roc": "b1a40d5343fc1ab50c6c33fc62cc0c97cc1f3eff0523d94200603960b6ac8746",
+    "package/Inflate.roc": "cbc9ecb2be67bef20e28bf0b0addafef08a71ed7152e48d412e1ad1a17524781",
+    "package/Matchfinder.roc": "f1ed36d2b1b7695908a5a7e0362e5bb3b8190c2cd5507f67768df0a3ad33c172",
+    "package/main.roc": "efe101d86a5ad8d07f643246222d69ac26df9cc5e8feafe1a473d6510a4b17bb"
+  },
+  "library": "0660245594da9bd230ab1bb1a7db606406a9da19",
+  "library_diff": "diff --git a/package/BlockOut.roc b/package/BlockOut.roc\nindex 9296869..4d255d5 100644\n--- a/package/BlockOut.roc\n+++ b/package/BlockOut.roc\n@@ -286,7 +286,7 @@ BlockOut := [].{\n \t\tbitbuf : U64,\n \t\tbitcount : U64,\n \t\tseqs : List(Sequence),\n-\t\titems : List(U64),\n+\t\titems : List(U32),\n \t\tlitlen_lens : List(U8),\n \t\tlitlen_codewords : List(U32),\n \t\toffset_lens : List(U8),\n@@ -497,9 +497,9 @@ BlockOut := [].{\n \t## The chosen literals and matches arrive one of two ways. The greedy and\n \t## lazy parsers hand over `seqs`, runs of literals each followed by a match,\n \t## with the literals themselves read back out of the input. The near-optimal\n-\t## parser hands over `items`, its path nodes, each with the packed entry for\n-\t## its position in the high half. `use_items` selects between them.\n-\tflush_block : List(U8), U64, U64, List(U8), U64, U64, List(BlockOut.Sequence), List(U32), List(U32), List(U8), List(U32), List(U8), List(U32), List(U8), List(U32), List(U8), List(U32), List(U64), U64, U64 -> FlushResult\n+\t## parser hands over `items`, one packed entry per position along its chosen\n+\t## path. `use_items` selects between them.\n+\tflush_block : List(U8), U64, U64, List(U8), U64, U64, List(BlockOut.Sequence), List(U32), List(U32), List(U8), List(U32), List(U8), List(U32), List(U8), List(U32), List(U8), List(U32), List(U32), U64, U64 -> FlushResult\n \tflush_block = |out_0, bitbuf_0, bitcount_0, input, block_begin, block_length_0, seqs, freqs_litlen, freqs_offset, litlen_lens, litlen_codewords, offset_lens, offset_codewords, s_litlen_lens, s_litlen_codewords, s_offset_lens, s_offset_codewords, items, use_items, is_final| {\n \t\tprecode = BlockOut.precompute_huffman_header(litlen_lens, offset_lens)\n \n@@ -711,7 +711,7 @@ BlockOut := [].{\n \t\t\titems_top = List.len(items).minus_wrap(1)\n \t\t\tvar $item_at = if use_items == 1 { 0.U64 } else { block_length }\n \t\t\twhile $item_at != block_length {\n-\t\t\t\titem = (List.get(items, items_top.minus_wrap($item_at)) ?? 0).shr_zf_wrap(32).to_u32_wrap()\n+\t\t\t\titem = List.get(items, items_top.minus_wrap($item_at)) ?? 0\n \t\t\t\tlength = item.bitwise_and(0x1FF).to_u64()\n \t\t\t\tpayload = item.shr_zf_wrap(9).to_u64()\n \t\t\t\tif length == 1 {\ndiff --git a/package/BtMatchfinder.roc b/package/BtMatchfinder.roc\nindex 24699b8..15b4ed6 100644\n--- a/package/BtMatchfinder.roc\n+++ b/package/BtMatchfinder.roc\n@@ -207,7 +207,7 @@ BtMatchfinder := [].{\n \t\t\t# changes nothing and the saturating subtract never saturates. Both\n \t\t\t# state bounds the range prover carries: the candidate is at or\n \t\t\t# before the current position.\n-\t\t\tmatch_at = in_next.minus_saturated(cur_pos.plus_wrap(Matchfinder.node_bias).minus_wrap($node.to_u64()).bitwise_and(32767))\n+\t\t\tmatch_at = Matchfinder.node_index(in_base, $node)\n \n \t\t\tif (List.get(input, match_at.plus_wrap($len)) ?? 0) == (List.get(input, in_next.plus_wrap($len)) ?? 0) {\n \t\t\t\t$len = Matchfinder.lz_extend(input, in_next, match_at, $len.plus_wrap(1), max_len)\n@@ -383,7 +383,7 @@ BtMatchfinder := [].{\n \t\t\t# changes nothing and the saturating subtract never saturates. Both\n \t\t\t# state bounds the range prover carries: the candidate is at or\n \t\t\t# before the current position.\n-\t\t\tmatch_at = in_next.minus_saturated(cur_pos.plus_wrap(Matchfinder.node_bias).minus_wrap($node.to_u64()).bitwise_and(32767))\n+\t\t\tmatch_at = Matchfinder.node_index(in_base, $node)\n \n \t\t\tif (List.get(input, match_at.plus_wrap($len)) ?? 0) == (List.get(input, in_next.plus_wrap($len)) ?? 0) {\n \t\t\t\t$len = Matchfinder.lz_extend(input, in_next, match_at, $len.plus_wrap(1), nice_len)\ndiff --git a/package/CompressOptimal.roc b/package/CompressOptimal.roc\nindex 0fe074d..43adf1b 100644\n--- a/package/CompressOptimal.roc\n+++ b/package/CompressOptimal.roc\n@@ -387,11 +387,9 @@ CompressOptimal := [].{\n \t\t}\n \t}\n \n-\t## The path a min-cost search chose: for each position, the cost of the\n-\t## cheapest way of finishing the block from there in a node's low half and\n-\t## the item that starts it in the high half. One list rather than two keeps\n-\t## the search's per-position append to a single cursor and a single store.\n-\tPathResult : { nodes : List(U64) }\n+\t## The path a min-cost search chose: for each position, the item that\n+\t## starts the cheapest way of finishing the block from there.\n+\tPathResult : { node_cost : List(U32), node_item : List(U32) }\n \n \t## The symbols a path uses and the Huffman codes built for them.\n \tTallyResult : {\n@@ -413,12 +411,12 @@ CompressOptimal := [].{\n \t## is considered, which is what makes that scan linear in the number of\n \t## matches rather than quadratic.\n \t##\n-\t## The nodes are appended in that same order, so node `n` sits at index\n-\t## `top - n` (see `node_top`): a position's node comes after every later\n-\t## position's, which is exactly what its cost scan reads. The node list\n-\t## keeps its capacity from block to block and is never initialized.\n-\tfind_min_cost_path : U64, List(U32), U64, List(U64), List(U32), List(U32), List(U32) -> PathResult\n-\tfind_min_cost_path = |block_length, cache, cache_end, nodes_0, cost_literal, cost_length, cost_offset_slot| {\n+\t## The node tables are appended in that same order, so node `n` sits at\n+\t## index `top - n` (see `node_top`): a position's node comes after every\n+\t## later position's, which is exactly what its cost scan reads. The tables\n+\t## keep their capacity from block to block and are never initialized.\n+\tfind_min_cost_path : U64, List(U32), U64, List(U32), List(U32), List(U32), List(U32), List(U32) -> PathResult\n+\tfind_min_cost_path = |block_length, cache, cache_end, node_cost_0, node_item_0, cost_literal, cost_length, cost_offset_slot| {\n \t\ttop = CompressOptimal.node_top(block_length)\n \t\t# The length table has one cost per match length. Stating its size here\n \t\t# lets every per-length read below skip its bounds test.\n@@ -426,23 +424,26 @@ CompressOptimal := [].{\n \t\t\tcrash \"CompressOptimal.find_min_cost_path: length cost table too short\"\n \t\t} else {\n \t\t}\n-\t\tvar $nodes = List.clear(nodes_0)\n+\t\tvar $node_cost = List.clear(node_cost_0)\n+\t\tvar $node_item = List.clear(node_item_0)\n \n \t\t# Make the block really end where it should, even though matches found\n \t\t# near the end may reach past it: every node past the end costs too\n \t\t# much to ever be chosen.\n \t\tvar $guard = top\n \t\twhile $guard != block_length {\n-\t\t\t$nodes = List.append($nodes, 0x80000000)\n+\t\t\t$node_cost = List.append($node_cost, 0x80000000)\n+\t\t\t$node_item = List.append($node_item, 0)\n \t\t\t$guard = $guard.minus_wrap(1)\n \t\t}\n-\t\t$nodes = List.append($nodes, 0)\n-\t\t# Node `n` lives at `List.len($nodes) - (n - cur)` while the cursor is\n-\t\t# at `cur`, and a match reaches at most `max_match_len` nodes ahead, so\n-\t\t# the list holds at least that many entries from here on: with that\n+\t\t$node_cost = List.append($node_cost, 0)\n+\t\t$node_item = List.append($node_item, 0)\n+\t\t# Node `n` lives at `List.len($node_cost) - (n - cur)` while the cursor\n+\t\t# is at `cur`, and a match reaches at most `max_match_len` nodes ahead,\n+\t\t# so the tables hold at least that many entries from here on: with that\n \t\t# stated once, every node read below is provably in bounds.\n-\t\tif List.len($nodes) < DeflateTables.max_match_len {\n-\t\t\tcrash \"CompressOptimal.find_min_cost_path: node list too short\"\n+\t\tif List.len($node_cost) < DeflateTables.max_match_len {\n+\t\t\tcrash \"CompressOptimal.find_min_cost_path: node tables too short\"\n \t\t} else {\n \t\t}\n \n@@ -460,7 +461,7 @@ CompressOptimal := [].{\n \t\t\tliteral = (List.get(cache, $cp) ?? 0).shr_zf_wrap(16).to_u64()\n \n \t\t\t# A literal is always available, so it seeds the comparison.\n-\t\t\tvar $best = (List.get(cost_literal, literal) ?? 0).plus_wrap((List.get($nodes, List.len($nodes).minus_wrap(1)) ?? 0).to_u32_wrap())\n+\t\t\tvar $best = (List.get(cost_literal, literal) ?? 0).plus_wrap(List.get($node_cost, List.len($node_cost).minus_wrap(1)) ?? 0)\n \t\t\tvar $item = literal.to_u32_wrap().shl_wrap(CompressOptimal.optimum_offset_shift).bitwise_or(1)\n \n \t\t\tif num_matches != 0 {\n@@ -485,7 +486,7 @@ CompressOptimal := [].{\n \t\t\t\t\t\tlen = $k.plus_wrap(DeflateTables.min_match_len)\n \t\t\t\t\t\tcost_to_end = offset_cost\n \t\t\t\t\t\t\t.plus_wrap(List.get(cost_length, len) ?? 0)\n-\t\t\t\t\t\t\t.plus_wrap((List.get($nodes, List.len($nodes).minus_wrap(len)) ?? 0).to_u32_wrap())\n+\t\t\t\t\t\t\t.plus_wrap(List.get($node_cost, List.len($node_cost).minus_wrap(len)) ?? 0)\n \t\t\t\t\t\tif cost_to_end < $best {\n \t\t\t\t\t\t\t$best = cost_to_end\n \t\t\t\t\t\t\t$item = len.to_u32_wrap()\n@@ -500,10 +501,11 @@ CompressOptimal := [].{\n \t\t\t} else {\n \t\t\t}\n \n-\t\t\t$nodes = List.append($nodes, $best.to_u64().bitwise_or($item.to_u64().shl_wrap(32)))\n+\t\t\t$node_cost = List.append($node_cost, $best)\n+\t\t\t$node_item = List.append($node_item, $item)\n \t\t}\n \n-\t\t{ nodes: $nodes }\n+\t\t{ node_cost: $node_cost, node_item: $node_item }\n \t}\n \n \t## The index of node 0 in a path's node tables, which hold node `n` at\n@@ -521,8 +523,8 @@ CompressOptimal := [].{\n \n \t## Count the symbols a chosen path uses and build the Huffman codes for\n \t## them, walking the path forwards this time.\n-\ttally_and_build_codes : List(U64), U64 -> TallyResult\n-\ttally_and_build_codes = |nodes, block_length| {\n+\ttally_and_build_codes : List(U32), U64 -> TallyResult\n+\ttally_and_build_codes = |node_item, block_length| {\n \t\t# Each list covers every index its lookup can produce, not just the\n \t\t# alphabet: a literal is a byte, the length slot is a byte added to 257,\n \t\t# and the offset slot is a byte plus 14, so the counts need no bounds\n@@ -536,7 +538,7 @@ CompressOptimal := [].{\n \t\t# branch on every item.\n \t\tvar $at = 0.U64\n \t\twhile $at != block_length {\n-\t\t\titem = (List.get(nodes, top.minus_wrap($at)) ?? 0).shr_zf_wrap(32).to_u32_wrap()\n+\t\t\titem = List.get(node_item, top.minus_wrap($at)) ?? 0\n \t\t\tlength = item.bitwise_and(CompressOptimal.optimum_len_mask).to_u64()\n \t\t\toffset = item.shr_zf_wrap(CompressOptimal.optimum_offset_shift).to_u64()\n \t\t\tif length == 1 {\n@@ -717,7 +719,8 @@ CompressOptimal := [].{\n \n \t\tvar $cache = List.repeat(0.U32, CompressOptimal.match_cache_size)\n \t\tvar $cache_ptr = 0.U64\n-\t\tvar $nodes = List.with_capacity(CompressOptimal.optimum_nodes_size)\n+\t\tvar $node_cost = List.with_capacity(CompressOptimal.optimum_nodes_size)\n+\t\tvar $node_item = List.with_capacity(CompressOptimal.optimum_nodes_size)\n \n \t\tvar $cost_literal = List.repeat(0.U32, DeflateTables.num_literals)\n \t\tvar $cost_length = List.repeat(0.U32, DeflateTables.max_match_len + 1)\n@@ -992,13 +995,15 @@ CompressOptimal := [].{\n \t\t\t\t\tblock_length,\n \t\t\t\t\t$cache,\n \t\t\t\t\t$cache_end,\n-\t\t\t\t\t$nodes,\n+\t\t\t\t\t$node_cost,\n+\t\t\t\t\t$node_item,\n \t\t\t\t\tsc.literal,\n \t\t\t\t\tsc.length,\n \t\t\t\t\tsc.offset_slot,\n \t\t\t\t)\n-\t\t\t\t$nodes = path.nodes\n-\t\t\t\t$static_cost = (List.last($nodes) ?? 0).to_u32_wrap().to_u64() // CompressOptimal.bit_cost + 7\n+\t\t\t\t$node_cost = path.node_cost\n+\t\t\t\t$node_item = path.node_item\n+\t\t\t\t$static_cost = (List.last($node_cost) ?? 0).to_u64() // CompressOptimal.bit_cost + 7\n \t\t\t} else {\n \t\t\t}\n \n@@ -1054,13 +1059,15 @@ CompressOptimal := [].{\n \t\t\t\t\tblock_length,\n \t\t\t\t\t$cache,\n \t\t\t\t\t$cache_end,\n-\t\t\t\t\t$nodes,\n+\t\t\t\t\t$node_cost,\n+\t\t\t\t\t$node_item,\n \t\t\t\t\t$cost_literal,\n \t\t\t\t\t$cost_length,\n \t\t\t\t\t$cost_offset_slot,\n \t\t\t\t)\n-\t\t\t\t$nodes = path.nodes\n-\t\t\t\ttallied = CompressOptimal.tally_and_build_codes($nodes, block_length)\n+\t\t\t\t$node_cost = path.node_cost\n+\t\t\t\t$node_item = path.node_item\n+\t\t\t\ttallied = CompressOptimal.tally_and_build_codes($node_item, block_length)\n \t\t\t\t$freqs_litlen = tallied.freqs_litlen\n \t\t\t\t$freqs_offset = tallied.freqs_offset\n \t\t\t\t$litlen_lens = tallied.litlen_lens\n@@ -1150,13 +1157,15 @@ CompressOptimal := [].{\n \t\t\t\t\t\tblock_length,\n \t\t\t\t\t\t$cache,\n \t\t\t\t\t\t$cache_end,\n-\t\t\t\t\t\t$nodes,\n+\t\t\t\t\t\t$node_cost,\n+\t\t\t\t\t\t$node_item,\n \t\t\t\t\t\t$cost_literal,\n \t\t\t\t\t\t$cost_length,\n \t\t\t\t\t\t$cost_offset_slot,\n \t\t\t\t\t)\n-\t\t\t\t\t$nodes = path.nodes\n-\t\t\t\t\ttallied = CompressOptimal.tally_and_build_codes($nodes, block_length)\n+\t\t\t\t\t$node_cost = path.node_cost\n+\t\t\t\t\t$node_item = path.node_item\n+\t\t\t\t\ttallied = CompressOptimal.tally_and_build_codes($node_item, block_length)\n \t\t\t\t\t$freqs_litlen = tallied.freqs_litlen\n \t\t\t\t\t$freqs_offset = tallied.freqs_offset\n \t\t\t\t\t$litlen_lens = tallied.litlen_lens\n@@ -1174,13 +1183,15 @@ CompressOptimal := [].{\n \t\t\t\t\tblock_length,\n \t\t\t\t\t$cache,\n \t\t\t\t\t$cache_end,\n-\t\t\t\t\t$nodes,\n+\t\t\t\t\t$node_cost,\n+\t\t\t\t\t$node_item,\n \t\t\t\t\t$cost_literal,\n \t\t\t\t\t$cost_length,\n \t\t\t\t\t$cost_offset_slot,\n \t\t\t\t)\n-\t\t\t\t$nodes = path.nodes\n-\t\t\t\ttallied = CompressOptimal.tally_and_build_codes($nodes, block_length)\n+\t\t\t\t$node_cost = path.node_cost\n+\t\t\t\t$node_item = path.node_item\n+\t\t\t\ttallied = CompressOptimal.tally_and_build_codes($node_item, block_length)\n \t\t\t\t$freqs_litlen = tallied.freqs_litlen\n \t\t\t\t$freqs_offset = tallied.freqs_offset\n \t\t\t\t$litlen_lens = tallied.litlen_lens\n@@ -1218,7 +1229,7 @@ CompressOptimal := [].{\n \t\t\t\t$s_litlen_codewords,\n \t\t\t\t$s_offset_lens,\n \t\t\t\t$s_offset_codewords,\n-\t\t\t\t$nodes,\n+\t\t\t\t$node_item,\n \t\t\t\t$use_items,\n \t\t\t\t$is_final,\n \t\t\t)\n@@ -1226,7 +1237,7 @@ CompressOptimal := [].{\n \t\t\t$bitbuf = flushed.bitbuf\n \t\t\t$bitcount = flushed.bitcount\n \t\t\t$seqs = flushed.seqs\n-\t\t\t$nodes = flushed.items\n+\t\t\t$node_item = flushed.items\n \t\t\t$s_litlen_lens = flushed.static_litlen_lens\n \t\t\t$s_litlen_codewords = flushed.static_litlen_codewords\n \t\t\t$s_offset_lens = flushed.static_offset_lens\n",
+  "libdeflate": "b122c8be1d78b19f6d0a6efc5bb79bfcbb30dd51",
+  "libdeflate_diff": "",
+  "files": [
+    "mr",
+    "x-ray",
+    "nci",
+    "reymont"
+  ],
+  "levels": [
+    10,
+    11,
+    12
+  ],
+  "reps": 3,
+  "driver_protocol": "per-case-process-v1",
+  "warmup_min_ns": 200000000,
+  "corpus_sha256": {
+    "mr": "68637ed52e3e4860174ed2dc0840ac77d5f1a60abbcb13770d5754e3774d53e6",
+    "x-ray": "7de9fce1405dc44ae5e6813ed21cd5751e761bd4265655a005d39b9685d1c9ad",
+    "nci": "fc63a31770947b8c2062d3b19ca94c00485a232bb91b502021948fee983e1635",
+    "reymont": "0eac0114a3dfe6e2ee1f345a0f79d653cb26c3bc9f0ed79238af4933422b7578"
+  },
+  "input_bytes": {
+    "mr": 9970564,
+    "x-ray": 8474240,
+    "nci": 33553445,
+    "reymont": 6627202
+  },
+  "reference_sha256": {
+    "mr": {
+      "10": "04d53bd1ec34ee2a6908d0bc8d2b08c60102817a69136cbcd65008e09f6cfc57",
+      "11": "00b44652f5312fe729e280fba5f08a5f4e512b307e669c5d45789fa4c4ecb659",
+      "12": "4e1e674a6956265dbacb48d399c6c2ac29183b74257c73f36c57181e0af5ab80"
+    },
+    "x-ray": {
+      "10": "8fc4e4c1470d50e850d5c8ccf0be338dff28b71ab627979cfe7f91188233fc5c",
+      "11": "aa65e6b2f108f10066d94bbcce11c3608b7320db139babbed77b0fa38aa6e49e",
+      "12": "28965ce50ba0dc1c8c3eed8bcfa42f347532812aadfb8f8a0156307f0df87e69"
+    },
+    "nci": {
+      "10": "6088d5312be67d3c0d12e0ecb21b54948d8dca4b6ea18b885a62848f4e5a6048",
+      "11": "bfbf253e4eba1c5334e342cf01027aa0548c3157bbad834343a3b6aa6183315b",
+      "12": "6653a34608db03967b0f0341533a5cb659194acc332834e8b7eb109259a1a07a"
+    },
+    "reymont": {
+      "10": "bf18668ac3aedab732e6261acb48fd90fb62f6070ed51488b3c12482d97753bc",
+      "11": "c7e59c4f04723ac7e0484a66b041dc05071fdc1472a62afc251a28ece6b163e8",
+      "12": "e94512f0a11fffd64dbff8d3db270104554f02648a56ee3c4496afd12af5e0c5"
+    }
+  },
+  "executable_sha256": {
+    "mr": {
+      "cbench": "73ee008f68d92b619a6ee2776ed97677199dc1140dd62cabc719e99cfc74b99a",
+      "rocbench": "3f18813b32961b1d810547d01932fe2fc5dba4e4376b918ccfd0f744813b06cc"
+    },
+    "x-ray": {
+      "cbench": "5dc458b7bb24bd9d661f75463c14c5ae1df9a79b5e795477378016f99e2f1cc2",
+      "rocbench": "9cac3496bb2ab676198177797810f2f3c2e2d2f701521b15384c4413e82e2015"
+    },
+    "nci": {
+      "cbench": "cbbe19bcfc025fd2ca43797a1badd83d63e592ed94292495e8f613f9fd2928d8",
+      "rocbench": "2c3a2390a95b1796a639ba687c09ddcc8278429de0a363d97fd48ff3ce00fed8"
+    },
+    "reymont": {
+      "cbench": "3f2a12e9e943b24b60f37056ff6e5b6a9387410673cfe0a5a6a840bb39aa130e",
+      "rocbench": "55f28cef68cc5cc213fe0a00ac39fbcfc4dc2bc4c5545c3c79d1b8960593e58a"
+    }
+  },
+  "platform_sha256": {
+    "host.c": "e4e24d385a902ecf47f4b5dc5e38512a6b18a2a279cc6f679812dd03bc228a00",
+    "main.roc": "bc9a1a787f6299ada9db7315025133fa9bb4ec6cde8e66f542203c80306bcdc0",
+    "Host.roc": "d754ec51c80a727aa09a626a1547f6da64f7039f916c796976068776813a2037",
+    "roc_platform_abi.h": "29774c638bfd88af975ae8f13560c7c8529c78b3feb8308ffbadf21651e3e3db",
+    "Bench.roc": "adcaf0e9dc4d0a344f0805b6ffae35c30edb4702a1b3036c3623b1e011d04e7e",
+    "build.sh": "a7c336d3a9a0f5871b7562c86c6de43d0a5b2a87cce3c80830856b42107a5d3c",
+    "measure.py": "9a7a2c2c085384dfe013fa8b851ca5fc0920c0704b5c5f82a4b9bb1ce407da6f"
+  },
+  "target": "arm64mac",
+  "system": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83\n",
+  "cpu": "Apple M1 Pro",
+  "cc_version": "Apple clang version 17.0.0 (clang-1700.6.4.2)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin\n"
+}

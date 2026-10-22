@@ -1,0 +1,134 @@
+{
+  "roc": "/private/tmp/roc-deflate-compiler-latest-2026-10-22/install-d99/bin/roc",
+  "roc_sha256": "f71830c482abe5beb171ef80c5becbff068fdd3e112da1063e8166b169ef191f",
+  "roc_version": "Roc compiler version release-fast-d99c7b83",
+  "staging_directory": "/Users/rtfeldman/code/worktrees/roc-deflate/macos-deflate-gap/roc-deflate/benchmark/echo-clock/.build/measurement",
+  "package_sha256": {
+    "package/BlockOut.roc": "3964b066eda11a4d99123255809615ed4caec7636085f5ec7f76804b640187a2",
+    "package/BtMatchfinder.roc": "4970b6d3e93bb46e511c2db3071e7619f0d1d9cc02402cbaea1af0c98c7542d3",
+    "package/CompressFast.roc": "248aa8a4f7292e52a8300ded0ae2587f2e75e71d88c1494721ee138e3420cfe0",
+    "package/CompressLazy.roc": "1370eb6bf4df3cd21757f51757786988ff7a13cf8988f105fd6cb0c2debd7880",
+    "package/CompressOptimal.roc": "76640a1c710d8392abd7902c7841a9e0b34cba2eb5acd857ae6acd65e7c11e61",
+    "package/Deflate.roc": "37dc76638190df2af21dc4a7bee33a79a525bfec796045ce09086ae7ba956c51",
+    "package/DeflateTables.roc": "34683f82623b438f71e7048ee8d8e402ea8e0121e3fd6b97d1c351db5b05368b",
+    "package/HcMatchfinder.roc": "7e65573bd05f37fd57aa6268d4db25aaa4264f97981de31712688a461560f335",
+    "package/HtMatchfinder.roc": "6ad20f55f3185fc46b6b46ff15ffdfdbd987a7d74d9f804f3eb369aa0652d983",
+    "package/HuffmanEncode.roc": "b1a40d5343fc1ab50c6c33fc62cc0c97cc1f3eff0523d94200603960b6ac8746",
+    "package/Inflate.roc": "cbc9ecb2be67bef20e28bf0b0addafef08a71ed7152e48d412e1ad1a17524781",
+    "package/Matchfinder.roc": "f1ed36d2b1b7695908a5a7e0362e5bb3b8190c2cd5507f67768df0a3ad33c172",
+    "package/main.roc": "efe101d86a5ad8d07f643246222d69ac26df9cc5e8feafe1a473d6510a4b17bb"
+  },
+  "library": "dd9fbc6894929ed4e97043506ffc8ee8a32b7f67",
+  "library_diff": "diff --git a/package/CompressFast.roc b/package/CompressFast.roc\nindex 6b1a137..39754d2 100644\n--- a/package/CompressFast.roc\n+++ b/package/CompressFast.roc\n@@ -138,17 +138,17 @@ CompressFast := [].{\n \t\t\t\t\t\t$nh = Matchfinder.lz_hash(U32.from_le_bytes(input, $in_next.plus_wrap(1)) ?? 0, HtMatchfinder.hash_order)\n \t\t\t\t\t\t$tab = List.prefetched($tab, $nh.times_wrap(2))\n \t\t\t\t\t\tcur_node0 = List.get($tab, slot0) ?? 0\n+\t\t\t\t\t\tcur_node1 = List.get($tab, slot0.plus_wrap(1)) ?? 0\n \t\t\t\t\t\t$tab = match List.set($tab, slot0, cur_pos.plus_wrap(Matchfinder.node_bias).to_u16_wrap()) {\n \t\t\t\t\t\t\tOk(next) => next\n \t\t\t\t\t\t\tErr(_) => crash \"CompressFast.compress: tab index out of bounds\"\n \t\t\t\t\t\t}\n+\t\t\t\t\t\t# Push the displaced entry into the second slot.\n+\t\t\t\t\t\t$tab = match List.set($tab, slot0.plus_wrap(1), cur_node0) {\n+\t\t\t\t\t\t\tOk(next) => next\n+\t\t\t\t\t\t\tErr(_) => crash \"CompressFast.compress: tab index out of bounds\"\n+\t\t\t\t\t\t}\n \t\t\t\t\t\tif cur_node0.to_u64() > cur_pos {\n-\t\t\t\t\t\t\t# Push the displaced entry into the second slot.\n-\t\t\t\t\t\t\tcur_node1 = List.get($tab, slot0.plus_wrap(1)) ?? 0\n-\t\t\t\t\t\t\t$tab = match List.set($tab, slot0.plus_wrap(1), cur_node0) {\n-\t\t\t\t\t\t\t\tOk(next) => next\n-\t\t\t\t\t\t\t\tErr(_) => crash \"CompressFast.compress: tab index out of bounds\"\n-\t\t\t\t\t\t\t}\n \t\t\t\t\t\t\tif (U32.from_le_bytes(input, Matchfinder.node_index($base, cur_node0)) ?? 0) == seq {\n \t\t\t\t\t\t\t\t$found0 = True\n \t\t\t\t\t\t\t\t$found = True\n",
+  "libdeflate": "b122c8be1d78b19f6d0a6efc5bb79bfcbb30dd51",
+  "libdeflate_diff": "",
+  "files": [
+    "dickens",
+    "reymont",
+    "mr",
+    "nci",
+    "xml"
+  ],
+  "levels": [
+    1,
+    2,
+    3,
+    4,
+    8,
+    9
+  ],
+  "reps": 3,
+  "driver_protocol": "per-case-process-v1",
+  "warmup_min_ns": 200000000,
+  "corpus_sha256": {
+    "dickens": "b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a",
+    "reymont": "0eac0114a3dfe6e2ee1f345a0f79d653cb26c3bc9f0ed79238af4933422b7578",
+    "mr": "68637ed52e3e4860174ed2dc0840ac77d5f1a60abbcb13770d5754e3774d53e6",
+    "nci": "fc63a31770947b8c2062d3b19ca94c00485a232bb91b502021948fee983e1635",
+    "xml": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c"
+  },
+  "input_bytes": {
+    "dickens": 10192446,
+    "reymont": 6627202,
+    "mr": 9970564,
+    "nci": 33553445,
+    "xml": 5345280
+  },
+  "reference_sha256": {
+    "dickens": {
+      "1": "404f55484d4b00a57be50a432ebfa5cd689ee67ad9b6bf190b1a29596a6b6adb",
+      "2": "2db134288815f66201c30eef94bf3ca125f054f546fdc3c05762e2719fbeaa5f",
+      "3": "a0326c0db524d42dd589074ac2c12c58bfbe3637d29c3bb17df92bc2938f3d34",
+      "4": "c446f72a3481b7a07b347a5c12c2e65c1ab268525c2fe54b1528a569ba306766",
+      "8": "eb0ce469d02f1fb4794f8e4a09bf647b9c29429d88b5e935ea8be0f03ccb5c97",
+      "9": "077e18fcb1fc0771ba2d46a09ca3dafbab9bf9427a47fcc420aaa8a8f9d115b1"
+    },
+    "reymont": {
+      "1": "bdf887b89c617368856ca525302466040250f2d0229d1e31823f5c8c7f5fd861",
+      "2": "1c0188bdcb72cfdbc275152c406ff950b8d490c6a8e0c1c9ddba630f78fb82c4",
+      "3": "8264a2d384b4cb539876f7b4ef98fc916eab08519581b907730533a11721978c",
+      "4": "d958514cd5851e0008ea0789160a16a7f6904502833f165b3319899f14aabded",
+      "8": "d400b91ee3b0f9fb167743debb592ef75c3ad5b66edbc5bd6e803731cc414b14",
+      "9": "59910398aa9adea3b4b8bffc0de506b9785c5d698eb2b6c63fb8dfda4b5aa5d2"
+    },
+    "mr": {
+      "1": "2fd58abf85af6db0f7eb0da0638e36159a804e7ccb40675099e2c90911088010",
+      "2": "751b42bf1944147cd2084b773b9193aa0612d1c473f9ebf52854cff093b94e6e",
+      "3": "35fdb271daeba14a90cdff2b9d7f88125a9baa43395e637436f2c33b508d216f",
+      "4": "629f17ca7c1bb3242fcdabb79e63d45907f1265acb0caa6ff9c3dc39aa25b34f",
+      "8": "83e04e354123476d1f11e1487bbb9703245c3526fe8d065ceee24a0d21037fde",
+      "9": "63fdadb956e857b27511f0fa02a089b575f1964e83305256d118d0d1d5b3a6e9"
+    },
+    "nci": {
+      "1": "4f08b2d8667008cda761bdfe519e50abe6b3cce9ce6d76429518b2f704b8593d",
+      "2": "88215f39ce4043ee62dc2e59a4011a97222bde7ed0e2b01aaa5f047c4511f8c7",
+      "3": "25a15cd033ffbdc743b6987c477bd5da430afe4cdbe8c51fe9ba27dd0ae903cc",
+      "4": "0b1e0380b4c5d3ec11280492d61b670b448378d5f82cee4a6d43a6ea1a57a490",
+      "8": "6a38889a177ee78821ef5339dcefab36ec28e27ed84ccb755dff56edf8b421c7",
+      "9": "cfffe3428398cf09e2d9a2922a2b91d7d54f55852893d442b131a7691ae11dea"
+    },
+    "xml": {
+      "1": "dac71b0f063c7f838b9526502465950bde013652a1118df7bd2eb9d4b16057c0",
+      "2": "ac42847d8574aa4ee460735bbdb49d46316b0cc9f79dcfaa7e1db214baa6b40e",
+      "3": "5616b46971b0db763440b20c21f0a1c32216e87b505a37560f5ceb829193b006",
+      "4": "915e7c0daf5a880e6ee06cf0f8aa606944b8f3bb7b42e3be57c009e2139748a9",
+      "8": "567510a20eb059aa53169648107ef08accc5aceb4ed5b1919235a527f7719593",
+      "9": "7b42553f7982e457e2a8af54cb6ff4b107c52483034bfbeac201c42fbc503f1e"
+    }
+  },
+  "executable_sha256": {
+    "dickens": {
+      "cbench": "3adb345cefb9fd3f4d90df08f48f108bb3b10bfc6a4a0ad60027a912eb7fe49d",
+      "rocbench": "7fb657b3c53707b1e2d52beb8c0b2bd511ea5d469ac1acaf516c30c41f66ff13"
+    },
+    "reymont": {
+      "cbench": "3f2a12e9e943b24b60f37056ff6e5b6a9387410673cfe0a5a6a840bb39aa130e",
+      "rocbench": "555be9ddc347bba6b7b5c3a0b695b1d5fb77f19e19f86d62d945343bbcf3d917"
+    },
+    "mr": {
+      "cbench": "73ee008f68d92b619a6ee2776ed97677199dc1140dd62cabc719e99cfc74b99a",
+      "rocbench": "d16fa060178d8492e878ae609f5eeea65b98cc160c06068c2a6c6831f754dec5"
+    },
+    "nci": {
+      "cbench": "cbbe19bcfc025fd2ca43797a1badd83d63e592ed94292495e8f613f9fd2928d8",
+      "rocbench": "ecc3e8b58ce9564d3d3f17c2d68b738dc8ab044c5e46edb2346da4ea6dc0c57e"
+    },
+    "xml": {
+      "cbench": "2b401eb6ad645c041a4fc8295f65347b6c533a8eb3f2541ff1248e5fd26b8488",
+      "rocbench": "f0277f29e0822dfad2ea1675e69ebc02bad76a6adfcf0d4e6c1558c45728b148"
+    }
+  },
+  "platform_sha256": {
+    "host.c": "e4e24d385a902ecf47f4b5dc5e38512a6b18a2a279cc6f679812dd03bc228a00",
+    "main.roc": "bc9a1a787f6299ada9db7315025133fa9bb4ec6cde8e66f542203c80306bcdc0",
+    "Host.roc": "d754ec51c80a727aa09a626a1547f6da64f7039f916c796976068776813a2037",
+    "roc_platform_abi.h": "29774c638bfd88af975ae8f13560c7c8529c78b3feb8308ffbadf21651e3e3db",
+    "Bench.roc": "adcaf0e9dc4d0a344f0805b6ffae35c30edb4702a1b3036c3623b1e011d04e7e",
+    "build.sh": "a7c336d3a9a0f5871b7562c86c6de43d0a5b2a87cce3c80830856b42107a5d3c",
+    "measure.py": "9a7a2c2c085384dfe013fa8b851ca5fc0920c0704b5c5f82a4b9bb1ce407da6f"
+  },
+  "target": "arm64mac",
+  "system": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83\n",
+  "cpu": "Apple M1 Pro",
+  "cc_version": "Apple clang version 17.0.0 (clang-1700.6.4.2)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin\n"
+}

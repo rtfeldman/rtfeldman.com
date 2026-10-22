@@ -1,0 +1,1792 @@
+diff --git a/benchmark/echo-clock/.gitignore b/benchmark/echo-clock/.gitignore
+index 59361c2..a4859c6 100644
+--- a/benchmark/echo-clock/.gitignore
++++ b/benchmark/echo-clock/.gitignore
+@@ -1,2 +1,3 @@
+ /targets/
+ /.build/
++/__pycache__/
+diff --git a/benchmark/echo-clock/Bench.roc b/benchmark/echo-clock/Bench.roc
+new file mode 100644
+index 0000000..ed12079
+--- /dev/null
++++ b/benchmark/echo-clock/Bench.roc
+@@ -0,0 +1,44 @@
++import pf.Host exposing [echo!, now!]
++import deflate.Deflate
++
++Bench := [].{
++	# The case arrives through the C entrypoint at runtime. This prevents
++	# compile-time compression and gives both engines a fresh process for
++	# each file/level case, without allocator history from other levels.
++	run! : List(U8), List({ level : U64, expected : List(U8) }), U64, U64 => {}
++	run! = |input, cases, reps, level_number| {
++		level = Deflate.Level.from_u64(level_number) ?? crash "bad level"
++		item = List.find_first(cases, |entry| entry.level == level_number) ?? crash "missing case"
++		var $buf = List.with_capacity(Deflate.compress_bound(input.len()))
++		warm_started = now!()
++		$buf = Deflate.compress_into(input, level, $buf)
++		if $buf != item.expected {
++			crash "libdeflate output differs"
++		}
++		decoded = Deflate.decompress($buf) ?? crash "decompression failed"
++		if decoded != input {
++			crash "round-trip differs"
++		}
++		# Warm the same output storage that the measured calls will reuse.
++		# Both engines spend at least 200 ms here, including the first call
++		# and its verification, so short cases do not measure process startup.
++		while now!() - warm_started < 200000000 {
++			$buf = Deflate.compress_into(input, level, List.clear($buf))
++			if $buf != item.expected {
++				crash "warmup output differs"
++			}
++		}
++		var $rep = 0.U64
++		while $rep < reps {
++			empty = List.clear($buf)
++			start = now!()
++			$buf = Deflate.compress_into(input, level, empty)
++			elapsed = now!() - start
++			if $buf != item.expected {
++				crash "timed output differs"
++			}
++			echo!("rep\t${item.level.to_str()}\t${$rep.to_str()}\t${elapsed.to_str()}\t${$buf.len().to_str()}")
++			$rep = $rep + 1
++		}
++	}
++}
+diff --git a/benchmark/echo-clock/README.md b/benchmark/echo-clock/README.md
+index 582a8ed..44d7e60 100644
+--- a/benchmark/echo-clock/README.md
++++ b/benchmark/echo-clock/README.md
+@@ -11,8 +11,10 @@ import pf.Host exposing [echo!, now!]
+ 
+ `echo!` writes a string and a newline. `now!` reads `CLOCK_MONOTONIC` in
+ nanoseconds from an unspecified origin; subtract two readings for elapsed time.
+-The app supplies `main! : () => {}`. There are no file, network, or command-line
+-argument APIs. Inputs can be imported at compile time as `List(U8)`.
++The app supplies `main! : U64 => {}`. Its one entry argument is an optional unsigned
++integer on the command line (default 0). This lets the runner select a case at
++runtime without adding a hosted effect or precomputing compression. Inputs are
++imported at compile time as `List(U8)`; no file or network effects are provided.
+ 
+ Roc allocations call **mimalloc directly**, statically linked at v2.1.7 commit
+ `8c532c32c3c96e5ba1f2283e032f69ead8add00f`, the same version as the existing
+@@ -34,10 +36,59 @@ and a native build script for Apple Silicon and Intel macOS. The C clock uses
+ POSIX; Linux link inputs and WebAssembly host clock imports are not supplied.
+ 
+ The example imports the repository README as bytes, compresses it, verifies a
+-round trip, and prints the elapsed time. Its level depends on a runtime clock
+-reading to prevent compile-time compression. It is a usage example, not the
+-Silesia measurement procedure; existing benchmark CSVs still describe the
+-previous basic-cli harness.
++round trip, and prints the elapsed time. Its level depends on the runtime entry
++argument to prevent compile-time compression.
++
++## Embedded-input measurements
++
++`measure.py` builds a C and a Roc executable for each Silesia file. Both embed
++the original input bytes and call mimalloc directly. Roc imports the inputs
++and the expected compressed streams; it needs no runtime file API. The C
++driver uses the pinned libdeflate checkout supplied on the command line.
++
++```sh
++python3 benchmark/echo-clock/measure.py build \
++  --roc /absolute/path/to/roc \
++  --corpus /absolute/path/to/silesia-files \
++  --libdeflate /absolute/path/to/libdeflate \
++  --out /absolute/path/to/results
++python3 benchmark/echo-clock/measure.py run \
++  --roc /absolute/path/to/roc \
++  --corpus /absolute/path/to/silesia-files \
++  --libdeflate /absolute/path/to/libdeflate \
++  --out /absolute/path/to/results
++```
++
++Defaults are all 12 files, levels 1–12, three rounds, and five repetitions per
++case per round. `--files`, `--levels`, `--rounds`, and `--reps` can select a
++smaller experiment. The files, levels, and repetitions are fixed when building;
++`run` reads them from `build.json`. `--rounds` controls the measurement run.
++Builds use a fixed staging path and disable the Roc compilation cache. Run
++builds serially, and finish builds and other CPU-intensive work before timing.
++
++Each engine warms the same reusable output buffer for at least 200 ms, including
++the initial compression and decompression check, before timing. Every measured
++compression is checked outside the timed interval: Roc must reproduce
++libdeflate's exact bytes, and C must reproduce its warmup output. Both reuse an
++output buffer. C also reuses its compressor object; Roc uses `compress_into`,
++which creates its internal scratch storage per call. Those are the respective
++library APIs, and internal Roc allocations remain inside the timed region.
++
++Both engines run one file/level case per process. The runner passes the selected
++level number to Roc as the runtime entry argument, which also prevents compile-time
++compression. This keeps allocator history from other compression levels out of
++the comparison. The runner alternates which engine runs first across rounds.
++It records every observation in `timings.csv`, preserves process output in
++`raw/`, and writes source, compiler, executable, corpus, and reference hashes
++in `build.json`. `run.json` identifies the build, round count, start/end times,
++and sample count. The runner rejects missing, duplicate, or unexpected samples
++and changed inputs or executables.
++
++`summary.csv` compares each case's median elapsed time. Its gap is
++`100 * (Roc median / C median - 1)`; positive means Roc takes longer. These
++embedded-input measurements form a new benchmark series. Earlier CSVs from
++the basic-cli harness retain their original provenance and should be identified
++separately when comparing results.
+ 
+ Run the focused checks with:
+ 
+@@ -47,10 +98,12 @@ ROC=/path/to/roc benchmark/echo-clock/test.sh
+ 
+ They exercise allocation alignment and resizing, small/static/shared/sliced
+ string ownership (including embedded NUL output), monotonic readings, and the
+-compression example under both native dev and LLVM speed compilation. Verified
+-on Apple M1 Pro with Roc `5e62c0e13ae779c28f7904dcdd2849ba13240beb`.
++compression example and 64-bit entry arguments under both native dev and LLVM
++speed compilation. Verified on Apple M1 Pro with Roc
++`5e62c0e13ae779c28f7904dcdd2849ba13240beb` and
++`d99c7b838fb05bb1047eb0c18d4d06d0f86f345d`.
+ 
+-`roc_platform_abi.h` is generated by that compiler's C glue specification. To
++`roc_platform_abi.h` is generated by Roc's C glue specification. To
+ regenerate it after changing the interface:
+ 
+ ```sh
+diff --git a/benchmark/echo-clock/argument-test.roc b/benchmark/echo-clock/argument-test.roc
+new file mode 100644
+index 0000000..629b8f0
+--- /dev/null
++++ b/benchmark/echo-clock/argument-test.roc
+@@ -0,0 +1,3 @@
++app [main!] { pf: platform "main.roc" }
++import pf.Host exposing [echo!]
++main! = |argument| echo!(argument.to_str())
+diff --git a/benchmark/echo-clock/example.roc b/benchmark/echo-clock/example.roc
+index 3c7c7c6..63de4fd 100644
+--- a/benchmark/echo-clock/example.roc
++++ b/benchmark/echo-clock/example.roc
+@@ -7,9 +7,8 @@ import pf.Host exposing [echo!, now!]
+ import deflate.Deflate
+ import "../../README.md" as input : List(U8)
+ 
+-main! = || {
++main! = |seed| {
+ 	# A runtime level keeps this example's compression from being precomputed.
+-	seed = now!()
+ 	level = Deflate.Level.from_u64(1 + seed % 12) ?? 6
+ 	buf = List.with_capacity(Deflate.compress_bound(input.len()))
+ 	start = now!()
+diff --git a/benchmark/echo-clock/host-test.c b/benchmark/echo-clock/host-test.c
+index 9a97144..665d3f0 100644
+--- a/benchmark/echo-clock/host-test.c
++++ b/benchmark/echo-clock/host-test.c
+@@ -13,7 +13,7 @@ static void counted_free(void *ptr) { frees++; mi_free(ptr); }
+ #undef main
+ #undef mi_free
+ 
+-void roc_main(void) {}
++void roc_main(uint64_t argument) { (void)argument; }
+ 
+ int main(void) {
+     for (size_t alignment = 1; alignment <= 256; alignment *= 2) {
+diff --git a/benchmark/echo-clock/host.c b/benchmark/echo-clock/host.c
+index df08ad1..09c3967 100644
+--- a/benchmark/echo-clock/host.c
++++ b/benchmark/echo-clock/host.c
+@@ -2,6 +2,7 @@
+ #include "roc_platform_abi.h"
+ #include "mimalloc.h"
+ 
++#include <errno.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+@@ -72,8 +73,18 @@ void roc_crashed(const uint8_t *bytes, size_t length) {
+     exit(1);
+ }
+ 
+-int main(void) {
+-    roc_main();
++int main(int argc, char **argv) {
++    uint64_t argument = 0;
++    if (argc > 2) fail("expected at most one unsigned integer argument");
++    if (argc == 2) {
++        char *end;
++        errno = 0;
++        unsigned long long value = strtoull(argv[1], &end, 10);
++        if (errno || !argv[1][0] || *end || argv[1][0] == '-')
++            fail("invalid unsigned integer argument");
++        argument = (uint64_t)value;
++    }
++    roc_main(argument);
+     if (fflush(stdout) == EOF) fail("stdout flush failed");
+     return 0;
+ }
+diff --git a/benchmark/echo-clock/main.roc b/benchmark/echo-clock/main.roc
+index 7b457b2..bfbe3a3 100644
+--- a/benchmark/echo-clock/main.roc
++++ b/benchmark/echo-clock/main.roc
+@@ -1,6 +1,6 @@
+ platform "echo-clock"
+ 	requires {
+-		main! : () => {}
++		main! : U64 => {}
+ 	}
+ 	exposes [Host]
+ 	packages {}
+@@ -17,5 +17,5 @@ platform "echo-clock"
+ 
+ import Host
+ 
+-main_for_host! : () => {}
++main_for_host! : U64 => {}
+ main_for_host! = main!
+diff --git a/benchmark/echo-clock/measure.py b/benchmark/echo-clock/measure.py
+new file mode 100644
+index 0000000..99f1416
+--- /dev/null
++++ b/benchmark/echo-clock/measure.py
+@@ -0,0 +1,175 @@
++#!/usr/bin/env python3
++"""Build/run embedded-input C and Roc drivers, preserving every timing sample."""
++import argparse, csv, hashlib, json, os, pathlib, shutil, statistics, subprocess, time
++
++ROOT = pathlib.Path(__file__).resolve().parents[2]
++PLATFORM = ROOT / 'benchmark/echo-clock'
++FILES = 'dickens mozilla mr nci ooffice osdb reymont samba sao webster x-ray xml'.split()
++
++def run(cmd, **kw):
++    return subprocess.run([str(x) for x in cmd], check=True, **kw)
++
++def digest(p):
++    return hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
++
++def build(args):
++    run([PLATFORM / 'build.sh'])
++    out = args.out
++    out.mkdir(parents=True, exist_ok=True)
++    mi = PLATFORM / '.build/mimalloc-8c532c32c3c96e5ba1f2283e032f69ead8add00f'
++    target = 'arm64mac' if os.uname().machine == 'arm64' else 'x64mac'
++    libs = list((args.libdeflate / 'lib').glob('*.c')) + list((args.libdeflate / 'lib').glob('*/*.c'))
++    for file in args.files:
++        directory = out / file
++        directory.mkdir(exist_ok=True)
++        data = (args.corpus / file).resolve()
++        # Both engines use the exact file bytes embedded in the executable.
++        asm = '.section __TEXT,__const\n.p2align 4\n.globl _corpus_input\n_corpus_input:\n.incbin ' + json.dumps(str(data)) + '\n'
++        (directory / 'input.s').write_text(asm)
++        source = (ROOT / 'benchmark/cbench.c').read_text()
++        start, end = source.index('static unsigned char *slurp'), source.index('\nint main(')
++        source = source[:start] + f'''extern unsigned char corpus_input[];
++static unsigned char *slurp(const char *path, size_t *len) {{
++    (void)path; *len = {data.stat().st_size}; return corpus_input;
++}}
++''' + source[end:]
++        source = '#include "mimalloc.h"\n' + source
++        source = source.replace('malloc(', 'mi_malloc(')
++        source = source.replace('    struct libdeflate_compressor *c =', '    libdeflate_set_memory_allocator(mi_malloc, mi_free);\n    struct libdeflate_compressor *c =')
++        source = source.replace('    size_t sz = libdeflate_deflate_compress', '    struct timespec warm_started, warm_now;\n    clock_gettime(CLOCK_MONOTONIC, &warm_started);\n    size_t sz = libdeflate_deflate_compress')
++        source = source.replace('    long long best = 0;', '''    unsigned char *expected = mi_malloc(sz);
++    size_t expected_len = sz;
++    memcpy(expected, out, sz);
++    clock_gettime(CLOCK_MONOTONIC, &warm_now);
++    while ((warm_now.tv_sec - warm_started.tv_sec) * 1000000000LL + warm_now.tv_nsec - warm_started.tv_nsec < 200000000LL) {
++        sz = libdeflate_deflate_compress(c, in, n, out, cap);
++        if (sz != expected_len || memcmp(out, expected, sz)) { fprintf(stderr, "warmup output changed\\n"); return 6; }
++        clock_gettime(CLOCK_MONOTONIC, &warm_now);
++    }
++    long long best = 0;''')
++        source = source.replace('        if (i == 0 || ns < best) best = ns;', '''        if (sz != expected_len || memcmp(out, expected, sz)) { fprintf(stderr, "output changed\\n"); return 6; }
++        printf("rep\\t%d\\t%d\\t%lld\\t%zu\\n", level, i, ns, sz);
++        if (i == 0 || ns < best) best = ns;''')
++        source = source.replace('    return 0;\n}', '''    libdeflate_free_compressor(c);
++    libdeflate_free_decompressor(d);
++    mi_free(out); mi_free(back); mi_free(expected);
++    return 0;
++}''')
++        (directory / 'cbench.c').write_text(source)
++        run(['cc', '-O3', '-DMI_STATIC_LIB', '-I', mi / 'include', '-I', args.libdeflate,
++             directory / 'cbench.c', directory / 'input.s', *libs, PLATFORM / f'targets/{target}/mimalloc.o', '-o', directory / 'cbench'])
++        stage = PLATFORM / ".build/measurement" / file
++        stage.mkdir(parents=True, exist_ok=True)
++        imports, cases = [], []
++        for level in args.levels:
++            ref = directory / f'level-{level}.deflate'
++            run([directory / 'cbench', 'embedded', level, 1, ref], stdout=subprocess.DEVNULL)
++            shutil.copyfile(ref, stage / ref.name)
++            imports.append(f'import "{ref.name}" as ref{level} : List(U8)')
++            cases.append(f'{{ level: {level}, expected: ref{level} }}')
++        rel = lambda p: json.dumps(os.path.relpath(p, stage))
++        (stage / 'app.roc').write_text('app [main!] {\n' +
++            f' pf: platform {rel(PLATFORM / "main.roc")},\n deflate: {rel(ROOT / "package/main.roc")},\n' +
++            '}\nimport Bench\n' + f'import {rel(data)} as input : List(U8)\n' + '\n'.join(imports) +
++            '\nmain! = |level_number| Bench.run!(input, [' + ', '.join(cases) + f'], {args.reps}, level_number)\n')
++        shutil.copyfile(PLATFORM / 'Bench.roc', stage / 'Bench.roc')
++        shutil.copyfile(stage / 'Bench.roc', directory / 'Bench.roc')
++        shutil.copyfile(stage / 'app.roc', directory / 'app.roc')
++        run([args.roc, 'build', '--no-cache', '--opt=speed', stage / 'app.roc', '--output=' + str(directory / 'rocbench')])
++        print('built', file, flush=True)
++    metadata = dict(roc=str(args.roc), roc_sha256=digest(args.roc),
++        roc_version=run([args.roc, 'version'], capture_output=True, text=True).stdout.strip(),
++        staging_directory=str(PLATFORM / '.build/measurement'),
++        package_sha256={str(p.relative_to(ROOT)):digest(p) for p in sorted((ROOT/'package').glob('*.roc'))},
++        library=run(['git', '-C', ROOT, 'rev-parse', 'HEAD'], capture_output=True, text=True).stdout.strip(),
++        library_diff=run(['git', '-C', ROOT, 'diff', '--', 'package'], capture_output=True, text=True).stdout,
++        libdeflate=run(['git', '-C', args.libdeflate, 'rev-parse', 'HEAD'], capture_output=True, text=True).stdout.strip(),
++        libdeflate_diff=run(['git', '-C', args.libdeflate, 'diff'], capture_output=True, text=True).stdout,
++        files=args.files, levels=args.levels, reps=args.reps, driver_protocol='per-case-process-v1', warmup_min_ns=200000000,
++        corpus_sha256={f:digest(args.corpus / f) for f in args.files},
++        input_bytes={f:(args.corpus / f).stat().st_size for f in args.files},
++        reference_sha256={f:{str(l):digest(out / f / f'level-{l}.deflate') for l in args.levels} for f in args.files},
++        executable_sha256={f:{e:digest(args.out / f / e) for e in ['cbench','rocbench']} for f in args.files},
++        platform_sha256={f:digest(PLATFORM / f) for f in ['host.c','main.roc','Host.roc','roc_platform_abi.h','Bench.roc','build.sh','measure.py']},
++        target=target, system=run(['sw_vers'],capture_output=True,text=True).stdout,
++        cpu=run(['sysctl','-n','machdep.cpu.brand_string'],capture_output=True,text=True).stdout.strip(),
++        cc_version=run(['cc','--version'],capture_output=True,text=True).stdout)
++    (out / 'build.json').write_text(json.dumps(metadata, indent=2) + '\n')
++
++def measure(args):
++    meta = json.loads((args.out / 'build.json').read_text())
++    assert meta['driver_protocol'] == 'per-case-process-v1'
++    assert args.rounds > 0
++    for file in meta['files']:
++        assert digest(args.corpus / file) == meta['corpus_sha256'][file]
++        for level, expected_hash in meta['reference_sha256'][file].items():
++            assert digest(args.out / file / f'level-{level}.deflate') == expected_hash
++    execution = dict(rounds=args.rounds, started=time.strftime('%Y-%m-%dT%H:%M:%S%z'),
++                     build_sha256=digest(args.out / 'build.json'))
++    (args.out / 'run.json').write_text(json.dumps(execution, indent=2) + '\n')
++    raw = args.out / 'raw'
++    raw.mkdir(exist_ok=True)
++    rows = []
++    fields = ['engine','level','corpus','input_bytes','round','rep','ns','mb_per_s','compressed_bytes']
++    with (args.out / 'timings.csv').open('w') as handle:
++        writer = csv.DictWriter(handle, fieldnames=fields)
++        writer.writeheader()
++        for round in range(1, args.rounds + 1):
++            for file in meta['files']:
++                directory = args.out / file
++                for selected_level in meta['levels']:
++                    for engine in (['libdeflate','roc-deflate'] if round % 2 else ['roc-deflate','libdeflate']):
++                        binary = directory / ('cbench' if engine == 'libdeflate' else 'rocbench')
++                        assert digest(binary) == meta['executable_sha256'][file][binary.name]
++                        cmd = [binary, 'embedded', selected_level, meta['reps']] if engine == 'libdeflate' else [binary, selected_level]
++                        output = run(cmd, capture_output=True, text=True, env={k:v for k,v in os.environ.items() if k not in ['DYLD_INSERT_LIBRARIES','LD_PRELOAD']}).stdout
++                        (raw / f'{round}-{file}-{selected_level}-{engine}.txt').write_text(output)
++                        samples = [line.split('\t') for line in output.splitlines() if line.startswith('rep\t')]
++                        assert len(samples) == meta['reps'], output
++                        assert {(int(s[1]),int(s[2])) for s in samples} == {(selected_level,r) for r in range(meta['reps'])}
++                        for _, level, rep, ns, size in samples:
++                            n = (args.corpus / file).stat().st_size
++                            assert int(ns) > 0 and int(level) == selected_level
++                            assert int(size) == (directory / f'level-{level}.deflate').stat().st_size
++                            row = dict(engine=engine, level=int(level), corpus=file, input_bytes=n,
++                                round=round, rep=int(rep)+1, ns=int(ns), mb_per_s=f'{n/int(ns)*1000:.2f}', compressed_bytes=int(size))
++                            writer.writerow(row); rows.append(row)
++                        handle.flush()
++                print(f'round {round} {file} done {time.strftime("%H:%M:%S")}', flush=True)
++    execution['finished'] = time.strftime('%Y-%m-%dT%H:%M:%S%z')
++    execution['samples'] = len(rows)
++    (args.out / 'run.json').write_text(json.dumps(execution, indent=2) + '\n')
++    summarize(args.out)
++
++def summarize(out):
++    rows = list(csv.DictReader((out / 'timings.csv').open()))
++    groups = {}
++    for r in rows: groups.setdefault((r['corpus'], int(r['level']), r['engine']), []).append(int(r['ns']))
++    result = []
++    for file,level in sorted({k[:2] for k in groups}):
++        c,roc = [statistics.median(groups[(file,level,e)]) for e in ['libdeflate','roc-deflate']]
++        result.append(dict(corpus=file, level=level, c_ns=c, roc_ns=roc, gap_pct=(roc/c-1)*100))
++    result.sort(key=lambda r:r['gap_pct'], reverse=True)
++    with (out / 'summary.csv').open('w') as f:
++        w=csv.DictWriter(f,fieldnames=result[0].keys());w.writeheader();w.writerows(result)
++    print(json.dumps(dict(worst=result[0],median=statistics.median(r['gap_pct'] for r in result), best=result[-1]),indent=2),flush=True)
++
++if __name__ == '__main__':
++    p=argparse.ArgumentParser(description=__doc__)
++    p.add_argument('action',choices=['build','run','all','summary'])
++    p.add_argument('--roc',type=pathlib.Path,required=True)
++    p.add_argument('--corpus',type=pathlib.Path,required=True)
++    p.add_argument('--libdeflate',type=pathlib.Path,required=True)
++    p.add_argument('--out',type=pathlib.Path,required=True)
++    p.add_argument('--files',nargs='+',default=FILES)
++    p.add_argument('--levels',nargs='+',type=int,default=list(range(1,13)))
++    p.add_argument('--reps',type=int,default=5)
++    p.add_argument('--rounds',type=int,default=3)
++    args=p.parse_args()
++    assert args.reps > 0 and args.rounds > 0
++    assert args.levels and len(set(args.levels)) == len(args.levels) and all(1 <= l <= 12 for l in args.levels)
++    assert args.files and len(set(args.files)) == len(args.files) and set(args.files) <= set(FILES)
++    for key in ['roc','corpus','libdeflate','out']: setattr(args,key,getattr(args,key).resolve())
++    if args.action in ['build','all']: build(args)
++    if args.action in ['run','all']: measure(args)
++    if args.action == 'summary': summarize(args.out)
+diff --git a/benchmark/echo-clock/roc_platform_abi.h b/benchmark/echo-clock/roc_platform_abi.h
+index cfad99a..3fe2ef6 100644
+--- a/benchmark/echo-clock/roc_platform_abi.h
++++ b/benchmark/echo-clock/roc_platform_abi.h
+@@ -225,7 +225,7 @@ extern uint64_t roc_now(void);
+ // Provided Symbols
+ 
+ /* Entrypoint: main_for_host! */
+-extern void roc_main(void);
++extern void roc_main(uint64_t arg0);
+ 
+ 
+ // HostedFunctions Registry
+diff --git a/benchmark/echo-clock/test.sh b/benchmark/echo-clock/test.sh
+index 77a2f80..391d691 100755
+--- a/benchmark/echo-clock/test.sh
++++ b/benchmark/echo-clock/test.sh
+@@ -16,4 +16,13 @@ cmp .build/expected.txt .build/actual.txt
+ for backend in dev speed; do
+     "${ROC:-roc}" build --no-cache --opt="$backend" example.roc --output=".build/example-$backend"
+     ".build/example-$backend"
++    "${ROC:-roc}" build --no-cache --opt="$backend" argument-test.roc --output=".build/argument-$backend"
++    test "$(".build/argument-$backend")" = 0
++    for argument in 17 18446744073709551615; do
++        test "$(".build/argument-$backend" "$argument")" = "$argument"
++    done
++    if ".build/argument-$backend" 18446744073709551616 > /dev/null 2>&1; then
++        echo 'Overflowing entry argument was accepted' >&2
++        exit 1
++    fi
+ done
+diff --git a/package/BlockOut.roc b/package/BlockOut.roc
+index 4d255d5..9296869 100644
+--- a/package/BlockOut.roc
++++ b/package/BlockOut.roc
+@@ -286,7 +286,7 @@ BlockOut := [].{
+ 		bitbuf : U64,
+ 		bitcount : U64,
+ 		seqs : List(Sequence),
+-		items : List(U32),
++		items : List(U64),
+ 		litlen_lens : List(U8),
+ 		litlen_codewords : List(U32),
+ 		offset_lens : List(U8),
+@@ -497,9 +497,9 @@ BlockOut := [].{
+ 	## The chosen literals and matches arrive one of two ways. The greedy and
+ 	## lazy parsers hand over `seqs`, runs of literals each followed by a match,
+ 	## with the literals themselves read back out of the input. The near-optimal
+-	## parser hands over `items`, one packed entry per position along its chosen
+-	## path. `use_items` selects between them.
+-	flush_block : List(U8), U64, U64, List(U8), U64, U64, List(BlockOut.Sequence), List(U32), List(U32), List(U8), List(U32), List(U8), List(U32), List(U8), List(U32), List(U8), List(U32), List(U32), U64, U64 -> FlushResult
++	## parser hands over `items`, its path nodes, each with the packed entry for
++	## its position in the high half. `use_items` selects between them.
++	flush_block : List(U8), U64, U64, List(U8), U64, U64, List(BlockOut.Sequence), List(U32), List(U32), List(U8), List(U32), List(U8), List(U32), List(U8), List(U32), List(U8), List(U32), List(U64), U64, U64 -> FlushResult
+ 	flush_block = |out_0, bitbuf_0, bitcount_0, input, block_begin, block_length_0, seqs, freqs_litlen, freqs_offset, litlen_lens, litlen_codewords, offset_lens, offset_codewords, s_litlen_lens, s_litlen_codewords, s_offset_lens, s_offset_codewords, items, use_items, is_final| {
+ 		precode = BlockOut.precompute_huffman_header(litlen_lens, offset_lens)
+ 
+@@ -711,7 +711,7 @@ BlockOut := [].{
+ 			items_top = List.len(items).minus_wrap(1)
+ 			var $item_at = if use_items == 1 { 0.U64 } else { block_length }
+ 			while $item_at != block_length {
+-				item = List.get(items, items_top.minus_wrap($item_at)) ?? 0
++				item = (List.get(items, items_top.minus_wrap($item_at)) ?? 0).shr_zf_wrap(32).to_u32_wrap()
+ 				length = item.bitwise_and(0x1FF).to_u64()
+ 				payload = item.shr_zf_wrap(9).to_u64()
+ 				if length == 1 {
+diff --git a/package/BtMatchfinder.roc b/package/BtMatchfinder.roc
+index 78f9eac..24699b8 100644
+--- a/package/BtMatchfinder.roc
++++ b/package/BtMatchfinder.roc
+@@ -104,11 +104,21 @@ BtMatchfinder := [].{
+ 		var $cache_ptr = cache_ptr_0
+ 
+ 		in_next = in_base.plus_wrap(cur_pos)
+-				next_hashseq = U32.from_le_bytes(input, in_next.plus_wrap(1)) ?? 0
++		# The caller leaves `max_len` bytes readable at the position, which the
++		# walk's reads at the current position and at each candidate rely on.
++		if in_next + max_len > List.len(input) {
++			crash "BtMatchfinder.get_matches: search window outside the input"
++		} else {
++		}
++		next_hashseq = U32.from_le_bytes(input, in_next.plus_wrap(1)) ?? 0
+ 		hash3 = nh3
+ 		hash4 = nh4
+ 		out_hash3 = Matchfinder.lz_hash(next_hashseq.bitwise_and(0xFFFFFF), BtMatchfinder.hash3_order)
+ 		out_hash4 = Matchfinder.lz_hash(next_hashseq, BtMatchfinder.hash4_order)
++		# Both buckets the next position reads are known now, a whole walk
++		# before they are needed, so start bringing them into the cache.
++		$mf = List.prefetched($mf, BtMatchfinder.hash3_base.plus_wrap(out_hash3.times_wrap(2)))
++		$mf = List.prefetched($mf, BtMatchfinder.hash4_base.plus_wrap(out_hash4))
+ 		pos = cur_pos.plus_wrap(Matchfinder.node_bias).to_u16_wrap()
+ 
+ 		# The length-3 hash keeps two ways, so a short match survives one
+@@ -187,8 +197,17 @@ BtMatchfinder := [].{
+ 		var $best_len = 3.U64
+ 		var $walking = 1.U64
+ 
+-		while $walking == 1 {
+-			match_at = Matchfinder.node_index(in_base, $node)
++		# The walk continues only while the match in hand is shorter than
++		# `nice_len`, which is at most `max_len`, so the length test is always
++		# true here. Testing it at the head states the bound every read in the
++		# walk needs.
++		while $walking == 1 and $len < max_len {
++			# The candidate's distance back is the current position less the
++			# node's, which for a node in the window is 1 to 32767, so the mask
++			# changes nothing and the saturating subtract never saturates. Both
++			# state bounds the range prover carries: the candidate is at or
++			# before the current position.
++			match_at = in_next.minus_saturated(cur_pos.plus_wrap(Matchfinder.node_bias).minus_wrap($node.to_u64()).bitwise_and(32767))
+ 
+ 			if (List.get(input, match_at.plus_wrap($len)) ?? 0) == (List.get(input, in_next.plus_wrap($len)) ?? 0) {
+ 				$len = Matchfinder.lz_extend(input, in_next, match_at, $len.plus_wrap(1), max_len)
+@@ -292,11 +311,21 @@ BtMatchfinder := [].{
+ 		}
+ 
+ 		in_next = in_base.plus_wrap(cur_pos)
+-				next_hashseq = U32.from_le_bytes(input, in_next.plus_wrap(1)) ?? 0
++		# The caller leaves `nice_len` bytes readable at the position, which the
++		# walk's reads at the current position and at each candidate rely on.
++		if in_next + nice_len > List.len(input) {
++			crash "BtMatchfinder.skip_byte: search window outside the input"
++		} else {
++		}
++		next_hashseq = U32.from_le_bytes(input, in_next.plus_wrap(1)) ?? 0
+ 		hash3 = nh3
+ 		hash4 = nh4
+ 		out_hash3 = Matchfinder.lz_hash(next_hashseq.bitwise_and(0xFFFFFF), BtMatchfinder.hash3_order)
+ 		out_hash4 = Matchfinder.lz_hash(next_hashseq, BtMatchfinder.hash4_order)
++		# Both buckets the next position reads are known now, a whole walk
++		# before they are needed, so start bringing them into the cache.
++		$mf = List.prefetched($mf, BtMatchfinder.hash3_base.plus_wrap(out_hash3.times_wrap(2)))
++		$mf = List.prefetched($mf, BtMatchfinder.hash4_base.plus_wrap(out_hash4))
+ 		pos = cur_pos.plus_wrap(Matchfinder.node_bias).to_u16_wrap()
+ 
+ 		slot3 = BtMatchfinder.hash3_base.plus_wrap(hash3.bitwise_and(0xFFFF).times_wrap(2))
+@@ -344,8 +373,17 @@ BtMatchfinder := [].{
+ 		var $len = 0.U64
+ 		var $walking = 1.U64
+ 
+-		while $walking == 1 {
+-			match_at = Matchfinder.node_index(in_base, $node)
++		# The walk continues only while the match in hand is shorter than
++		# `nice_len`, which is at most `nice_len`, so the length test is always
++		# true here. Testing it at the head states the bound every read in the
++		# walk needs.
++		while $walking == 1 and $len < nice_len {
++			# The candidate's distance back is the current position less the
++			# node's, which for a node in the window is 1 to 32767, so the mask
++			# changes nothing and the saturating subtract never saturates. Both
++			# state bounds the range prover carries: the candidate is at or
++			# before the current position.
++			match_at = in_next.minus_saturated(cur_pos.plus_wrap(Matchfinder.node_bias).minus_wrap($node.to_u64()).bitwise_and(32767))
+ 
+ 			if (List.get(input, match_at.plus_wrap($len)) ?? 0) == (List.get(input, in_next.plus_wrap($len)) ?? 0) {
+ 				$len = Matchfinder.lz_extend(input, in_next, match_at, $len.plus_wrap(1), nice_len)
+diff --git a/package/CompressFast.roc b/package/CompressFast.roc
+index 6b1a137..c773bac 100644
+--- a/package/CompressFast.roc
++++ b/package/CompressFast.roc
+@@ -138,17 +138,19 @@ CompressFast := [].{
+ 						$nh = Matchfinder.lz_hash(U32.from_le_bytes(input, $in_next.plus_wrap(1)) ?? 0, HtMatchfinder.hash_order)
+ 						$tab = List.prefetched($tab, $nh.times_wrap(2))
+ 						cur_node0 = List.get($tab, slot0) ?? 0
++						cur_node1 = List.get($tab, slot0.plus_wrap(1)) ?? 0
+ 						$tab = match List.set($tab, slot0, cur_pos.plus_wrap(Matchfinder.node_bias).to_u16_wrap()) {
+ 							Ok(next) => next
+ 							Err(_) => crash "CompressFast.compress: tab index out of bounds"
+ 						}
++						# Read both entries before updating this bucket. Even an expired
++						# first entry can replace the second: the second is older, so it
++						# cannot be a valid candidate when the first has expired.
++						$tab = match List.set($tab, slot0.plus_wrap(1), cur_node0) {
++							Ok(next) => next
++							Err(_) => crash "CompressFast.compress: tab index out of bounds"
++						}
+ 						if cur_node0.to_u64() > cur_pos {
+-							# Push the displaced entry into the second slot.
+-							cur_node1 = List.get($tab, slot0.plus_wrap(1)) ?? 0
+-							$tab = match List.set($tab, slot0.plus_wrap(1), cur_node0) {
+-								Ok(next) => next
+-								Err(_) => crash "CompressFast.compress: tab index out of bounds"
+-							}
+ 							if (U32.from_le_bytes(input, Matchfinder.node_index($base, cur_node0)) ?? 0) == seq {
+ 								$found0 = True
+ 								$found = True
+diff --git a/package/CompressLazy.roc b/package/CompressLazy.roc
+index 9aa045a..916585c 100644
+--- a/package/CompressLazy.roc
++++ b/package/CompressLazy.roc
+@@ -3,6 +3,7 @@ import HuffmanEncode
+ import BlockOut
+ import Matchfinder
+ import HcMatchfinder
++import HcTables
+ 
+ ## The greedy and lazy DEFLATE parsers, ported from libdeflate's
+ ## `deflate_compress_greedy` and `deflate_compress_lazy_generic`.
+@@ -284,10 +285,11 @@ CompressLazy := [].{
+ 		var $in_next = 0.U64
+ 		var $max_len = DeflateTables.max_match_len
+ 		var $nice_len = params.nice_match_length.min(DeflateTables.max_match_len)
+-		# The matchfinder tables are held as separate values rather than one
+-		# record: a record of lists is copied whenever it crosses a call
+-		# boundary, which at these sizes would dwarf the search itself.
+-		var $mf = HcMatchfinder.init_tables({})
++		# Keep the hash heads and chain links in separate lists so each search
++		# indexes its table directly, with its size established before the loop.
++		var $mf3 = List.repeat(0.U16, HcMatchfinder.hash3_size)
++		var $mf4 = List.repeat(0.U16, HcMatchfinder.hash4_size)
++		var $mfnext = List.repeat(0.U16, Matchfinder.window_size)
+ 		var $base = 0.U64
+ 		var $nh3 = 0.U64
+ 		var $nh4 = 0.U64
+@@ -318,7 +320,7 @@ CompressLazy := [].{
+ 			# writes only replace entries and the slide keeps the length, so stating
+ 			# the size once here lets every table write in the block skip its
+ 			# bounds test.
+-			if List.len($mf) < HcMatchfinder.table_size {
++			if (List.len($mf3) < HcMatchfinder.hash3_size or List.len($mf4) < HcMatchfinder.hash4_size or List.len($mfnext) < Matchfinder.window_size) {
+ 				crash "CompressLazy.compress_greedy: hash-chain tables too short"
+ 			} else {
+ 			}
+@@ -349,11 +351,13 @@ CompressLazy := [].{
+ 				# heads read here are the ones from before the insert, so the walk
+ 				# starts at the previous occurrence rather than at this position.
+ 				if $in_next.minus_wrap($base) == Matchfinder.window_size {
+-					$mf = Matchfinder.rebase_nodes($mf)
++					$mf3 = Matchfinder.rebase_nodes($mf3)
++					$mf4 = Matchfinder.rebase_nodes($mf4)
++					$mfnext = Matchfinder.rebase_nodes($mfnext)
+ 					$base = $base.plus_wrap(Matchfinder.window_size)
+ 					# The slide keeps the length, but stating it again here is what
+ 					# lets the table writes below keep skipping their bounds tests.
+-					if List.len($mf) < HcMatchfinder.table_size {
++					if (List.len($mf3) < HcMatchfinder.hash3_size or List.len($mf4) < HcMatchfinder.hash4_size or List.len($mfnext) < Matchfinder.window_size) {
+ 						crash "CompressLazy.compress_greedy: hash-chain tables too short"
+ 					} else {
+ 					}
+@@ -371,25 +375,33 @@ CompressLazy := [].{
+ 					if $max_len < 5 {
+ 						# Not enough bytes left to read the next position's hash sequence.
+ 					} else {
++						# `max_len` bytes are readable here: it is at most what remained
++						# where the block loop last set it, and the scan stops a full
++						# match length before the input end. Stating it once bounds reads
++						# at this position; candidates retain their own bounds tests.
++						if $in_next + $max_len > in_end {
++							crash "CompressLazy.compress_greedy: search window outside the input"
++						} else {
++						}
+ 						cur_pos = $in_next.minus_wrap($base)
+ 						# Both hashes are already reduced to their region's size and the
+ 						# position is within one window of the base, so these masks change
+ 						# nothing. They state those bounds where the table accesses can
+ 						# use them, which a hash carried round the loop cannot.
+-						slot3 = HcMatchfinder.greedy_layout.hash3_base.plus_wrap($nh3.bitwise_and(32767))
+-						slot4 = HcMatchfinder.greedy_layout.hash4_base.plus_wrap($nh4.bitwise_and(65535))
+-						cur_node3 = List.get($mf, slot3) ?? 0
+-						cur_node4 = List.get($mf, slot4) ?? 0
++						slot3 = $nh3.bitwise_and(32767)
++						slot4 = $nh4.bitwise_and(65535)
++						cur_node3 = List.get($mf3, slot3) ?? 0
++						cur_node4 = List.get($mf4, slot4) ?? 0
+ 						pos = (cur_pos.plus_wrap(Matchfinder.node_bias)).to_u16_wrap()
+-						$mf = match List.set($mf, slot3, pos) {
++						$mf3 = match List.set($mf3, slot3, pos) {
+ 							Ok(next) => next
+ 							Err(_) => crash "CompressLazy.compress_greedy: mf index out of bounds"
+ 						}
+-						$mf = match List.set($mf, slot4, pos) {
++						$mf4 = match List.set($mf4, slot4, pos) {
+ 							Ok(next) => next
+ 							Err(_) => crash "CompressLazy.compress_greedy: mf index out of bounds"
+ 						}
+-						$mf = match List.set($mf, HcMatchfinder.greedy_layout.next_base.plus_wrap(cur_pos.bitwise_and(32767)), cur_node4) {
++						$mfnext = match List.set($mfnext, cur_pos.bitwise_and(32767), cur_node4) {
+ 							Ok(next) => next
+ 							Err(_) => crash "CompressLazy.compress_greedy: mf index out of bounds"
+ 						}
+@@ -398,10 +410,10 @@ CompressLazy := [].{
+ 						$nh4 = Matchfinder.lz_hash(next_hashseq, HcMatchfinder.hash4_order)
+ 						# Both buckets the next position reads are known now, a whole search
+ 						# before they are needed, so start bringing them into the cache.
+-						$mf = List.prefetched($mf, HcMatchfinder.greedy_layout.hash3_base.plus_wrap($nh3))
+-						$mf = List.prefetched($mf, HcMatchfinder.greedy_layout.hash4_base.plus_wrap($nh4))
++						$mf3 = List.prefetched($mf3, $nh3)
++						$mf4 = List.prefetched($mf4, $nh4)
+ 						# The hash-chain search, one of the four copies of libdeflate's
+-						# `hc_matchfinder_longest_match` (see HcMatchfinder), written out here
++						# `hc_matchfinder_longest_match` (see HcTables), written out here
+ 						# rather than called: it is the greedy loop's whole body, and as a call
+ 						# it returned its match through memory and spilled the loop's state
+ 						# around itself.
+@@ -445,7 +457,7 @@ CompressLazy := [].{
+ 											break
+ 										} else {
+ 										}
+-										$node4 = List.get($mf, HcMatchfinder.greedy_layout.next_base.plus_wrap($node4.to_u64().bitwise_and(32767))) ?? 0
++										$node4 = List.get($mfnext, $node4.to_u64().bitwise_and(32767)) ?? 0
+ 										$depth = $depth.minus_wrap(1)
+ 										if $node4.to_u64() <= cur_pos or $depth == 0 {
+ 											$done = 1
+@@ -460,7 +472,7 @@ CompressLazy := [].{
+ 										if $best_len >= $nice_len {
+ 											$done = 1
+ 										} else {
+-											$node4 = List.get($mf, HcMatchfinder.greedy_layout.next_base.plus_wrap($node4.to_u64().bitwise_and(32767))) ?? 0
++											$node4 = List.get($mfnext, $node4.to_u64().bitwise_and(32767)) ?? 0
+ 											$depth = $depth.minus_wrap(1)
+ 											if $node4.to_u64() <= cur_pos or $depth == 0 {
+ 												$done = 1
+@@ -480,6 +492,14 @@ CompressLazy := [].{
+ 
+ 						# Now look only for matches longer than the one in hand.
+ 						while $done == 0 {
++							# The walk runs only while the match in hand is at least three bytes
++							# and shorter than `nice_len`, which is at most `max_len`. Stating that
++							# bounds the four-byte reads that end where the match in hand does, at
++							# the current position and at each candidate before it.
++							if $best_len < 3 or $best_len >= $nice_len or $nice_len > $max_len {
++								crash "CompressLazy: longer-match walk outside its bounds"
++							} else {
++							}
+ 							var $cand_at = 0.U64
+ 							# The four bytes ending just past the current best length are
+ 							# what a longer match must agree on. The best length holds for
+@@ -497,7 +517,7 @@ CompressLazy := [].{
+ 									break
+ 								} else {
+ 								}
+-								$node4 = List.get($mf, HcMatchfinder.greedy_layout.next_base.plus_wrap($node4.to_u64().bitwise_and(32767))) ?? 0
++								$node4 = List.get($mfnext, $node4.to_u64().bitwise_and(32767)) ?? 0
+ 								$depth = $depth.minus_wrap(1)
+ 								if $node4.to_u64() <= cur_pos or $depth == 0 {
+ 									$done = 1
+@@ -518,7 +538,7 @@ CompressLazy := [].{
+ 								} else {
+ 								}
+ 								if $done == 0 {
+-									$node4 = List.get($mf, HcMatchfinder.greedy_layout.next_base.plus_wrap($node4.to_u64().bitwise_and(32767))) ?? 0
++									$node4 = List.get($mfnext, $node4.to_u64().bitwise_and(32767)) ?? 0
+ 									$depth = $depth.minus_wrap(1)
+ 									if $node4.to_u64() <= cur_pos or $depth == 0 {
+ 										$done = 1
+@@ -605,13 +625,15 @@ CompressLazy := [].{
+ 						or in_end > List.len(input)
+ 						or skip_end.plus_wrap(5) > in_end
+ 						or skip_end.minus_wrap($base) > Matchfinder.window_size
+-						or List.len($mf) < HcMatchfinder.table_size
++						or (List.len($mf3) < HcMatchfinder.hash3_size or List.len($mf4) < HcMatchfinder.hash4_size or List.len($mfnext) < Matchfinder.window_size)
+ 						or $nh3 >= HcMatchfinder.hash3_size
+ 						or $nh4 >= HcMatchfinder.hash4_size {
+-						skipped = match HcMatchfinder.skip_bytes($mf, $base, $nh3, $nh4, input, $in_next.plus_wrap(1), in_end, $found.length.minus_wrap(1), HcMatchfinder.greedy_layout) {
++						skipped = match HcTables.skip_bytes($mf3, $mf4, $mfnext, $base, $nh3, $nh4, input, $in_next.plus_wrap(1), in_end, $found.length.minus_wrap(1)) {
+ 							Ok(v) => v
+ 						}
+-						$mf = skipped.tab
++						$mf3 = skipped.head3
++						$mf4 = skipped.head4
++						$mfnext = skipped.chain
+ 						$base = skipped.in_cur_base
+ 						$nh3 = skipped.next_hash3
+ 						$nh4 = skipped.next_hash4
+@@ -637,7 +659,7 @@ CompressLazy := [].{
+ 							}
+ 							var $repeat_slot = $skip_node.bitwise_and(32767)
+ 							while $repeat_slot < repeat_limit {
+-								$mf = match List.set($mf, HcMatchfinder.greedy_layout.next_base.plus_wrap($repeat_slot), $repeat_slot.plus_wrap(32767).to_u16_wrap()) {
++								$mfnext = match List.set($mfnext, $repeat_slot, $repeat_slot.plus_wrap(32767).to_u16_wrap()) {
+ 									Ok(next) => next
+ 									Err(_) => crash "CompressLazy.compress_greedy: repeat chain index out of bounds"
+ 								}
+@@ -646,11 +668,11 @@ CompressLazy := [].{
+ 							$skip_at = repeat_end
+ 							$skip_node = repeat_limit.plus_wrap(Matchfinder.node_bias)
+ 							last_node = $skip_node.minus_wrap(1).to_u16_wrap()
+-							$mf = match List.set($mf, HcMatchfinder.greedy_layout.hash3_base.plus_wrap($nh3), last_node) {
++							$mf3 = match List.set($mf3, $nh3, last_node) {
+ 								Ok(next) => next
+ 								Err(_) => crash "CompressLazy.compress_greedy: repeat hash3 index out of bounds"
+ 							}
+-							$mf = match List.set($mf, HcMatchfinder.greedy_layout.hash4_base.plus_wrap($nh4), last_node) {
++							$mf4 = match List.set($mf4, $nh4, last_node) {
+ 								Ok(next) => next
+ 								Err(_) => crash "CompressLazy.compress_greedy: repeat hash4 index out of bounds"
+ 							}
+@@ -661,16 +683,16 @@ CompressLazy := [].{
+ 						}
+ 						while $skip_at < skip_limit {
+ 							skip_node = $skip_node.to_u16_wrap()
+-							prev_head = List.get($mf, HcMatchfinder.greedy_layout.hash4_base.plus_wrap($nh4)) ?? 0
+-							$mf = match List.set($mf, HcMatchfinder.greedy_layout.hash3_base.plus_wrap($nh3), skip_node) {
++							prev_head = List.get($mf4, $nh4) ?? 0
++							$mf3 = match List.set($mf3, $nh3, skip_node) {
+ 								Ok(next) => next
+ 								Err(_) => crash "CompressLazy.compress_greedy: mf index out of bounds"
+ 							}
+-							$mf = match List.set($mf, HcMatchfinder.greedy_layout.next_base.plus_wrap($skip_node.bitwise_and(32767)), prev_head) {
++							$mfnext = match List.set($mfnext, $skip_node.bitwise_and(32767), prev_head) {
+ 								Ok(next) => next
+ 								Err(_) => crash "CompressLazy.compress_greedy: mf index out of bounds"
+ 							}
+-							$mf = match List.set($mf, HcMatchfinder.greedy_layout.hash4_base.plus_wrap($nh4), skip_node) {
++							$mf4 = match List.set($mf4, $nh4, skip_node) {
+ 								Ok(next) => next
+ 								Err(_) => crash "CompressLazy.compress_greedy: mf index out of bounds"
+ 							}
+@@ -682,8 +704,8 @@ CompressLazy := [].{
+ 						}
+ 					}
+ 					$in_next = $in_next.plus_wrap($found.length)
+-					$mf = List.prefetched($mf, HcMatchfinder.greedy_layout.hash3_base.plus_wrap($nh3))
+-					$mf = List.prefetched($mf, HcMatchfinder.greedy_layout.hash4_base.plus_wrap($nh4))
++					$mf3 = List.prefetched($mf3, $nh3)
++					$mf4 = List.prefetched($mf4, $nh4)
+ 				} else {
+ 				}
+ 
+@@ -802,10 +824,11 @@ CompressLazy := [].{
+ 		var $in_next = 0.U64
+ 		var $max_len = DeflateTables.max_match_len
+ 		var $nice_len = params.nice_match_length.min(DeflateTables.max_match_len)
+-		# The matchfinder tables are held as separate values rather than one
+-		# record: a record of lists is copied whenever it crosses a call
+-		# boundary, which at these sizes would dwarf the search itself.
+-		var $mf = HcMatchfinder.init_tables({})
++		# Keep the hash heads and chain links in separate lists so each search
++		# indexes its table directly, with its size established before the loop.
++		var $mf3 = List.repeat(0.U16, HcMatchfinder.hash3_size)
++		var $mf4 = List.repeat(0.U16, HcMatchfinder.hash4_size)
++		var $mfnext = List.repeat(0.U16, Matchfinder.window_size)
+ 		var $base = 0.U64
+ 		var $nh3 = 0.U64
+ 		var $nh4 = 0.U64
+@@ -838,7 +861,7 @@ CompressLazy := [].{
+ 			# writes only replace entries and the slide keeps the length, so stating
+ 			# the size once here lets every table write in the block skip its
+ 			# bounds test.
+-			if List.len($mf) < HcMatchfinder.table_size {
++			if (List.len($mf3) < HcMatchfinder.hash3_size or List.len($mf4) < HcMatchfinder.hash4_size or List.len($mfnext) < Matchfinder.window_size) {
+ 				crash "CompressLazy.compress: hash-chain tables too short"
+ 			} else {
+ 			}
+@@ -877,11 +900,13 @@ CompressLazy := [].{
+ 				# heads read here are the ones from before the insert, so the walk
+ 				# starts at the previous occurrence rather than at this position.
+ 				if $in_next.minus_wrap($base) == Matchfinder.window_size {
+-					$mf = Matchfinder.rebase_nodes($mf)
++					$mf3 = Matchfinder.rebase_nodes($mf3)
++					$mf4 = Matchfinder.rebase_nodes($mf4)
++					$mfnext = Matchfinder.rebase_nodes($mfnext)
+ 					$base = $base.plus_wrap(Matchfinder.window_size)
+ 					# The slide keeps the length, but stating it again here is what
+ 					# lets the table writes below keep skipping their bounds tests.
+-					if List.len($mf) < HcMatchfinder.table_size {
++					if (List.len($mf3) < HcMatchfinder.hash3_size or List.len($mf4) < HcMatchfinder.hash4_size or List.len($mfnext) < Matchfinder.window_size) {
+ 						crash "CompressLazy.compress: hash-chain tables too short"
+ 					} else {
+ 					}
+@@ -891,25 +916,32 @@ CompressLazy := [].{
+ 				if $max_len < 5 {
+ 					# Not enough bytes left to read the next position's hash sequence.
+ 				} else {
++					# `max_len` bytes are readable here: it is at most what remained
++					# where it was last set, and it only shrinks. Stating it bounds the
++					# reads at this position; candidates keep their own bounds tests.
++					if $in_next + $max_len > in_end {
++						crash "CompressLazy.compress: search window outside the input"
++					} else {
++					}
+ 					cur_pos = $in_next.minus_wrap($base)
+ 					# Both hashes are already reduced to their region's size and the
+ 					# position is within one window of the base, so these masks change
+ 					# nothing. They state those bounds where the table accesses can
+ 					# use them, which a hash carried round the loop cannot.
+-					slot3 = HcMatchfinder.hash3_base.plus_wrap($nh3.bitwise_and(32767))
+-					slot4 = HcMatchfinder.hash4_base.plus_wrap($nh4.bitwise_and(65535))
+-					cur_node3 = List.get($mf, slot3) ?? 0
+-					cur_node4 = List.get($mf, slot4) ?? 0
++					slot3 = $nh3.bitwise_and(32767)
++					slot4 = $nh4.bitwise_and(65535)
++					cur_node3 = List.get($mf3, slot3) ?? 0
++					cur_node4 = List.get($mf4, slot4) ?? 0
+ 					pos = (cur_pos.plus_wrap(Matchfinder.node_bias)).to_u16_wrap()
+-					$mf = match List.set($mf, slot3, pos) {
++					$mf3 = match List.set($mf3, slot3, pos) {
+ 						Ok(next) => next
+ 						Err(_) => crash "CompressLazy.compress: mf index out of bounds"
+ 					}
+-					$mf = match List.set($mf, slot4, pos) {
++					$mf4 = match List.set($mf4, slot4, pos) {
+ 						Ok(next) => next
+ 						Err(_) => crash "CompressLazy.compress: mf index out of bounds"
+ 					}
+-					$mf = match List.set($mf, HcMatchfinder.next_base.plus_wrap(cur_pos.bitwise_and(32767)), cur_node4) {
++					$mfnext = match List.set($mfnext, cur_pos.bitwise_and(32767), cur_node4) {
+ 						Ok(next) => next
+ 						Err(_) => crash "CompressLazy.compress: mf index out of bounds"
+ 					}
+@@ -918,10 +950,10 @@ CompressLazy := [].{
+ 					$nh4 = Matchfinder.lz_hash(next_hashseq, HcMatchfinder.hash4_order)
+ 					# Both buckets the next position reads are known now, a whole search
+ 					# before they are needed, so start bringing them into the cache.
+-					$mf = List.prefetched($mf, HcMatchfinder.hash3_base.plus_wrap($nh3))
+-					$mf = List.prefetched($mf, HcMatchfinder.hash4_base.plus_wrap($nh4))
++					$mf3 = List.prefetched($mf3, $nh3)
++					$mf4 = List.prefetched($mf4, $nh4)
+ 					# The hash-chain search, one of the four copies of libdeflate's
+-					# `hc_matchfinder_longest_match` (see HcMatchfinder), written out here
++					# `hc_matchfinder_longest_match` (see HcTables), written out here
+ 					# rather than called so the loop's state stays in registers across it.
+ 					# The masked node selects a chain slot within one window;
+ 					# next_base maps it into the shared table allocation.
+@@ -963,7 +995,7 @@ CompressLazy := [].{
+ 										break
+ 									} else {
+ 									}
+-									$node4_s = List.get($mf, HcMatchfinder.next_base.plus_wrap($node4_s.to_u64().bitwise_and(32767))) ?? 0
++									$node4_s = List.get($mfnext, $node4_s.to_u64().bitwise_and(32767)) ?? 0
+ 									$depth_s = $depth_s.minus_wrap(1)
+ 									if $node4_s.to_u64() <= cur_pos or $depth_s == 0 {
+ 										$done_s = 1
+@@ -978,7 +1010,7 @@ CompressLazy := [].{
+ 									if $best_len_s >= $nice_len {
+ 										$done_s = 1
+ 									} else {
+-										$node4_s = List.get($mf, HcMatchfinder.next_base.plus_wrap($node4_s.to_u64().bitwise_and(32767))) ?? 0
++										$node4_s = List.get($mfnext, $node4_s.to_u64().bitwise_and(32767)) ?? 0
+ 										$depth_s = $depth_s.minus_wrap(1)
+ 										if $node4_s.to_u64() <= cur_pos or $depth_s == 0 {
+ 											$done_s = 1
+@@ -998,6 +1030,14 @@ CompressLazy := [].{
+ 
+ 					# Now look only for matches longer than the one in hand.
+ 					while $done_s == 0 {
++						# The walk runs only while the match in hand is at least three bytes
++						# and shorter than `nice_len`, which is at most `max_len`. Stating that
++						# bounds the four-byte reads that end where the match in hand does, at
++						# the current position and at each candidate before it.
++						if $best_len_s < 3 or $best_len_s >= $nice_len or $nice_len > $max_len {
++							crash "CompressLazy: longer-match walk outside its bounds"
++						} else {
++						}
+ 						var $cand_at_s = 0.U64
+ 						# The four bytes ending just past the current best length are
+ 						# what a longer match must agree on. The best length holds for
+@@ -1016,7 +1056,7 @@ CompressLazy := [].{
+ 								break
+ 							} else {
+ 							}
+-							$node4_s = List.get($mf, HcMatchfinder.next_base.plus_wrap($node4_s.to_u64().bitwise_and(32767))) ?? 0
++							$node4_s = List.get($mfnext, $node4_s.to_u64().bitwise_and(32767)) ?? 0
+ 							$depth_s = $depth_s.minus_wrap(1)
+ 							if $node4_s.to_u64() <= cur_pos or $depth_s == 0 {
+ 								$done_s = 1
+@@ -1037,7 +1077,7 @@ CompressLazy := [].{
+ 							} else {
+ 							}
+ 							if $done_s == 0 {
+-								$node4_s = List.get($mf, HcMatchfinder.next_base.plus_wrap($node4_s.to_u64().bitwise_and(32767))) ?? 0
++								$node4_s = List.get($mfnext, $node4_s.to_u64().bitwise_and(32767)) ?? 0
+ 								$depth_s = $depth_s.minus_wrap(1)
+ 								if $node4_s.to_u64() <= cur_pos or $depth_s == 0 {
+ 									$done_s = 1
+@@ -1099,11 +1139,13 @@ CompressLazy := [].{
+ 							# heads read here are the ones from before the insert, so the walk
+ 							# starts at the previous occurrence rather than at this position.
+ 							if $in_next.minus_wrap($base) == Matchfinder.window_size {
+-								$mf = Matchfinder.rebase_nodes($mf)
++								$mf3 = Matchfinder.rebase_nodes($mf3)
++								$mf4 = Matchfinder.rebase_nodes($mf4)
++								$mfnext = Matchfinder.rebase_nodes($mfnext)
+ 								$base = $base.plus_wrap(Matchfinder.window_size)
+ 								# The slide keeps the length, but stating it again here is what
+ 								# lets the table writes below keep skipping their bounds tests.
+-								if List.len($mf) < HcMatchfinder.table_size {
++								if (List.len($mf3) < HcMatchfinder.hash3_size or List.len($mf4) < HcMatchfinder.hash4_size or List.len($mfnext) < Matchfinder.window_size) {
+ 									crash "CompressLazy.compress: hash-chain tables too short"
+ 								} else {
+ 								}
+@@ -1113,25 +1155,32 @@ CompressLazy := [].{
+ 							if $max_len < 5 {
+ 								# Not enough bytes left to read the next position's hash sequence.
+ 							} else {
++								# `max_len` bytes are readable here: it is at most what remained
++								# where it was last set, and it only shrinks. Stating it bounds the
++								# reads at this position; candidates keep their own bounds tests.
++								if $in_next + $max_len > in_end {
++									crash "CompressLazy.compress: search window outside the input"
++								} else {
++								}
+ 								cur_pos = $in_next.minus_wrap($base)
+ 								# Both hashes are already reduced to their region's size and the
+ 								# position is within one window of the base, so these masks change
+ 								# nothing. They state those bounds where the table accesses can
+ 								# use them, which a hash carried round the loop cannot.
+-								slot3 = HcMatchfinder.hash3_base.plus_wrap($nh3.bitwise_and(32767))
+-								slot4 = HcMatchfinder.hash4_base.plus_wrap($nh4.bitwise_and(65535))
+-								cur_node3 = List.get($mf, slot3) ?? 0
+-								cur_node4 = List.get($mf, slot4) ?? 0
++								slot3 = $nh3.bitwise_and(32767)
++								slot4 = $nh4.bitwise_and(65535)
++								cur_node3 = List.get($mf3, slot3) ?? 0
++								cur_node4 = List.get($mf4, slot4) ?? 0
+ 								pos = (cur_pos.plus_wrap(Matchfinder.node_bias)).to_u16_wrap()
+-								$mf = match List.set($mf, slot3, pos) {
++								$mf3 = match List.set($mf3, slot3, pos) {
+ 									Ok(next) => next
+ 									Err(_) => crash "CompressLazy.compress: mf index out of bounds"
+ 								}
+-								$mf = match List.set($mf, slot4, pos) {
++								$mf4 = match List.set($mf4, slot4, pos) {
+ 									Ok(next) => next
+ 									Err(_) => crash "CompressLazy.compress: mf index out of bounds"
+ 								}
+-								$mf = match List.set($mf, HcMatchfinder.next_base.plus_wrap(cur_pos.bitwise_and(32767)), cur_node4) {
++								$mfnext = match List.set($mfnext, cur_pos.bitwise_and(32767), cur_node4) {
+ 									Ok(next) => next
+ 									Err(_) => crash "CompressLazy.compress: mf index out of bounds"
+ 								}
+@@ -1140,10 +1189,10 @@ CompressLazy := [].{
+ 								$nh4 = Matchfinder.lz_hash(next_hashseq, HcMatchfinder.hash4_order)
+ 								# Both buckets the next position reads are known now, a whole search
+ 								# before they are needed, so start bringing them into the cache.
+-								$mf = List.prefetched($mf, HcMatchfinder.hash3_base.plus_wrap($nh3))
+-								$mf = List.prefetched($mf, HcMatchfinder.hash4_base.plus_wrap($nh4))
++								$mf3 = List.prefetched($mf3, $nh3)
++								$mf4 = List.prefetched($mf4, $nh4)
+ 								# The hash-chain search, one of the four copies of libdeflate's
+-								# `hc_matchfinder_longest_match` (see HcMatchfinder), written out here
++								# `hc_matchfinder_longest_match` (see HcTables), written out here
+ 								# rather than called so the loop's state stays in registers across it.
+ 								# The masked node selects a chain slot within one window;
+ 								# next_base maps it into the shared table allocation.
+@@ -1185,7 +1234,7 @@ CompressLazy := [].{
+ 													break
+ 												} else {
+ 												}
+-												$node4_n = List.get($mf, HcMatchfinder.next_base.plus_wrap($node4_n.to_u64().bitwise_and(32767))) ?? 0
++												$node4_n = List.get($mfnext, $node4_n.to_u64().bitwise_and(32767)) ?? 0
+ 												$depth_n = $depth_n.minus_wrap(1)
+ 												if $node4_n.to_u64() <= cur_pos or $depth_n == 0 {
+ 													$done_n = 1
+@@ -1200,7 +1249,7 @@ CompressLazy := [].{
+ 												if $best_len_n >= $nice_len {
+ 													$done_n = 1
+ 												} else {
+-													$node4_n = List.get($mf, HcMatchfinder.next_base.plus_wrap($node4_n.to_u64().bitwise_and(32767))) ?? 0
++													$node4_n = List.get($mfnext, $node4_n.to_u64().bitwise_and(32767)) ?? 0
+ 													$depth_n = $depth_n.minus_wrap(1)
+ 													if $node4_n.to_u64() <= cur_pos or $depth_n == 0 {
+ 														$done_n = 1
+@@ -1220,6 +1269,14 @@ CompressLazy := [].{
+ 
+ 								# Now look only for matches longer than the one in hand.
+ 								while $done_n == 0 {
++									# The walk runs only while the match in hand is at least three bytes
++									# and shorter than `nice_len`, which is at most `max_len`. Stating that
++									# bounds the four-byte reads that end where the match in hand does, at
++									# the current position and at each candidate before it.
++									if $best_len_n < 3 or $best_len_n >= $nice_len or $nice_len > $max_len {
++										crash "CompressLazy: longer-match walk outside its bounds"
++									} else {
++									}
+ 									var $cand_at_n = 0.U64
+ 									# The four bytes ending just past the current best length are
+ 									# what a longer match must agree on. The best length holds for
+@@ -1238,7 +1295,7 @@ CompressLazy := [].{
+ 											break
+ 										} else {
+ 										}
+-										$node4_n = List.get($mf, HcMatchfinder.next_base.plus_wrap($node4_n.to_u64().bitwise_and(32767))) ?? 0
++										$node4_n = List.get($mfnext, $node4_n.to_u64().bitwise_and(32767)) ?? 0
+ 										$depth_n = $depth_n.minus_wrap(1)
+ 										if $node4_n.to_u64() <= cur_pos or $depth_n == 0 {
+ 											$done_n = 1
+@@ -1259,7 +1316,7 @@ CompressLazy := [].{
+ 										} else {
+ 										}
+ 										if $done_n == 0 {
+-											$node4_n = List.get($mf, HcMatchfinder.next_base.plus_wrap($node4_n.to_u64().bitwise_and(32767))) ?? 0
++											$node4_n = List.get($mfnext, $node4_n.to_u64().bitwise_and(32767)) ?? 0
+ 											$depth_n = $depth_n.minus_wrap(1)
+ 											if $node4_n.to_u64() <= cur_pos or $depth_n == 0 {
+ 												$done_n = 1
+@@ -1310,11 +1367,13 @@ CompressLazy := [].{
+ 								# heads read here are the ones from before the insert, so the walk
+ 								# starts at the previous occurrence rather than at this position.
+ 								if $in_next.minus_wrap($base) == Matchfinder.window_size {
+-									$mf = Matchfinder.rebase_nodes($mf)
++									$mf3 = Matchfinder.rebase_nodes($mf3)
++									$mf4 = Matchfinder.rebase_nodes($mf4)
++									$mfnext = Matchfinder.rebase_nodes($mfnext)
+ 									$base = $base.plus_wrap(Matchfinder.window_size)
+ 									# The slide keeps the length, but stating it again here is what
+ 									# lets the table writes below keep skipping their bounds tests.
+-									if List.len($mf) < HcMatchfinder.table_size {
++									if (List.len($mf3) < HcMatchfinder.hash3_size or List.len($mf4) < HcMatchfinder.hash4_size or List.len($mfnext) < Matchfinder.window_size) {
+ 										crash "CompressLazy.compress: hash-chain tables too short"
+ 									} else {
+ 									}
+@@ -1324,25 +1383,32 @@ CompressLazy := [].{
+ 								if $max_len < 5 {
+ 									# Not enough bytes left to read the next position's hash sequence.
+ 								} else {
++									# `max_len` bytes are readable here: it is at most what remained
++									# where it was last set, and it only shrinks. Stating it bounds the
++									# reads at this position; candidates keep their own bounds tests.
++									if $in_next + $max_len > in_end {
++										crash "CompressLazy.compress: search window outside the input"
++									} else {
++									}
+ 									cur_pos = $in_next.minus_wrap($base)
+ 									# Both hashes are already reduced to their region's size and the
+ 									# position is within one window of the base, so these masks change
+ 									# nothing. They state those bounds where the table accesses can
+ 									# use them, which a hash carried round the loop cannot.
+-									slot3 = HcMatchfinder.hash3_base.plus_wrap($nh3.bitwise_and(32767))
+-									slot4 = HcMatchfinder.hash4_base.plus_wrap($nh4.bitwise_and(65535))
+-									cur_node3 = List.get($mf, slot3) ?? 0
+-									cur_node4 = List.get($mf, slot4) ?? 0
++									slot3 = $nh3.bitwise_and(32767)
++									slot4 = $nh4.bitwise_and(65535)
++									cur_node3 = List.get($mf3, slot3) ?? 0
++									cur_node4 = List.get($mf4, slot4) ?? 0
+ 									pos = (cur_pos.plus_wrap(Matchfinder.node_bias)).to_u16_wrap()
+-									$mf = match List.set($mf, slot3, pos) {
++									$mf3 = match List.set($mf3, slot3, pos) {
+ 										Ok(next) => next
+ 										Err(_) => crash "CompressLazy.compress: mf index out of bounds"
+ 									}
+-									$mf = match List.set($mf, slot4, pos) {
++									$mf4 = match List.set($mf4, slot4, pos) {
+ 										Ok(next) => next
+ 										Err(_) => crash "CompressLazy.compress: mf index out of bounds"
+ 									}
+-									$mf = match List.set($mf, HcMatchfinder.next_base.plus_wrap(cur_pos.bitwise_and(32767)), cur_node4) {
++									$mfnext = match List.set($mfnext, cur_pos.bitwise_and(32767), cur_node4) {
+ 										Ok(next) => next
+ 										Err(_) => crash "CompressLazy.compress: mf index out of bounds"
+ 									}
+@@ -1351,10 +1417,10 @@ CompressLazy := [].{
+ 									$nh4 = Matchfinder.lz_hash(next_hashseq, HcMatchfinder.hash4_order)
+ 									# Both buckets the next position reads are known now, a whole search
+ 									# before they are needed, so start bringing them into the cache.
+-									$mf = List.prefetched($mf, HcMatchfinder.hash3_base.plus_wrap($nh3))
+-									$mf = List.prefetched($mf, HcMatchfinder.hash4_base.plus_wrap($nh4))
++									$mf3 = List.prefetched($mf3, $nh3)
++									$mf4 = List.prefetched($mf4, $nh4)
+ 									# The hash-chain search, one of the four copies of libdeflate's
+-									# `hc_matchfinder_longest_match` (see HcMatchfinder), written out here
++									# `hc_matchfinder_longest_match` (see HcTables), written out here
+ 									# rather than called so the loop's state stays in registers across it.
+ 									# The masked node selects a chain slot within one window;
+ 									# next_base maps it into the shared table allocation.
+@@ -1396,7 +1462,7 @@ CompressLazy := [].{
+ 														break
+ 													} else {
+ 													}
+-													$node4_m = List.get($mf, HcMatchfinder.next_base.plus_wrap($node4_m.to_u64().bitwise_and(32767))) ?? 0
++													$node4_m = List.get($mfnext, $node4_m.to_u64().bitwise_and(32767)) ?? 0
+ 													$depth_m = $depth_m.minus_wrap(1)
+ 													if $node4_m.to_u64() <= cur_pos or $depth_m == 0 {
+ 														$done_m = 1
+@@ -1411,7 +1477,7 @@ CompressLazy := [].{
+ 													if $best_len_m >= $nice_len {
+ 														$done_m = 1
+ 													} else {
+-														$node4_m = List.get($mf, HcMatchfinder.next_base.plus_wrap($node4_m.to_u64().bitwise_and(32767))) ?? 0
++														$node4_m = List.get($mfnext, $node4_m.to_u64().bitwise_and(32767)) ?? 0
+ 														$depth_m = $depth_m.minus_wrap(1)
+ 														if $node4_m.to_u64() <= cur_pos or $depth_m == 0 {
+ 															$done_m = 1
+@@ -1431,6 +1497,14 @@ CompressLazy := [].{
+ 
+ 									# Now look only for matches longer than the one in hand.
+ 									while $done_m == 0 {
++										# The walk runs only while the match in hand is at least three bytes
++										# and shorter than `nice_len`, which is at most `max_len`. Stating that
++										# bounds the four-byte reads that end where the match in hand does, at
++										# the current position and at each candidate before it.
++										if $best_len_m < 3 or $best_len_m >= $nice_len or $nice_len > $max_len {
++											crash "CompressLazy: longer-match walk outside its bounds"
++										} else {
++										}
+ 										var $cand_at_m = 0.U64
+ 										# The four bytes ending just past the current best length are
+ 										# what a longer match must agree on. The best length holds for
+@@ -1449,7 +1523,7 @@ CompressLazy := [].{
+ 												break
+ 											} else {
+ 											}
+-											$node4_m = List.get($mf, HcMatchfinder.next_base.plus_wrap($node4_m.to_u64().bitwise_and(32767))) ?? 0
++											$node4_m = List.get($mfnext, $node4_m.to_u64().bitwise_and(32767)) ?? 0
+ 											$depth_m = $depth_m.minus_wrap(1)
+ 											if $node4_m.to_u64() <= cur_pos or $depth_m == 0 {
+ 												$done_m = 1
+@@ -1470,7 +1544,7 @@ CompressLazy := [].{
+ 											} else {
+ 											}
+ 											if $done_m == 0 {
+-												$node4_m = List.get($mf, HcMatchfinder.next_base.plus_wrap($node4_m.to_u64().bitwise_and(32767))) ?? 0
++												$node4_m = List.get($mfnext, $node4_m.to_u64().bitwise_and(32767)) ?? 0
+ 												$depth_m = $depth_m.minus_wrap(1)
+ 												if $node4_m.to_u64() <= cur_pos or $depth_m == 0 {
+ 													$done_m = 1
+@@ -1566,13 +1640,15 @@ CompressLazy := [].{
+ 									or in_end > List.len(input)
+ 									or skip_end.plus_wrap(5) > in_end
+ 									or skip_end.minus_wrap($base) > Matchfinder.window_size
+-									or List.len($mf) < HcMatchfinder.table_size
++									or (List.len($mf3) < HcMatchfinder.hash3_size or List.len($mf4) < HcMatchfinder.hash4_size or List.len($mfnext) < Matchfinder.window_size)
+ 									or $nh3 >= HcMatchfinder.hash3_size
+ 									or $nh4 >= HcMatchfinder.hash4_size {
+-									skipped = match HcMatchfinder.skip_bytes($mf, $base, $nh3, $nh4, input, $in_next, in_end, $skip_after, HcMatchfinder.default_layout) {
++									skipped = match HcTables.skip_bytes($mf3, $mf4, $mfnext, $base, $nh3, $nh4, input, $in_next, in_end, $skip_after) {
+ 										Ok(v) => v
+ 									}
+-									$mf = skipped.tab
++									$mf3 = skipped.head3
++									$mf4 = skipped.head4
++									$mfnext = skipped.chain
+ 									$base = skipped.in_cur_base
+ 									$nh3 = skipped.next_hash3
+ 									$nh4 = skipped.next_hash4
+@@ -1585,16 +1661,16 @@ CompressLazy := [].{
+ 									var $skip_node = $skip_at.minus_wrap($base).plus_wrap(Matchfinder.node_bias)
+ 									while $skip_at < skip_limit {
+ 										skip_node = $skip_node.to_u16_wrap()
+-										prev_head = List.get($mf, HcMatchfinder.hash4_base.plus_wrap($nh4)) ?? 0
+-										$mf = match List.set($mf, HcMatchfinder.hash3_base.plus_wrap($nh3), skip_node) {
++										prev_head = List.get($mf4, $nh4) ?? 0
++										$mf3 = match List.set($mf3, $nh3, skip_node) {
+ 											Ok(next) => next
+ 											Err(_) => crash "CompressLazy.compress: mf index out of bounds"
+ 										}
+-										$mf = match List.set($mf, HcMatchfinder.next_base.plus_wrap($skip_node.bitwise_and(32767)), prev_head) {
++										$mfnext = match List.set($mfnext, $skip_node.bitwise_and(32767), prev_head) {
+ 											Ok(next) => next
+ 											Err(_) => crash "CompressLazy.compress: mf index out of bounds"
+ 										}
+-										$mf = match List.set($mf, HcMatchfinder.hash4_base.plus_wrap($nh4), skip_node) {
++										$mf4 = match List.set($mf4, $nh4, skip_node) {
+ 											Ok(next) => next
+ 											Err(_) => crash "CompressLazy.compress: mf index out of bounds"
+ 										}
+@@ -1606,8 +1682,8 @@ CompressLazy := [].{
+ 									}
+ 								}
+ 								$in_next = $in_next.plus_wrap($skip_after)
+-								$mf = List.prefetched($mf, HcMatchfinder.hash3_base.plus_wrap($nh3))
+-								$mf = List.prefetched($mf, HcMatchfinder.hash4_base.plus_wrap($nh4))
++								$mf3 = List.prefetched($mf3, $nh3)
++								$mf4 = List.prefetched($mf4, $nh4)
+ 							} else {
+ 							}
+ 							$matching = 0
+diff --git a/package/CompressOptimal.roc b/package/CompressOptimal.roc
+index 6ad23a2..0fe074d 100644
+--- a/package/CompressOptimal.roc
++++ b/package/CompressOptimal.roc
+@@ -387,9 +387,11 @@ CompressOptimal := [].{
+ 		}
+ 	}
+ 
+-	## The path a min-cost search chose: for each position, the item that
+-	## starts the cheapest way of finishing the block from there.
+-	PathResult : { node_cost : List(U32), node_item : List(U32) }
++	## The path a min-cost search chose: for each position, the cost of the
++	## cheapest way of finishing the block from there in a node's low half and
++	## the item that starts it in the high half. One list rather than two keeps
++	## the search's per-position append to a single cursor and a single store.
++	PathResult : { nodes : List(U64) }
+ 
+ 	## The symbols a path uses and the Huffman codes built for them.
+ 	TallyResult : {
+@@ -411,12 +413,12 @@ CompressOptimal := [].{
+ 	## is considered, which is what makes that scan linear in the number of
+ 	## matches rather than quadratic.
+ 	##
+-	## The node tables are appended in that same order, so node `n` sits at
+-	## index `top - n` (see `node_top`): a position's node comes after every
+-	## later position's, which is exactly what its cost scan reads. The tables
+-	## keep their capacity from block to block and are never initialized.
+-	find_min_cost_path : U64, List(U32), U64, List(U32), List(U32), List(U32), List(U32), List(U32) -> PathResult
+-	find_min_cost_path = |block_length, cache, cache_end, node_cost_0, node_item_0, cost_literal, cost_length, cost_offset_slot| {
++	## The nodes are appended in that same order, so node `n` sits at index
++	## `top - n` (see `node_top`): a position's node comes after every later
++	## position's, which is exactly what its cost scan reads. The node list
++	## keeps its capacity from block to block and is never initialized.
++	find_min_cost_path : U64, List(U32), U64, List(U64), List(U32), List(U32), List(U32) -> PathResult
++	find_min_cost_path = |block_length, cache, cache_end, nodes_0, cost_literal, cost_length, cost_offset_slot| {
+ 		top = CompressOptimal.node_top(block_length)
+ 		# The length table has one cost per match length. Stating its size here
+ 		# lets every per-length read below skip its bounds test.
+@@ -424,26 +426,23 @@ CompressOptimal := [].{
+ 			crash "CompressOptimal.find_min_cost_path: length cost table too short"
+ 		} else {
+ 		}
+-		var $node_cost = List.clear(node_cost_0)
+-		var $node_item = List.clear(node_item_0)
++		var $nodes = List.clear(nodes_0)
+ 
+ 		# Make the block really end where it should, even though matches found
+ 		# near the end may reach past it: every node past the end costs too
+ 		# much to ever be chosen.
+ 		var $guard = top
+ 		while $guard != block_length {
+-			$node_cost = List.append($node_cost, 0x80000000)
+-			$node_item = List.append($node_item, 0)
++			$nodes = List.append($nodes, 0x80000000)
+ 			$guard = $guard.minus_wrap(1)
+ 		}
+-		$node_cost = List.append($node_cost, 0)
+-		$node_item = List.append($node_item, 0)
+-		# Node `n` lives at `List.len($node_cost) - (n - cur)` while the cursor
+-		# is at `cur`, and a match reaches at most `max_match_len` nodes ahead,
+-		# so the tables hold at least that many entries from here on: with that
++		$nodes = List.append($nodes, 0)
++		# Node `n` lives at `List.len($nodes) - (n - cur)` while the cursor is
++		# at `cur`, and a match reaches at most `max_match_len` nodes ahead, so
++		# the list holds at least that many entries from here on: with that
+ 		# stated once, every node read below is provably in bounds.
+-		if List.len($node_cost) < DeflateTables.max_match_len {
+-			crash "CompressOptimal.find_min_cost_path: node tables too short"
++		if List.len($nodes) < DeflateTables.max_match_len {
++			crash "CompressOptimal.find_min_cost_path: node list too short"
+ 		} else {
+ 		}
+ 
+@@ -461,7 +460,7 @@ CompressOptimal := [].{
+ 			literal = (List.get(cache, $cp) ?? 0).shr_zf_wrap(16).to_u64()
+ 
+ 			# A literal is always available, so it seeds the comparison.
+-			var $best = (List.get(cost_literal, literal) ?? 0).plus_wrap(List.get($node_cost, List.len($node_cost).minus_wrap(1)) ?? 0)
++			var $best = (List.get(cost_literal, literal) ?? 0).plus_wrap((List.get($nodes, List.len($nodes).minus_wrap(1)) ?? 0).to_u32_wrap())
+ 			var $item = literal.to_u32_wrap().shl_wrap(CompressOptimal.optimum_offset_shift).bitwise_or(1)
+ 
+ 			if num_matches != 0 {
+@@ -486,7 +485,7 @@ CompressOptimal := [].{
+ 						len = $k.plus_wrap(DeflateTables.min_match_len)
+ 						cost_to_end = offset_cost
+ 							.plus_wrap(List.get(cost_length, len) ?? 0)
+-							.plus_wrap(List.get($node_cost, List.len($node_cost).minus_wrap(len)) ?? 0)
++							.plus_wrap((List.get($nodes, List.len($nodes).minus_wrap(len)) ?? 0).to_u32_wrap())
+ 						if cost_to_end < $best {
+ 							$best = cost_to_end
+ 							$item = len.to_u32_wrap()
+@@ -501,11 +500,10 @@ CompressOptimal := [].{
+ 			} else {
+ 			}
+ 
+-			$node_cost = List.append($node_cost, $best)
+-			$node_item = List.append($node_item, $item)
++			$nodes = List.append($nodes, $best.to_u64().bitwise_or($item.to_u64().shl_wrap(32)))
+ 		}
+ 
+-		{ node_cost: $node_cost, node_item: $node_item }
++		{ nodes: $nodes }
+ 	}
+ 
+ 	## The index of node 0 in a path's node tables, which hold node `n` at
+@@ -523,37 +521,47 @@ CompressOptimal := [].{
+ 
+ 	## Count the symbols a chosen path uses and build the Huffman codes for
+ 	## them, walking the path forwards this time.
+-	tally_and_build_codes : List(U32), U64 -> TallyResult
+-	tally_and_build_codes = |node_item, block_length| {
+-		var $freqs_litlen = List.repeat(0.U32, DeflateTables.num_litlen_syms)
+-		var $freqs_offset = List.repeat(0.U32, DeflateTables.num_offset_syms)
++	tally_and_build_codes : List(U64), U64 -> TallyResult
++	tally_and_build_codes = |nodes, block_length| {
++		# Each list covers every index its lookup can produce, not just the
++		# alphabet: a literal is a byte, the length slot is a byte added to 257,
++		# and the offset slot is a byte plus 14, so the counts need no bounds
++		# tests.
++		var $freqs_litlen = List.repeat(0.U32, DeflateTables.first_len_sym + 256)
++		var $freqs_offset = List.repeat(0.U32, 256 + 14)
+ 		top = CompressOptimal.node_top(block_length)
++		# Wrapping arithmetic on the per-item path: a count never exceeds the
++		# block length, and the cursor steps through the block by lengths that
++		# end exactly at its end, so a checked add would only put an overflow
++		# branch on every item.
+ 		var $at = 0.U64
+ 		while $at != block_length {
+-			item = List.get(node_item, top.minus_wrap($at)) ?? 0
++			item = (List.get(nodes, top.minus_wrap($at)) ?? 0).shr_zf_wrap(32).to_u32_wrap()
+ 			length = item.bitwise_and(CompressOptimal.optimum_len_mask).to_u64()
+ 			offset = item.shr_zf_wrap(CompressOptimal.optimum_offset_shift).to_u64()
+ 			if length == 1 {
+-				offset_count = (List.get($freqs_litlen, offset) ?? 0) + 1
+-				$freqs_litlen = match List.set($freqs_litlen, offset, offset_count) {
++				# A literal item's offset field holds the literal byte.
++				literal = offset.bitwise_and(0xFF)
++				offset_count = (List.get($freqs_litlen, literal) ?? 0).plus_wrap(1)
++				$freqs_litlen = match List.set($freqs_litlen, literal, offset_count) {
+ 					Ok(next) => next
+ 					Err(_) => crash "CompressOptimal.tally_and_build_codes: freqs_litlen index out of bounds"
+ 				}
+ 			} else {
+-				sym = DeflateTables.first_len_sym + DeflateTables.length_slot(length)
+-				sym_count = (List.get($freqs_litlen, sym) ?? 0) + 1
++				sym = DeflateTables.first_len_sym.plus_wrap(DeflateTables.length_slot(length))
++				sym_count = (List.get($freqs_litlen, sym) ?? 0).plus_wrap(1)
+ 				$freqs_litlen = match List.set($freqs_litlen, sym, sym_count) {
+ 					Ok(next) => next
+ 					Err(_) => crash "CompressOptimal.tally_and_build_codes: freqs_litlen index out of bounds"
+ 				}
+ 				slot = DeflateTables.offset_slot(offset)
+-				slot_count = (List.get($freqs_offset, slot) ?? 0) + 1
++				slot_count = (List.get($freqs_offset, slot) ?? 0).plus_wrap(1)
+ 				$freqs_offset = match List.set($freqs_offset, slot, slot_count) {
+ 					Ok(next) => next
+ 					Err(_) => crash "CompressOptimal.tally_and_build_codes: freqs_offset index out of bounds"
+ 				}
+ 			}
+-			$at = $at + length
++			$at = $at.plus_wrap(length)
+ 		}
+ 		$freqs_litlen = match List.set($freqs_litlen, DeflateTables.end_of_block,
+ 			(List.get($freqs_litlen, DeflateTables.end_of_block) ?? 0) + 1) {
+@@ -709,8 +717,7 @@ CompressOptimal := [].{
+ 
+ 		var $cache = List.repeat(0.U32, CompressOptimal.match_cache_size)
+ 		var $cache_ptr = 0.U64
+-		var $node_cost = List.with_capacity(CompressOptimal.optimum_nodes_size)
+-		var $node_item = List.with_capacity(CompressOptimal.optimum_nodes_size)
++		var $nodes = List.with_capacity(CompressOptimal.optimum_nodes_size)
+ 
+ 		var $cost_literal = List.repeat(0.U32, DeflateTables.num_literals)
+ 		var $cost_length = List.repeat(0.U32, DeflateTables.max_match_len + 1)
+@@ -985,15 +992,13 @@ CompressOptimal := [].{
+ 					block_length,
+ 					$cache,
+ 					$cache_end,
+-					$node_cost,
+-					$node_item,
++					$nodes,
+ 					sc.literal,
+ 					sc.length,
+ 					sc.offset_slot,
+ 				)
+-				$node_cost = path.node_cost
+-				$node_item = path.node_item
+-				$static_cost = (List.last($node_cost) ?? 0).to_u64() // CompressOptimal.bit_cost + 7
++				$nodes = path.nodes
++				$static_cost = (List.last($nodes) ?? 0).to_u32_wrap().to_u64() // CompressOptimal.bit_cost + 7
+ 			} else {
+ 			}
+ 
+@@ -1049,15 +1054,13 @@ CompressOptimal := [].{
+ 					block_length,
+ 					$cache,
+ 					$cache_end,
+-					$node_cost,
+-					$node_item,
++					$nodes,
+ 					$cost_literal,
+ 					$cost_length,
+ 					$cost_offset_slot,
+ 				)
+-				$node_cost = path.node_cost
+-				$node_item = path.node_item
+-				tallied = CompressOptimal.tally_and_build_codes($node_item, block_length)
++				$nodes = path.nodes
++				tallied = CompressOptimal.tally_and_build_codes($nodes, block_length)
+ 				$freqs_litlen = tallied.freqs_litlen
+ 				$freqs_offset = tallied.freqs_offset
+ 				$litlen_lens = tallied.litlen_lens
+@@ -1147,15 +1150,13 @@ CompressOptimal := [].{
+ 						block_length,
+ 						$cache,
+ 						$cache_end,
+-						$node_cost,
+-						$node_item,
++						$nodes,
+ 						$cost_literal,
+ 						$cost_length,
+ 						$cost_offset_slot,
+ 					)
+-					$node_cost = path.node_cost
+-					$node_item = path.node_item
+-					tallied = CompressOptimal.tally_and_build_codes($node_item, block_length)
++					$nodes = path.nodes
++					tallied = CompressOptimal.tally_and_build_codes($nodes, block_length)
+ 					$freqs_litlen = tallied.freqs_litlen
+ 					$freqs_offset = tallied.freqs_offset
+ 					$litlen_lens = tallied.litlen_lens
+@@ -1173,15 +1174,13 @@ CompressOptimal := [].{
+ 					block_length,
+ 					$cache,
+ 					$cache_end,
+-					$node_cost,
+-					$node_item,
++					$nodes,
+ 					$cost_literal,
+ 					$cost_length,
+ 					$cost_offset_slot,
+ 				)
+-				$node_cost = path.node_cost
+-				$node_item = path.node_item
+-				tallied = CompressOptimal.tally_and_build_codes($node_item, block_length)
++				$nodes = path.nodes
++				tallied = CompressOptimal.tally_and_build_codes($nodes, block_length)
+ 				$freqs_litlen = tallied.freqs_litlen
+ 				$freqs_offset = tallied.freqs_offset
+ 				$litlen_lens = tallied.litlen_lens
+@@ -1219,7 +1218,7 @@ CompressOptimal := [].{
+ 				$s_litlen_codewords,
+ 				$s_offset_lens,
+ 				$s_offset_codewords,
+-				$node_item,
++				$nodes,
+ 				$use_items,
+ 				$is_final,
+ 			)
+@@ -1227,7 +1226,7 @@ CompressOptimal := [].{
+ 			$bitbuf = flushed.bitbuf
+ 			$bitcount = flushed.bitcount
+ 			$seqs = flushed.seqs
+-			$node_item = flushed.items
++			$nodes = flushed.items
+ 			$s_litlen_lens = flushed.static_litlen_lens
+ 			$s_litlen_codewords = flushed.static_litlen_codewords
+ 			$s_offset_lens = flushed.static_offset_lens
+diff --git a/package/HcMatchfinder.roc b/package/HcMatchfinder.roc
+index 398fd1e..bf431e5 100644
+--- a/package/HcMatchfinder.roc
++++ b/package/HcMatchfinder.roc
+@@ -1,31 +1,5 @@
+-import Matchfinder
+-
+-## The hash-chains matchfinder, ported from libdeflate's `hc_matchfinder.h`.
+-##
+-## Every position is inserted into a length-3 hash bucket and onto the front of
+-## a length-4 hash chain. A search walks the length-4 chain newest first, so it
+-## can stop after `max_search_depth` candidates and still have considered the
+-## nearest ones, which are the cheapest to encode.
+-##
+-## This module holds the tables, their layout and the insertion of skipped
+-## positions. The search itself, libdeflate's `hc_matchfinder_longest_match`,
+-## is written out in `CompressLazy` at each of its four sites (the greedy loop
+-## and the lazy loop's three), because a call here returned through memory
+-## and spilled the loop around it. libdeflate gets the same effect from
+-## `forceinline` on a single source. Keep the four copies in step with that
+-## function and with each other.
+-##
+-## Two details of the search carry most of the speed and are kept exactly:
+-##
+-##   - the walk rejects a candidate on four bytes at a time, and once a match
+-##     is established it first re-checks the four bytes ending just past the
+-##     current best length, so a candidate that cannot beat the incumbent is
+-##     discarded without extending it
+-##   - the first search and the "already have a length-4 match" search are
+-##     separate loops rather than one general loop, because each is tuned for
+-##     what it knows
++## Hash-chain table dimensions shared by the search and insertion loops.
+ HcMatchfinder := [].{
+-
+ 	hash3_order : U64
+ 	hash3_order = 15
+ 
+@@ -37,117 +11,4 @@ HcMatchfinder := [].{
+ 
+ 	hash4_size : U64
+ 	hash4_size = 65536
+-
+-	## The lazy parser keeps the chain links first, since its deeper searches
+-	## repeatedly follow them. The greedy parser instead puts the length-4
+-	## heads first to save address calculations while inserting skipped bytes.
+-	## Both layouts keep all three tables in one unique allocation.
+-	Layout : { next_base : U64, hash3_base : U64, hash4_base : U64 }
+-
+-	default_layout : Layout
+-	default_layout = { next_base: 0, hash3_base: 32768, hash4_base: 65536 }
+-
+-	greedy_layout : Layout
+-	greedy_layout = { next_base: 98304, hash3_base: 65536, hash4_base: 0 }
+-
+-	next_base : U64
+-	next_base = 0
+-
+-	hash3_base : U64
+-	hash3_base = 32768
+-
+-	hash4_base : U64
+-	hash4_base = 65536
+-
+-	table_size : U64
+-	table_size = 131072
+-
+-	State : {
+-		tab : List(U16),
+-		in_cur_base : U64,
+-		next_hash3 : U64,
+-		next_hash4 : U64,
+-	}
+-
+-	init_tables : {} -> List(U16)
+-	init_tables = |{}|
+-		Matchfinder.init_nodes(HcMatchfinder.table_size)
+-
+-	## Insert `count` positions into the tables without searching them.
+-	##
+-	## The result comes back in a `Try` that cannot fail. The compiler at
+-	## roc-lang/roc 66c32df makes the lazy levels a few percent slower when
+-	## this returns the bare record instead, though the work is the same.
+-	skip_bytes : List(U16), U64, U64, U64, List(U8), U64, U64, U64, Layout -> Try(State, [])
+-	skip_bytes = |tab_0, base_0, nh3_0, nh4_0, input, in_next0, in_end, count, layout| {
+-		# The run and the four bytes hashed past it stay inside the input.
+-		# Stated against the input's own length, that lets the hash read on
+-		# every skipped byte drop its bounds test.
+-		end = in_next0.plus_wrap(count)
+-		if end.plus_wrap(5) > in_end or in_end > List.len(input) {
+-			Ok({
+-				tab: tab_0,
+-				in_cur_base: base_0,
+-				next_hash3: nh3_0,
+-				next_hash4: nh4_0,
+-			})
+-		} else {
+-			var $tab = tab_0
+-			var $base = base_0
+-			var $cur_pos = in_next0.minus_wrap(base_0).to_i64_wrap()
+-			# One slide covers the whole run, since a match is far shorter than
+-			# a window. Positions past the slide go in already relative to the
+-			# new base.
+-			if $cur_pos.plus_wrap(count.to_i64_wrap()).minus_wrap(1) >= Matchfinder.window_size.to_i64_wrap() {
+-				$tab = Matchfinder.rebase_nodes($tab)
+-				$base = $base.plus_wrap(Matchfinder.window_size)
+-				$cur_pos = $cur_pos.minus_wrap(Matchfinder.window_size.to_i64_wrap())
+-			} else {
+-			}
+-			# The table holds all three regions, and the incoming hashes are
+-			# already reduced to their region's size. Establishing both once
+-			# here lets the bounds test on every table access in the loop fold
+-			# away instead of running per byte.
+-			if List.len($tab) < HcMatchfinder.table_size
+-				or nh3_0 >= HcMatchfinder.hash3_size
+-				or nh4_0 >= HcMatchfinder.hash4_size {
+-				crash "HcMatchfinder.skip_bytes: hash-chain tables too short or hash out of range"
+-			} else {
+-			}
+-			# Wrapping arithmetic: the run was bounded against the input above and
+-			# the table indices are a region base plus a reduced hash, so nothing
+-			# here can overflow and a checked add would only cost a branch per byte.
+-			var $in_next = in_next0
+-			var $hash3 = nh3_0
+-			var $hash4 = nh4_0
+-			while $in_next < end {
+-				pos = $cur_pos.plus_wrap(Matchfinder.node_bias.to_i64_wrap()).to_u16_wrap()
+-				slot = layout.next_base.plus_wrap($cur_pos.to_u64_wrap().bitwise_and(32767))
+-				prev_head = List.get($tab, layout.hash4_base.plus_wrap($hash4)) ?? 0
+-				tab1 = match List.set($tab, layout.hash3_base.plus_wrap($hash3), pos) {
+-					Ok(next) => next
+-					Err(_) => crash "HcMatchfinder.skip_bytes: tab index out of bounds"
+-				}
+-				tab2 = match List.set(tab1, slot, prev_head) {
+-					Ok(next) => next
+-					Err(_) => crash "HcMatchfinder.skip_bytes: tab1 index out of bounds"
+-				}
+-				$tab = match List.set(tab2, layout.hash4_base.plus_wrap($hash4), pos) {
+-					Ok(next) => next
+-					Err(_) => crash "HcMatchfinder.skip_bytes: tab2 index out of bounds"
+-				}
+-				$in_next = $in_next.plus_wrap(1)
+-				next_hashseq = U32.from_le_bytes(input, $in_next) ?? 0
+-				$hash3 = Matchfinder.lz_hash(next_hashseq.bitwise_and(0xFFFFFF), HcMatchfinder.hash3_order)
+-				$hash4 = Matchfinder.lz_hash(next_hashseq, HcMatchfinder.hash4_order)
+-				$cur_pos = $cur_pos.plus_wrap(1)
+-			}
+-			Ok({
+-				tab: $tab,
+-				in_cur_base: $base,
+-				next_hash3: $hash3,
+-				next_hash4: $hash4,
+-			})
+-		}
+-	}
+ }
+diff --git a/package/HcTables.roc b/package/HcTables.roc
+new file mode 100644
+index 0000000..c46f21d
+--- /dev/null
++++ b/package/HcTables.roc
+@@ -0,0 +1,68 @@
++import Matchfinder
++import HcMatchfinder
++
++## Hash-chain tables and insertion of positions skipped by a match.
++## The greedy and lazy parsers share this layout: length-3 hash heads,
++## length-4 hash heads, and window-sized chain links, all stored as U16.
++## The search loops live in CompressLazy so their bounds remain visible
++## alongside the surrounding parser state. Keep the four copies of
++## libdeflate's hc_matchfinder_longest_match consistent: the greedy search
++## and the lazy parser's three searches.
++HcTables := [].{
++	State : {
++		head3 : List(U16),
++		head4 : List(U16),
++		chain : List(U16),
++		in_cur_base : U64,
++		next_hash3 : U64,
++		next_hash4 : U64,
++	}
++
++	skip_bytes : List(U16), List(U16), List(U16), U64, U64, U64, List(U8), U64, U64, U64 -> Try(State, [])
++	skip_bytes = |head3_0, head4_0, chain_0, base_0, nh3_0, nh4_0, input, in_next0, in_end, count| {
++		# Include the lookahead used to hash the following position.
++		end = in_next0.plus_wrap(count)
++		if end.plus_wrap(5) > in_end or in_end > List.len(input) {
++			Ok({ head3: head3_0, head4: head4_0, chain: chain_0, in_cur_base: base_0, next_hash3: nh3_0, next_hash4: nh4_0 })
++		} else {
++			var $head3 = head3_0
++			var $head4 = head4_0
++			var $chain = chain_0
++			var $base = base_0
++			var $cur_pos = in_next0.minus_wrap(base_0).to_i64_wrap()
++			# A match is shorter than the window, so at most one slide is needed.
++			if $cur_pos.plus_wrap(count.to_i64_wrap()).minus_wrap(1) >= Matchfinder.window_size.to_i64_wrap() {
++				$head3 = Matchfinder.rebase_nodes($head3)
++				$head4 = Matchfinder.rebase_nodes($head4)
++				$chain = Matchfinder.rebase_nodes($chain)
++				$base = $base.plus_wrap(Matchfinder.window_size)
++				$cur_pos = $cur_pos.minus_wrap(Matchfinder.window_size.to_i64_wrap())
++			} else {}
++			# Establish table and initial hash bounds once, before the byte loop.
++			if List.len($head3) < HcMatchfinder.hash3_size
++				or List.len($head4) < HcMatchfinder.hash4_size
++				or List.len($chain) < Matchfinder.window_size
++				or nh3_0 >= HcMatchfinder.hash3_size
++				or nh4_0 >= HcMatchfinder.hash4_size {
++				crash "HcTables.skip_bytes: invalid tables or hash"
++			} else {}
++			var $in_next = in_next0
++			var $hash3 = nh3_0
++			var $hash4 = nh4_0
++			while $in_next < end {
++				pos = $cur_pos.plus_wrap(Matchfinder.node_bias.to_i64_wrap()).to_u16_wrap()
++				slot = $cur_pos.to_u64_wrap().bitwise_and(32767)
++				prev_head = List.get($head4, $hash4) ?? 0
++				$head3 = List.set($head3, $hash3, pos) ?? crash "hash3 outside table"
++				$chain = List.set($chain, slot, prev_head) ?? crash "chain outside table"
++				$head4 = List.set($head4, $hash4, pos) ?? crash "hash4 outside table"
++				$in_next = $in_next.plus_wrap(1)
++				next_hashseq = U32.from_le_bytes(input, $in_next) ?? 0
++				$hash3 = Matchfinder.lz_hash(next_hashseq.bitwise_and(0xFFFFFF), HcMatchfinder.hash3_order)
++				$hash4 = Matchfinder.lz_hash(next_hashseq, HcMatchfinder.hash4_order)
++				$cur_pos = $cur_pos.plus_wrap(1)
++			}
++			Ok({ head3: $head3, head4: $head4, chain: $chain, in_cur_base: $base, next_hash3: $hash3, next_hash4: $hash4 })
++		}
++	}
++}
+diff --git a/package/Matchfinder.roc b/package/Matchfinder.roc
+index bf713fe..3445b56 100644
+--- a/package/Matchfinder.roc
++++ b/package/Matchfinder.roc
+@@ -46,6 +46,7 @@ Matchfinder := [].{
+ 	node_index = |in_base, node|
+ 		in_base.plus_wrap(node.to_u64()).minus_wrap(Matchfinder.node_bias)
+ 
++
+ 	## Number of bytes at `match_at` that equal the bytes at `str_at`, counting
+ 	## the `start_len` bytes the caller already matched and stopping at
+ 	## `max_len`.

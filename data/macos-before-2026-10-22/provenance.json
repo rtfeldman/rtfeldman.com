@@ -1,0 +1,20 @@
+{
+  "library_pr": "https://github.com/rtfeldman/roc-deflate/pull/11",
+  "library_commit": "56998d3d806ef6d0ad70934957787e5c4aeb69a3",
+  "compiler_commit": "5e62c0e13ae779c28f7904dcdd2849ba13240beb",
+  "compiler_sha256": "afab77bd51e9262ac59c1306cca14bee8a9f5aeef28be67e866bd3af31c8b4cb",
+  "libdeflate_commit": "b122c8be1d78b19f6d0a6efc5bb79bfcbb30dd51",
+  "mimalloc_commit": "8c532c32c3c96e5ba1f2283e032f69ead8add00f",
+  "harness_commit": "671077457ff7ef3a3d44caf715a3fc595addf379",
+  "driver_protocol": "per-case-process-v1",
+  "warmup_min_ns": 200000000,
+  "cpu": "Apple M1 Pro",
+  "os": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83\n",
+  "memory_bytes": 34359738368,
+  "physical_cores": 10,
+  "power": "AC",
+  "measurement": "3 rounds x 5 repetitions x 144 cases; fresh process for each engine/file/level; common C measurements",
+  "compiler_flags": "--no-cache --opt=speed",
+  "c_flags": "-O3 -DMI_STATIC_LIB",
+  "source_version_note": "Before package overlaid exactly from 56998d3 while retaining the final platform; package hashes verified against git."
+}

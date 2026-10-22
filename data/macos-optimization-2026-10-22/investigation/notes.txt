@@ -1,0 +1,133 @@
+Overnight macOS optimization investigation, 2026-10-22
+
+These are screening experiments. The headline result comes from the separate,
+complete 144-case paired run in the parent directory. The manifest records each
+panel's protocol, sample count, engines, files, and levels. A panel's median is
+across that panel's cases; it is not the full-suite median.
+
+Related upstream work
+
+The library branch incorporates roc-deflate PR #6 through 04cb55f, including
+explicit input-span and longer-match length bounds. The selected compiler is
+PR #12507 at d99c7b83, built from source, with the relevant range-proof and
+loop-exit tests passing. The earlier compiler binaries were preserved for
+controlled comparisons. Exact compiler and package hashes are in build.json.
+
+Retaining the hash-chain span guards while using the original direct candidate
+index calculation helped the Mac compared with the saturated candidate-index
+formulation from the upstream changes. The later 04cb55f guards state the
+longer-match walk's bounds before its inner candidate search. These checks
+preserve the algorithm and can let the optimizer remove repeated bounds tests.
+
+Table layouts
+
+Three independent U16 lists for the greedy parser produced a modest improvement
+in the first fresh-process panel. Combined with reading both entries of a fast
+hash bucket before updating it, the 30-case maximum fell from 15.60% to 15.37%,
+and the median from 13.52% to 13.32%, in six balanced rounds of three samples.
+Those small differences alone require confirmation.
+
+Extending separate tables to the lazy parser produced much larger gains in
+levels 6-9, but initially raised the maximum in level 2. Restoring the greedy
+parser's combined table did not preserve those large lazy-level gains. This is
+an observed interaction between the source variants, not proof that a particular
+cache effect, register spill, or inlining decision caused it.
+
+The new upstream length guards combined successfully with separate tables in
+both parsers. In the five-round, 45-case comparison (25 samples per case), the
+baseline median was 13.107% and its maximum was 15.410% (MR level 9). The guarded
+separate-table version's median was 4.845% and its maximum was 15.160% (XML level
+1). The candidate preserves match selection, table entry widths, and window
+rebasing. It addresses each table directly and checks its own size. No corpus
+recognition, input-specific dispatch, or changes in compression effort are used.
+
+Integration is measured separately from the initial winning source. The shared
+insertion helper can be consolidated without retaining an unused combined
+layout; the final executable is rebuilt and measured rather than substituting
+times from a screening executable.
+
+High-compression and integration experiments
+
+Separating the optimal parser's packed U64 cost/path entries into two U32 lists
+improved the high-compression screening panel: median gap 4.62% to -0.61%, and
+maximum 12.54% to 10.29%. However, combining this with the new hash-chain layout
+raised the low-level maximum. In the four-round integration panel, the earlier
+separate-table source had a 14.25% maximum and 3.96% median; the combined source
+had a 15.83% maximum and 3.68% median. A distance-slot arithmetic specialization
+for the fast parser raised the maximum further, to 17.55%, despite a slightly
+lower median. It was rejected. The arithmetic helper passed an exhaustive
+comparison with the table-based result for every valid DEFLATE distance.
+
+The six-round isolation panel uses 30 samples per engine/case, with all six
+engine positions balanced. Earlier separate-table control: 14.00% maximum,
+4.33% median. Consolidated helper with packed optimal nodes: 14.58% maximum,
+4.09% median. Clean shared HcTables with packed optimal nodes: 14.19% maximum,
+4.41% median. Both unpacked optimal variants exceeded 16% at MR level 2.
+
+The selected source uses the clean shared HcTables module and packed optimal
+nodes. It removes the obsolete combined-table helper while remaining close to
+the earlier control's maximum. The 0.19 percentage-point difference from that
+control is small relative to observed round variation; unused code is not kept
+to chase a favorable executable layout. The optimal-storage change is excluded,
+even though it had the lowest median in this panel. The final committed source
+is 6710774, with explanatory comment updates after the panel; it is rebuilt for
+the independent full-suite run.
+
+Rejected directions
+
+- Wider U32 matchfinder positions reduce rebasing frequency but substantially
+  increased the worst gap (about 49% in the tested panel). The larger working
+  set is a plausible explanation, not an established hardware-counter finding.
+- Scalar unrolling of skipped-byte insertion and several explicit vector-hash
+  variants improved some cases while worsening the maximum. In the final
+  guarded-table panel the vector variant reached 26.13% on NCI level 2, versus
+  15.16% for the simpler guarded separate-table version.
+- Removing prefetches raised the maximum from 15.57% to 18.45% and also raised
+  the median. Prefetches were retained.
+- Other early screening included candidate-bound formulations, Huffman table
+  representations, distance-slot arithmetic applied globally, and insertion
+  loop rewrites. None was accepted solely for a better result on one input.
+
+Protocol and exclusions
+
+The wide, batching, and first greedy panels used the earlier matched per-file
+batch protocol. The fresh-process, prefetch, lazy, follow-up, guarded-walk, and
+later panels use one file/level case per process, a runtime level argument, and
+at least 200 ms warming the same output buffer that timed calls reuse. All
+engines use embedded inputs and directly linked mimalloc. Complete process
+output and each individual timing observation are retained.
+
+The new protocol was fixed before the final source selection and final paired
+run. The before source is rebuilt with that exact protocol. Historical basic-cli
+and batch maxima cannot be used as controlled before/after figures for this run.
+
+Builds, tests, and profiling did not overlap the retained performance panels or
+final run. Explicitly labeled preflight/validation-only observations are excluded.
+An early indexed-node prototype failed correctness checks: the block writer and
+static-cost selection still used the list's length/last element as a proxy for
+the last used node. Both were changed to explicit block-derived indexes before
+that variant entered its timing panel. The invalid prototype and its diagnostic
+logs are not performance evidence. Every retained timing driver verifies exact
+compressed bytes and a warmup round trip; final-source integration tests add
+edge-length, interop, decoder, and compression-ratio checks.
+
+The machine remains a shared desktop without CPU pinning or fixed frequency.
+Execution order is rotated, and the final report includes per-round results and
+within-case variability. Small changes should not be interpreted as exact causal
+effects or a universal performance bound for all macOS workloads.
+
+Independent final run
+
+The complete three-round, 144-case run used 15 samples per engine/case, with
+6,480 unique observations across C, the rebuilt earlier version, and the final
+source. The maximum gap fell from 17.6390% (NCI level 2) to 14.3766% (Reymont
+level 1); the median fell from 7.1746% to 2.6042%. Roc beat libdeflate in 54 cases
+versus 22 before. No compressed-byte mismatch occurred. The rounded-up bound
+for these case medians is 14.4%, not a bound on every individual repetition.
+
+The largest remaining gaps are Reymont level 1 (14.38%), XML level 1 (13.78%),
+and X-ray level 9 (13.64%). The complete suite also exposes tradeoffs that the
+focused panel cannot show: 16 cases regress by at least 1% versus the baseline,
+with the largest Roc time increase about 3.39% at X-ray levels 5 and 7. Both the
+maximum gap and median nevertheless improve in the paired full-suite run.
+The per-case CSV and report retain every regression alongside the improvements.

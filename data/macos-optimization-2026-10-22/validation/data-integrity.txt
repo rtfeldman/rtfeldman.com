@@ -1,0 +1,18 @@
+Final data integrity audit, 2026-10-22
+
+Passed: 6,480 unique observations across three engines, 144 cases, three rounds,
+and five repetitions; exactly 15 samples in every engine/case group.
+Passed: raw process output agrees with the imported CSV and raw TSV.
+Passed: independently recomputed Python minima, maxima, medians and win counts
+agree with the JavaScript summaries for both source versions.
+Passed: both datasets share exactly the same 2,160 C observations.
+Passed: before package hashes match 56998d3; after package hashes match 6710774.
+Passed: the source bundle verifies and contains the complete branch history.
+Passed: top-level report.txt and comparison-summary.csv match the current report
+and current-comparison-summary.csv respectively.
+Passed: supplied Linux CSV and TSV hashes still match the archive audit.
+Passed: local library HEAD and pushed PR head both equal 6710774.
+
+The final timing run completed without a compressed-byte mismatch.
+See import-final-data.py, analyze-embedded-benchmarks.mjs, build.json, run.json,
+and the separately retained successful library, platform and compiler logs.

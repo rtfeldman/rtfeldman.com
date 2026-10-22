@@ -12,5 +12,9 @@
     "comparison-vs-baseline.txt",
     "comparison-vs-run3.txt"
   ],
-  "omission_reason": "Comparisons with superseded runs; current summaries are regenerated from this archive's raw timings."
+  "omission_reason": "Comparisons with superseded runs; current summaries are regenerated from this archive's raw timings.",
+  "files_sha256": {
+    "roc-deflate-compression-timings.csv": "cdbc9c6437f9dc1aeffbe6eaac1e4a56bb54f819302d289a3126d5c5683ace65",
+    "raw.tsv": "aa54f6ba0e727a9721c2e25d3477e1afb8e81eae64640b3f6e325fb2ab46bd93"
+  }
 }
