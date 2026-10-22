@@ -1,10 +1,111 @@
 <!doctype html>
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="color-scheme" content="light dark" />
         <title>How close can pure FP get to C?</title>
         <link rel="stylesheet" href="site.css" />
+<!-- BEGIN COMPRESSION CHART STYLE -->
+<style>
+/* Chart heights are generated from CSVs by data/embed-compression-chart.pl. */
+.compression-chart {
+    --chart-surface: #faf9fd;
+    --chart-border: #dedbe7;
+    --chart-grid: #e6e3ec;
+    --chart-muted: #605b6e;
+    --roc-low: #c5abf5;
+    --roc-high: #6426b5;
+    --c-low: #c8c8cc;
+    --c-high: #50515a;
+    --chart-height: 340px;
+    --chart-axis-width: 38px;
+    position: relative;
+    margin: 1.75rem 0 2rem;
+    padding: 22px 20px 18px;
+    border: 1px solid var(--chart-border);
+    border-radius: 14px;
+    background: var(--chart-surface);
+    color: var(--text-color);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.5;
+}
+.compression-chart *, .compression-chart *::before, .compression-chart *::after { box-sizing: border-box; }
+.compression-chart h3 { margin: 0; font: 700 21px/1.3 var(--font-sans); letter-spacing: -.025em; }
+.compression-chart p { line-height: 1.5; }
+.compression-chart figcaption p { margin: 6px 0 18px; color: var(--chart-muted); }
+.chart-radio { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.chart-controls { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--chart-border); border-radius: 9px; width: fit-content; max-width: 100%; }
+.chart-controls label { display: flex; align-items: center; justify-content: center; min-height: 40px; padding: 7px 13px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; text-align: center; }
+#chart-mac:checked ~ .chart-controls label[for="chart-mac"],
+#chart-linux:checked ~ .chart-controls label[for="chart-linux"] { background: var(--heading-color); color: var(--body-bg-color); }
+#chart-mac:focus-visible ~ .chart-controls label[for="chart-mac"],
+#chart-linux:focus-visible ~ .chart-controls label[for="chart-linux"] { outline: 3px solid var(--link-color); outline-offset: 3px; }
+.chart-panel { display: none; }
+#chart-mac:checked ~ .chart-panel-mac, #chart-linux:checked ~ .chart-panel-linux { display: block; }
+.compression-chart .chart-note { min-height: 3em; margin: 14px 0 18px; font-size: 12px; color: var(--chart-muted); }
+.chart-axis-title { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin: 0 0 12px; }
+.chart-axis-title span { color: var(--chart-muted); font-weight: 400; }
+.chart-frame { display: grid; grid-template-columns: var(--chart-axis-width) minmax(0, 1fr); height: var(--chart-height); }
+.chart-y-axis { position: relative; color: var(--chart-muted); font-size: 11px; }
+.chart-y-axis span { position: absolute; right: 9px; transform: translateY(50%); }
+.chart-plot { position: relative; height: 100%; }
+.chart-grid { position: absolute; inset: 0; pointer-events: none; }
+.chart-grid span { position: absolute; width: 100%; border-top: 1px solid var(--chart-grid); }
+.chart-grid span:first-child { border-color: var(--chart-border); }
+.chart-groups { position: relative; height: 100%; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 8px; padding: 0 5px; }
+.chart-level { height: 100%; min-width: 0; position: relative; }
+.chart-pair { height: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 3px; }
+.chart-bar { width: 50%; max-width: 18px; display: flex; flex-direction: column-reverse; border-radius: 3px 3px 0 0; position: relative; }
+.chart-bar > span { display: block; width: 100%; flex: 0 0 auto; }
+.chart-bar > .chart-high { border-radius: 3px 3px 0 0; }
+.chart-bar:hover, .chart-bar:focus-visible { outline: 2px solid var(--heading-color); outline-offset: 2px; }
+.chart-bar-roc .chart-low, .legend-roc-low { background: var(--roc-low); }
+.chart-bar-roc .chart-high, .legend-roc-high { background: var(--roc-high); }
+.chart-bar-libdeflate .chart-low, .legend-c-low { background: var(--c-low); }
+.chart-bar-libdeflate .chart-high, .legend-c-high { background: var(--c-high); }
+.chart-level-label { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--chart-muted); }
+.compression-chart .chart-x-axis { margin: 32px 0 18px var(--chart-axis-width); text-align: center; font-size: 12px; font-weight: 600; }
+.chart-values { border-top: 1px solid var(--chart-border); padding: 11px 0 0; font-size: 12px; }
+.chart-values summary { cursor: pointer; padding: 3px 0; font-weight: 600; min-height: 32px; }
+.chart-values summary span { color: var(--chart-muted); font-weight: 400; margin-left: 8px; }
+.chart-value-list { margin: 8px 0; }
+.chart-value-row { display: grid; grid-template-columns: .65fr 1fr 1fr; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--chart-grid); }
+.chart-value-row span { color: var(--chart-muted); }
+.chart-value-row b { color: var(--text-color); font-weight: 500; white-space: nowrap; }
+.chart-legend { display: grid; grid-template-columns: repeat(4, auto); gap: 9px 12px; border-top: 1px solid var(--chart-border); margin-top: 10px; padding-top: 16px; font-size: 11px; }
+.chart-legend > span { display: flex; gap: 6px; align-items: center; }
+.chart-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
+.compression-chart .chart-footnote { font-size: 11px; color: var(--chart-muted); margin: 12px 0 0; }
+@media (prefers-color-scheme: dark) {
+    .compression-chart { --chart-surface: #1e1c23; --chart-border: #49434f; --chart-grid: #39353e; --chart-muted: #bbb4c7; --roc-low: #cfb5f5; --roc-high: #8245ce; --c-low: #c4c4ce; --c-high: #696974; }
+}
+@media (max-width: 540px) {
+    .compression-chart { --chart-height: 280px; --chart-axis-width: 31px; padding: 18px 12px 14px; border-radius: 10px; }
+    .chart-controls { width: 100%; }
+    .chart-controls label { flex: 1; padding: 7px 6px; font-size: 12px; }
+    .chart-groups { column-gap: 4px; padding: 0 2px; }
+    .chart-pair { gap: 2px; }
+    .chart-level-label { font-size: 10px; }
+    .chart-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .chart-value-row { grid-template-columns: 1fr 1fr; }
+    .chart-value-row strong { grid-column: 1 / -1; }
+    .chart-value-row b { display: block; }
+    .chart-values summary span { display: block; margin: 3px 0 0 14px; }
+}
+@media print {
+    .compression-chart { break-inside: avoid; print-color-adjust: exact; }
+    .chart-controls, .chart-radio, .chart-values { display: none; }
+    .chart-panel { display: block; }
+    .chart-panel::before { display: block; font-weight: bold; margin-top: 16px; }
+    .chart-panel-mac::before { content: "macOS · M1 Pro"; }
+    .chart-panel-linux::before { content: "Linux · Ryzen 3900X"; }
+}
+</style>
+<!-- END COMPRESSION CHART STYLE -->
+
     </head>
     <body>
         <main>
@@ -23,7 +124,437 @@
 <p>So I spent a bunch of time grinding through performance optimizations on <a href="https://github.com/niclas-ahden/roc-deflate">roc-deflate</a>, a package <a href="https://www.youtube.com/@NiclasAhden">Niclas Ahden</a> wrote (and <a href="https://youtu.be/12yVcgQHAK0?si=JETe6lec5y4jCLVL">has been using in paid production work</a>) for DEFLATE compression. I didn't expect to beat libdeflate's performance across the board like <code>lean-zip</code> did with <code>miniz_oxide</code>, but I wanted to see how close it could get on the non-streaming APIs (as roc-deflate hasn't implemented streaming yet), using the classic Silesia compression corpus, across all 12 compression levels, for benchmarking and verifying that it produced identical outputs.</p>
 <h2 id="under-10-slower"><a class="heading-link" href="#under-10-slower">Under 10% Slower</a></h2>
 <p>Here's where the benchmarks stand today, running on the 2021 MacBook Pro with an M1 Pro where I did all the optimization work, as well as on an AMD Ryzen 9 3900X Ubuntu machine for an x64 comparison.</p>
-<p>[graph goes here]</p>
+<!-- BEGIN COMPRESSION CHART -->
+<figure class="compression-chart" aria-labelledby="compression-chart-title" aria-describedby="compression-chart-description">
+  <figcaption>
+    <h3 id="compression-chart-title">Compression throughput</h3>
+    <p id="compression-chart-description">Slowest to fastest across the Silesia corpus. Higher is faster.</p>
+  </figcaption>
+  <input class="chart-radio" type="radio" name="compression-machine" id="chart-mac" checked />
+  <input class="chart-radio" type="radio" name="compression-machine" id="chart-linux" />
+  <div class="chart-controls" role="group" aria-label="Benchmark machine">
+    <label for="chart-mac">macOS · M1 Pro</label>
+    <label for="chart-linux">Linux · Ryzen 3900X</label>
+  </div>
+  <section class="chart-panel chart-panel-mac" aria-label="macOS · M1 Pro throughput">
+    <p class="chart-note" id="chart-note-mac">Range of individual runs across 12 Silesia files; 15 measurements per file, engine, and level.</p>
+    <div class="chart-axis-title">MB/s <span>↑ faster</span></div>
+    <div class="chart-frame" aria-describedby="chart-note-mac">
+      <div class="chart-y-axis" aria-hidden="true">
+        <span style="bottom:100.000000%">700</span>
+        <span style="bottom:85.714286%">600</span>
+        <span style="bottom:71.428571%">500</span>
+        <span style="bottom:57.142857%">400</span>
+        <span style="bottom:42.857143%">300</span>
+        <span style="bottom:28.571429%">200</span>
+        <span style="bottom:14.285714%">100</span>
+        <span style="bottom:0.000000%">0</span>
+      </div>
+      <div class="chart-plot">
+        <div class="chart-grid" aria-hidden="true">
+          <span style="bottom:0.000000%"></span>
+          <span style="bottom:14.285714%"></span>
+          <span style="bottom:28.571429%"></span>
+          <span style="bottom:42.857143%"></span>
+          <span style="bottom:57.142857%"></span>
+          <span style="bottom:71.428571%"></span>
+          <span style="bottom:85.714286%"></span>
+          <span style="bottom:100.000000%"></span>
+        </div>
+        <div class="chart-groups">
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:76.251429%" tabindex="0" role="img" aria-label="Roc · level 1. Slowest run: 132.91 MB/s (x-ray, round 3, run 3). Fastest run: 533.76 MB/s (nci, round 1, run 2)." title="Roc · level 1. Slowest run: 132.91 MB/s (x-ray, round 3, run 3). Fastest run: 533.76 MB/s (nci, round 1, run 2).">
+                <span class="chart-low" style="height:24.900704%" title="Roc · L1 · slowest run: 132.91 MB/s (x-ray, round 3, run 3)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:75.099296%" title="Roc · L1 · fastest run: 533.76 MB/s (nci, round 1, run 2); dark segment adds 400.85 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:86.702857%" tabindex="0" role="img" aria-label="libdeflate · level 1. Slowest run: 142.82 MB/s (x-ray, round 3, run 1). Fastest run: 606.92 MB/s (nci, round 3, run 4)." title="libdeflate · level 1. Slowest run: 142.82 MB/s (x-ray, round 3, run 1). Fastest run: 606.92 MB/s (nci, round 3, run 4).">
+                <span class="chart-low" style="height:23.531932%" title="libdeflate · L1 · slowest run: 142.82 MB/s (x-ray, round 3, run 1)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:76.468068%" title="libdeflate · L1 · fastest run: 606.92 MB/s (nci, round 3, run 4); dark segment adds 464.10 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">1</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:59.105714%" tabindex="0" role="img" aria-label="Roc · level 2. Slowest run: 103.28 MB/s (sao, round 3, run 2). Fastest run: 413.74 MB/s (nci, round 3, run 3)." title="Roc · level 2. Slowest run: 103.28 MB/s (sao, round 3, run 2). Fastest run: 413.74 MB/s (nci, round 3, run 3).">
+                <span class="chart-low" style="height:24.962537%" title="Roc · L2 · slowest run: 103.28 MB/s (sao, round 3, run 2)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:75.037463%" title="Roc · L2 · fastest run: 413.74 MB/s (nci, round 3, run 3); dark segment adds 310.46 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:65.027143%" tabindex="0" role="img" aria-label="libdeflate · level 2. Slowest run: 110.88 MB/s (sao, round 2, run 4). Fastest run: 455.19 MB/s (nci, round 1, run 2)." title="libdeflate · level 2. Slowest run: 110.88 MB/s (sao, round 2, run 4). Fastest run: 455.19 MB/s (nci, round 1, run 2).">
+                <span class="chart-low" style="height:24.359059%" title="libdeflate · L2 · slowest run: 110.88 MB/s (sao, round 2, run 4)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:75.640941%" title="libdeflate · L2 · fastest run: 455.19 MB/s (nci, round 1, run 2); dark segment adds 344.31 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">2</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:54.868571%" tabindex="0" role="img" aria-label="Roc · level 3. Slowest run: 93.67 MB/s (sao, round 2, run 5). Fastest run: 384.08 MB/s (nci, round 3, run 4)." title="Roc · level 3. Slowest run: 93.67 MB/s (sao, round 2, run 5). Fastest run: 384.08 MB/s (nci, round 3, run 4).">
+                <span class="chart-low" style="height:24.388148%" title="Roc · L3 · slowest run: 93.67 MB/s (sao, round 2, run 5)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:75.611852%" title="Roc · L3 · fastest run: 384.08 MB/s (nci, round 3, run 4); dark segment adds 290.41 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:59.918571%" tabindex="0" role="img" aria-label="libdeflate · level 3. Slowest run: 99.71 MB/s (sao, round 2, run 3). Fastest run: 419.43 MB/s (nci, round 1, run 3)." title="libdeflate · level 3. Slowest run: 99.71 MB/s (sao, round 2, run 3). Fastest run: 419.43 MB/s (nci, round 1, run 3).">
+                <span class="chart-low" style="height:23.772739%" title="libdeflate · L3 · slowest run: 99.71 MB/s (sao, round 2, run 3)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:76.227261%" title="libdeflate · L3 · fastest run: 419.43 MB/s (nci, round 1, run 3); dark segment adds 319.72 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">3</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:51.177143%" tabindex="0" role="img" aria-label="Roc · level 4. Slowest run: 88.22 MB/s (sao, round 3, run 5). Fastest run: 358.24 MB/s (nci, round 3, run 5)." title="Roc · level 4. Slowest run: 88.22 MB/s (sao, round 3, run 5). Fastest run: 358.24 MB/s (nci, round 3, run 5).">
+                <span class="chart-low" style="height:24.625949%" title="Roc · L4 · slowest run: 88.22 MB/s (sao, round 3, run 5)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:75.374051%" title="Roc · L4 · fastest run: 358.24 MB/s (nci, round 3, run 5); dark segment adds 270.02 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:54.114286%" tabindex="0" role="img" aria-label="libdeflate · level 4. Slowest run: 93.14 MB/s (sao, round 2, run 1). Fastest run: 378.80 MB/s (nci, round 2, run 5)." title="libdeflate · level 4. Slowest run: 93.14 MB/s (sao, round 2, run 1). Fastest run: 378.80 MB/s (nci, round 2, run 5).">
+                <span class="chart-low" style="height:24.588173%" title="libdeflate · L4 · slowest run: 93.14 MB/s (sao, round 2, run 1)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:75.411827%" title="libdeflate · L4 · fastest run: 378.80 MB/s (nci, round 2, run 5); dark segment adds 285.66 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">4</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:44.834286%" tabindex="0" role="img" aria-label="Roc · level 5. Slowest run: 76.43 MB/s (sao, round 1, run 1). Fastest run: 313.84 MB/s (nci, round 1, run 1)." title="Roc · level 5. Slowest run: 76.43 MB/s (sao, round 1, run 1). Fastest run: 313.84 MB/s (nci, round 1, run 1).">
+                <span class="chart-low" style="height:24.353174%" title="Roc · L5 · slowest run: 76.43 MB/s (sao, round 1, run 1)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:75.646826%" title="Roc · L5 · fastest run: 313.84 MB/s (nci, round 1, run 1); dark segment adds 237.41 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:41.325714%" tabindex="0" role="img" aria-label="libdeflate · level 5. Slowest run: 82.65 MB/s (sao, round 2, run 2). Fastest run: 289.28 MB/s (nci, round 3, run 2)." title="libdeflate · level 5. Slowest run: 82.65 MB/s (sao, round 2, run 2). Fastest run: 289.28 MB/s (nci, round 3, run 2).">
+                <span class="chart-low" style="height:28.570935%" title="libdeflate · L5 · slowest run: 82.65 MB/s (sao, round 2, run 2)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:71.429065%" title="libdeflate · L5 · fastest run: 289.28 MB/s (nci, round 3, run 2); dark segment adds 206.63 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">5</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:35.372857%" tabindex="0" role="img" aria-label="Roc · level 6. Slowest run: 65.37 MB/s (sao, round 3, run 2). Fastest run: 247.61 MB/s (nci, round 3, run 3)." title="Roc · level 6. Slowest run: 65.37 MB/s (sao, round 3, run 2). Fastest run: 247.61 MB/s (nci, round 3, run 3).">
+                <span class="chart-low" style="height:26.400388%" title="Roc · L6 · slowest run: 65.37 MB/s (sao, round 3, run 2)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:73.599612%" title="Roc · L6 · fastest run: 247.61 MB/s (nci, round 3, run 3); dark segment adds 182.24 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:31.717143%" tabindex="0" role="img" aria-label="libdeflate · level 6. Slowest run: 67.20 MB/s (sao, round 2, run 3). Fastest run: 222.02 MB/s (nci, round 3, run 5)." title="libdeflate · level 6. Slowest run: 67.20 MB/s (sao, round 2, run 3). Fastest run: 222.02 MB/s (nci, round 3, run 5).">
+                <span class="chart-low" style="height:30.267543%" title="libdeflate · L6 · slowest run: 67.20 MB/s (sao, round 2, run 3)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:69.732457%" title="libdeflate · L6 · fastest run: 222.02 MB/s (nci, round 3, run 5); dark segment adds 154.82 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">6</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:25.190000%" tabindex="0" role="img" aria-label="Roc · level 7. Slowest run: 50.06 MB/s (reymont, round 1, run 5). Fastest run: 176.33 MB/s (nci, round 2, run 5)." title="Roc · level 7. Slowest run: 50.06 MB/s (reymont, round 1, run 5). Fastest run: 176.33 MB/s (nci, round 2, run 5).">
+                <span class="chart-low" style="height:28.389951%" title="Roc · L7 · slowest run: 50.06 MB/s (reymont, round 1, run 5)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:71.610049%" title="Roc · L7 · fastest run: 176.33 MB/s (nci, round 2, run 5); dark segment adds 126.27 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:22.582857%" tabindex="0" role="img" aria-label="libdeflate · level 7. Slowest run: 46.52 MB/s (reymont, round 2, run 4). Fastest run: 158.08 MB/s (nci, round 3, run 1)." title="libdeflate · level 7. Slowest run: 46.52 MB/s (reymont, round 2, run 4). Fastest run: 158.08 MB/s (nci, round 3, run 1).">
+                <span class="chart-low" style="height:29.428138%" title="libdeflate · L7 · slowest run: 46.52 MB/s (reymont, round 2, run 4)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:70.571862%" title="libdeflate · L7 · fastest run: 158.08 MB/s (nci, round 3, run 1); dark segment adds 111.56 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">7</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:14.832857%" tabindex="0" role="img" aria-label="Roc · level 8. Slowest run: 27.58 MB/s (reymont, round 1, run 2). Fastest run: 103.83 MB/s (osdb, round 2, run 1)." title="Roc · level 8. Slowest run: 27.58 MB/s (reymont, round 1, run 2). Fastest run: 103.83 MB/s (osdb, round 2, run 1).">
+                <span class="chart-low" style="height:26.562650%" title="Roc · L8 · slowest run: 27.58 MB/s (reymont, round 1, run 2)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:73.437350%" title="Roc · L8 · fastest run: 103.83 MB/s (osdb, round 2, run 1); dark segment adds 76.25 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:15.440000%" tabindex="0" role="img" aria-label="libdeflate · level 8. Slowest run: 24.30 MB/s (reymont, round 3, run 5). Fastest run: 108.08 MB/s (osdb, round 3, run 4)." title="libdeflate · level 8. Slowest run: 24.30 MB/s (reymont, round 3, run 5). Fastest run: 108.08 MB/s (osdb, round 3, run 4).">
+                <span class="chart-low" style="height:22.483346%" title="libdeflate · L8 · slowest run: 24.30 MB/s (reymont, round 3, run 5)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:77.516654%" title="libdeflate · L8 · fastest run: 108.08 MB/s (osdb, round 3, run 4); dark segment adds 83.78 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">8</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:14.767143%" tabindex="0" role="img" aria-label="Roc · level 9. Slowest run: 22.42 MB/s (reymont, round 2, run 2). Fastest run: 103.37 MB/s (osdb, round 3, run 1)." title="Roc · level 9. Slowest run: 22.42 MB/s (reymont, round 2, run 2). Fastest run: 103.37 MB/s (osdb, round 3, run 1).">
+                <span class="chart-low" style="height:21.689078%" title="Roc · L9 · slowest run: 22.42 MB/s (reymont, round 2, run 2)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:78.310922%" title="Roc · L9 · fastest run: 103.37 MB/s (osdb, round 3, run 1); dark segment adds 80.95 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:15.318571%" tabindex="0" role="img" aria-label="libdeflate · level 9. Slowest run: 20.54 MB/s (reymont, round 2, run 4). Fastest run: 107.23 MB/s (osdb, round 3, run 5)." title="libdeflate · level 9. Slowest run: 20.54 MB/s (reymont, round 2, run 4). Fastest run: 107.23 MB/s (osdb, round 3, run 5).">
+                <span class="chart-low" style="height:19.155087%" title="libdeflate · L9 · slowest run: 20.54 MB/s (reymont, round 2, run 4)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:80.844913%" title="libdeflate · L9 · fastest run: 107.23 MB/s (osdb, round 3, run 5); dark segment adds 86.69 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">9</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:4.627143%" tabindex="0" role="img" aria-label="Roc · level 10. Slowest run: 7.17 MB/s (nci, round 3, run 1). Fastest run: 32.39 MB/s (x-ray, round 1, run 2)." title="Roc · level 10. Slowest run: 7.17 MB/s (nci, round 3, run 1). Fastest run: 32.39 MB/s (x-ray, round 1, run 2).">
+                <span class="chart-low" style="height:22.136462%" title="Roc · L10 · slowest run: 7.17 MB/s (nci, round 3, run 1)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:77.863538%" title="Roc · L10 · fastest run: 32.39 MB/s (x-ray, round 1, run 2); dark segment adds 25.22 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:4.961429%" tabindex="0" role="img" aria-label="libdeflate · level 10. Slowest run: 7.49 MB/s (nci, round 1, run 4). Fastest run: 34.73 MB/s (x-ray, round 2, run 5)." title="libdeflate · level 10. Slowest run: 7.49 MB/s (nci, round 1, run 4). Fastest run: 34.73 MB/s (x-ray, round 2, run 5).">
+                <span class="chart-low" style="height:21.566369%" title="libdeflate · L10 · slowest run: 7.49 MB/s (nci, round 1, run 4)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:78.433631%" title="libdeflate · L10 · fastest run: 34.73 MB/s (x-ray, round 2, run 5); dark segment adds 27.24 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">10</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:3.590000%" tabindex="0" role="img" aria-label="Roc · level 11. Slowest run: 4.74 MB/s (nci, round 1, run 1). Fastest run: 25.13 MB/s (x-ray, round 3, run 5)." title="Roc · level 11. Slowest run: 4.74 MB/s (nci, round 1, run 1). Fastest run: 25.13 MB/s (x-ray, round 3, run 5).">
+                <span class="chart-low" style="height:18.861918%" title="Roc · L11 · slowest run: 4.74 MB/s (nci, round 1, run 1)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:81.138082%" title="Roc · L11 · fastest run: 25.13 MB/s (x-ray, round 3, run 5); dark segment adds 20.39 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:3.738571%" tabindex="0" role="img" aria-label="libdeflate · level 11. Slowest run: 4.79 MB/s (nci, round 3, run 2). Fastest run: 26.17 MB/s (x-ray, round 3, run 1)." title="libdeflate · level 11. Slowest run: 4.79 MB/s (nci, round 3, run 2). Fastest run: 26.17 MB/s (x-ray, round 3, run 1).">
+                <span class="chart-low" style="height:18.303401%" title="libdeflate · L11 · slowest run: 4.79 MB/s (nci, round 3, run 2)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:81.696599%" title="libdeflate · L11 · fastest run: 26.17 MB/s (x-ray, round 3, run 1); dark segment adds 21.38 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">11</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:3.261429%" tabindex="0" role="img" aria-label="Roc · level 12. Slowest run: 3.45 MB/s (nci, round 2, run 1). Fastest run: 22.83 MB/s (x-ray, round 1, run 1)." title="Roc · level 12. Slowest run: 3.45 MB/s (nci, round 2, run 1). Fastest run: 22.83 MB/s (x-ray, round 1, run 1).">
+                <span class="chart-low" style="height:15.111695%" title="Roc · L12 · slowest run: 3.45 MB/s (nci, round 2, run 1)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:84.888305%" title="Roc · L12 · fastest run: 22.83 MB/s (x-ray, round 1, run 1); dark segment adds 19.38 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:3.390000%" tabindex="0" role="img" aria-label="libdeflate · level 12. Slowest run: 3.48 MB/s (nci, round 3, run 1). Fastest run: 23.73 MB/s (x-ray, round 2, run 3)." title="libdeflate · level 12. Slowest run: 3.48 MB/s (nci, round 3, run 1). Fastest run: 23.73 MB/s (x-ray, round 2, run 3).">
+                <span class="chart-low" style="height:14.664981%" title="libdeflate · L12 · slowest run: 3.48 MB/s (nci, round 3, run 1)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:85.335019%" title="libdeflate · L12 · fastest run: 23.73 MB/s (x-ray, round 2, run 3); dark segment adds 20.25 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">12</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="chart-x-axis">Compression level</p>
+    <details class="chart-values">
+      <summary>Exact values <span>MB/s · slowest → fastest</span></summary>
+      <div class="chart-value-list">
+        <div class="chart-value-row"><strong>Level 1</strong><span>Roc: <b>132.91 → 533.76</b></span><span>libdeflate: <b>142.82 → 606.92</b></span></div>
+        <div class="chart-value-row"><strong>Level 2</strong><span>Roc: <b>103.28 → 413.74</b></span><span>libdeflate: <b>110.88 → 455.19</b></span></div>
+        <div class="chart-value-row"><strong>Level 3</strong><span>Roc: <b>93.67 → 384.08</b></span><span>libdeflate: <b>99.71 → 419.43</b></span></div>
+        <div class="chart-value-row"><strong>Level 4</strong><span>Roc: <b>88.22 → 358.24</b></span><span>libdeflate: <b>93.14 → 378.80</b></span></div>
+        <div class="chart-value-row"><strong>Level 5</strong><span>Roc: <b>76.43 → 313.84</b></span><span>libdeflate: <b>82.65 → 289.28</b></span></div>
+        <div class="chart-value-row"><strong>Level 6</strong><span>Roc: <b>65.37 → 247.61</b></span><span>libdeflate: <b>67.20 → 222.02</b></span></div>
+        <div class="chart-value-row"><strong>Level 7</strong><span>Roc: <b>50.06 → 176.33</b></span><span>libdeflate: <b>46.52 → 158.08</b></span></div>
+        <div class="chart-value-row"><strong>Level 8</strong><span>Roc: <b>27.58 → 103.83</b></span><span>libdeflate: <b>24.30 → 108.08</b></span></div>
+        <div class="chart-value-row"><strong>Level 9</strong><span>Roc: <b>22.42 → 103.37</b></span><span>libdeflate: <b>20.54 → 107.23</b></span></div>
+        <div class="chart-value-row"><strong>Level 10</strong><span>Roc: <b>7.17 → 32.39</b></span><span>libdeflate: <b>7.49 → 34.73</b></span></div>
+        <div class="chart-value-row"><strong>Level 11</strong><span>Roc: <b>4.74 → 25.13</b></span><span>libdeflate: <b>4.79 → 26.17</b></span></div>
+        <div class="chart-value-row"><strong>Level 12</strong><span>Roc: <b>3.45 → 22.83</b></span><span>libdeflate: <b>3.48 → 23.73</b></span></div>
+      </div>
+    </details>
+  </section>
+  <section class="chart-panel chart-panel-linux" aria-label="Linux · Ryzen 3900X throughput">
+    <p class="chart-note" id="chart-note-linux">Range of per-file medians across 12 Silesia files; 7 runs per median. Individual Linux timings were not included in the archive.</p>
+    <div class="chart-axis-title">MB/s <span>↑ faster</span></div>
+    <div class="chart-frame" aria-describedby="chart-note-linux">
+      <div class="chart-y-axis" aria-hidden="true">
+        <span style="bottom:100.000000%">700</span>
+        <span style="bottom:85.714286%">600</span>
+        <span style="bottom:71.428571%">500</span>
+        <span style="bottom:57.142857%">400</span>
+        <span style="bottom:42.857143%">300</span>
+        <span style="bottom:28.571429%">200</span>
+        <span style="bottom:14.285714%">100</span>
+        <span style="bottom:0.000000%">0</span>
+      </div>
+      <div class="chart-plot">
+        <div class="chart-grid" aria-hidden="true">
+          <span style="bottom:0.000000%"></span>
+          <span style="bottom:14.285714%"></span>
+          <span style="bottom:28.571429%"></span>
+          <span style="bottom:42.857143%"></span>
+          <span style="bottom:57.142857%"></span>
+          <span style="bottom:71.428571%"></span>
+          <span style="bottom:85.714286%"></span>
+          <span style="bottom:100.000000%"></span>
+        </div>
+        <div class="chart-groups">
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:61.228571%" tabindex="0" role="img" aria-label="Roc · level 1. Slowest case median: 130.80 MB/s (x-ray, case median). Fastest case median: 428.60 MB/s (nci, case median)." title="Roc · level 1. Slowest case median: 130.80 MB/s (x-ray, case median). Fastest case median: 428.60 MB/s (nci, case median).">
+                <span class="chart-low" style="height:30.517965%" title="Roc · L1 · slowest case median: 130.80 MB/s (x-ray, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:69.482035%" title="Roc · L1 · fastest case median: 428.60 MB/s (nci, case median); dark segment adds 297.80 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:58.757143%" tabindex="0" role="img" aria-label="libdeflate · level 1. Slowest case median: 142.20 MB/s (x-ray, case median). Fastest case median: 411.30 MB/s (xml, case median)." title="libdeflate · level 1. Slowest case median: 142.20 MB/s (x-ray, case median). Fastest case median: 411.30 MB/s (xml, case median).">
+                <span class="chart-low" style="height:34.573304%" title="libdeflate · L1 · slowest case median: 142.20 MB/s (x-ray, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:65.426696%" title="libdeflate · L1 · fastest case median: 411.30 MB/s (xml, case median); dark segment adds 269.10 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">1</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:46.628571%" tabindex="0" role="img" aria-label="Roc · level 2. Slowest case median: 94.10 MB/s (sao, case median). Fastest case median: 326.40 MB/s (nci, case median)." title="Roc · level 2. Slowest case median: 94.10 MB/s (sao, case median). Fastest case median: 326.40 MB/s (nci, case median).">
+                <span class="chart-low" style="height:28.829657%" title="Roc · L2 · slowest case median: 94.10 MB/s (sao, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:71.170343%" title="Roc · L2 · fastest case median: 326.40 MB/s (nci, case median); dark segment adds 232.30 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:40.928571%" tabindex="0" role="img" aria-label="libdeflate · level 2. Slowest case median: 104.20 MB/s (sao, case median). Fastest case median: 286.50 MB/s (nci, case median)." title="libdeflate · level 2. Slowest case median: 104.20 MB/s (sao, case median). Fastest case median: 286.50 MB/s (nci, case median).">
+                <span class="chart-low" style="height:36.369983%" title="libdeflate · L2 · slowest case median: 104.20 MB/s (sao, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:63.630017%" title="libdeflate · L2 · fastest case median: 286.50 MB/s (nci, case median); dark segment adds 182.30 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">2</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:43.128571%" tabindex="0" role="img" aria-label="Roc · level 3. Slowest case median: 84.80 MB/s (sao, case median). Fastest case median: 301.90 MB/s (nci, case median)." title="Roc · level 3. Slowest case median: 84.80 MB/s (sao, case median). Fastest case median: 301.90 MB/s (nci, case median).">
+                <span class="chart-low" style="height:28.088771%" title="Roc · L3 · slowest case median: 84.80 MB/s (sao, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:71.911229%" title="Roc · L3 · fastest case median: 301.90 MB/s (nci, case median); dark segment adds 217.10 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:43.471429%" tabindex="0" role="img" aria-label="libdeflate · level 3. Slowest case median: 94.50 MB/s (sao, case median). Fastest case median: 304.30 MB/s (nci, case median)." title="libdeflate · level 3. Slowest case median: 94.50 MB/s (sao, case median). Fastest case median: 304.30 MB/s (nci, case median).">
+                <span class="chart-low" style="height:31.054880%" title="libdeflate · L3 · slowest case median: 94.50 MB/s (sao, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:68.945120%" title="libdeflate · L3 · fastest case median: 304.30 MB/s (nci, case median); dark segment adds 209.80 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">3</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:40.400000%" tabindex="0" role="img" aria-label="Roc · level 4. Slowest case median: 81.50 MB/s (sao, case median). Fastest case median: 282.80 MB/s (nci, case median)." title="Roc · level 4. Slowest case median: 81.50 MB/s (sao, case median). Fastest case median: 282.80 MB/s (nci, case median).">
+                <span class="chart-low" style="height:28.818953%" title="Roc · L4 · slowest case median: 81.50 MB/s (sao, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:71.181047%" title="Roc · L4 · fastest case median: 282.80 MB/s (nci, case median); dark segment adds 201.30 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:36.285714%" tabindex="0" role="img" aria-label="libdeflate · level 4. Slowest case median: 89.10 MB/s (sao, case median). Fastest case median: 254.00 MB/s (nci, case median)." title="libdeflate · level 4. Slowest case median: 89.10 MB/s (sao, case median). Fastest case median: 254.00 MB/s (nci, case median).">
+                <span class="chart-low" style="height:35.078740%" title="libdeflate · L4 · slowest case median: 89.10 MB/s (sao, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:64.921260%" title="libdeflate · L4 · fastest case median: 254.00 MB/s (nci, case median); dark segment adds 164.90 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">4</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:35.414286%" tabindex="0" role="img" aria-label="Roc · level 5. Slowest case median: 68.10 MB/s (sao, case median). Fastest case median: 247.90 MB/s (nci, case median)." title="Roc · level 5. Slowest case median: 68.10 MB/s (sao, case median). Fastest case median: 247.90 MB/s (nci, case median).">
+                <span class="chart-low" style="height:27.470754%" title="Roc · L5 · slowest case median: 68.10 MB/s (sao, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:72.529246%" title="Roc · L5 · fastest case median: 247.90 MB/s (nci, case median); dark segment adds 179.80 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:35.771429%" tabindex="0" role="img" aria-label="libdeflate · level 5. Slowest case median: 74.80 MB/s (sao, case median). Fastest case median: 250.40 MB/s (nci, case median)." title="libdeflate · level 5. Slowest case median: 74.80 MB/s (sao, case median). Fastest case median: 250.40 MB/s (nci, case median).">
+                <span class="chart-low" style="height:29.872204%" title="libdeflate · L5 · slowest case median: 74.80 MB/s (sao, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:70.127796%" title="libdeflate · L5 · fastest case median: 250.40 MB/s (nci, case median); dark segment adds 175.60 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">5</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:26.885714%" tabindex="0" role="img" aria-label="Roc · level 6. Slowest case median: 57.80 MB/s (dickens, case median). Fastest case median: 188.20 MB/s (nci, case median)." title="Roc · level 6. Slowest case median: 57.80 MB/s (dickens, case median). Fastest case median: 188.20 MB/s (nci, case median).">
+                <span class="chart-low" style="height:30.712009%" title="Roc · L6 · slowest case median: 57.80 MB/s (dickens, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:69.287991%" title="Roc · L6 · fastest case median: 188.20 MB/s (nci, case median); dark segment adds 130.40 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:29.014286%" tabindex="0" role="img" aria-label="libdeflate · level 6. Slowest case median: 64.40 MB/s (sao, case median). Fastest case median: 203.10 MB/s (nci, case median)." title="libdeflate · level 6. Slowest case median: 64.40 MB/s (sao, case median). Fastest case median: 203.10 MB/s (nci, case median).">
+                <span class="chart-low" style="height:31.708518%" title="libdeflate · L6 · slowest case median: 64.40 MB/s (sao, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:68.291482%" title="libdeflate · L6 · fastest case median: 203.10 MB/s (nci, case median); dark segment adds 138.70 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">6</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:20.242857%" tabindex="0" role="img" aria-label="Roc · level 7. Slowest case median: 36.20 MB/s (reymont, case median). Fastest case median: 141.70 MB/s (nci, case median)." title="Roc · level 7. Slowest case median: 36.20 MB/s (reymont, case median). Fastest case median: 141.70 MB/s (nci, case median).">
+                <span class="chart-low" style="height:25.546930%" title="Roc · L7 · slowest case median: 36.20 MB/s (reymont, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:74.453070%" title="Roc · L7 · fastest case median: 141.70 MB/s (nci, case median); dark segment adds 105.50 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:21.457143%" tabindex="0" role="img" aria-label="libdeflate · level 7. Slowest case median: 39.90 MB/s (reymont, case median). Fastest case median: 150.20 MB/s (nci, case median)." title="libdeflate · level 7. Slowest case median: 39.90 MB/s (reymont, case median). Fastest case median: 150.20 MB/s (nci, case median).">
+                <span class="chart-low" style="height:26.564581%" title="libdeflate · L7 · slowest case median: 39.90 MB/s (reymont, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:73.435419%" title="libdeflate · L7 · fastest case median: 150.20 MB/s (nci, case median); dark segment adds 110.30 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">7</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:12.885714%" tabindex="0" role="img" aria-label="Roc · level 8. Slowest case median: 19.50 MB/s (reymont, case median). Fastest case median: 90.20 MB/s (osdb, case median)." title="Roc · level 8. Slowest case median: 19.50 MB/s (reymont, case median). Fastest case median: 90.20 MB/s (osdb, case median).">
+                <span class="chart-low" style="height:21.618625%" title="Roc · L8 · slowest case median: 19.50 MB/s (reymont, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:78.381375%" title="Roc · L8 · fastest case median: 90.20 MB/s (osdb, case median); dark segment adds 70.70 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:13.971429%" tabindex="0" role="img" aria-label="libdeflate · level 8. Slowest case median: 20.60 MB/s (reymont, case median). Fastest case median: 97.80 MB/s (osdb, case median)." title="libdeflate · level 8. Slowest case median: 20.60 MB/s (reymont, case median). Fastest case median: 97.80 MB/s (osdb, case median).">
+                <span class="chart-low" style="height:21.063395%" title="libdeflate · L8 · slowest case median: 20.60 MB/s (reymont, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:78.936605%" title="libdeflate · L8 · fastest case median: 97.80 MB/s (osdb, case median); dark segment adds 77.20 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">8</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:12.971429%" tabindex="0" role="img" aria-label="Roc · level 9. Slowest case median: 15.90 MB/s (reymont, case median). Fastest case median: 90.80 MB/s (osdb, case median)." title="Roc · level 9. Slowest case median: 15.90 MB/s (reymont, case median). Fastest case median: 90.80 MB/s (osdb, case median).">
+                <span class="chart-low" style="height:17.511013%" title="Roc · L9 · slowest case median: 15.90 MB/s (reymont, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:82.488987%" title="Roc · L9 · fastest case median: 90.80 MB/s (osdb, case median); dark segment adds 74.90 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:13.614286%" tabindex="0" role="img" aria-label="libdeflate · level 9. Slowest case median: 16.90 MB/s (reymont, case median). Fastest case median: 95.30 MB/s (osdb, case median)." title="libdeflate · level 9. Slowest case median: 16.90 MB/s (reymont, case median). Fastest case median: 95.30 MB/s (osdb, case median).">
+                <span class="chart-low" style="height:17.733473%" title="libdeflate · L9 · slowest case median: 16.90 MB/s (reymont, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:82.266527%" title="libdeflate · L9 · fastest case median: 95.30 MB/s (osdb, case median); dark segment adds 78.40 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">9</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:4.200000%" tabindex="0" role="img" aria-label="Roc · level 10. Slowest case median: 6.80 MB/s (nci, case median). Fastest case median: 29.40 MB/s (x-ray, case median)." title="Roc · level 10. Slowest case median: 6.80 MB/s (nci, case median). Fastest case median: 29.40 MB/s (x-ray, case median).">
+                <span class="chart-low" style="height:23.129252%" title="Roc · L10 · slowest case median: 6.80 MB/s (nci, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:76.870748%" title="Roc · L10 · fastest case median: 29.40 MB/s (x-ray, case median); dark segment adds 22.60 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:4.957143%" tabindex="0" role="img" aria-label="libdeflate · level 10. Slowest case median: 7.30 MB/s (nci, case median). Fastest case median: 34.70 MB/s (x-ray, case median)." title="libdeflate · level 10. Slowest case median: 7.30 MB/s (nci, case median). Fastest case median: 34.70 MB/s (x-ray, case median).">
+                <span class="chart-low" style="height:21.037464%" title="libdeflate · L10 · slowest case median: 7.30 MB/s (nci, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:78.962536%" title="libdeflate · L10 · fastest case median: 34.70 MB/s (x-ray, case median); dark segment adds 27.40 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">10</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:3.285714%" tabindex="0" role="img" aria-label="Roc · level 11. Slowest case median: 4.50 MB/s (nci, case median). Fastest case median: 23.00 MB/s (x-ray, case median)." title="Roc · level 11. Slowest case median: 4.50 MB/s (nci, case median). Fastest case median: 23.00 MB/s (x-ray, case median).">
+                <span class="chart-low" style="height:19.565217%" title="Roc · L11 · slowest case median: 4.50 MB/s (nci, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:80.434783%" title="Roc · L11 · fastest case median: 23.00 MB/s (x-ray, case median); dark segment adds 18.50 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:3.828571%" tabindex="0" role="img" aria-label="libdeflate · level 11. Slowest case median: 4.70 MB/s (nci, case median). Fastest case median: 26.80 MB/s (x-ray, case median)." title="libdeflate · level 11. Slowest case median: 4.70 MB/s (nci, case median). Fastest case median: 26.80 MB/s (x-ray, case median).">
+                <span class="chart-low" style="height:17.537313%" title="libdeflate · L11 · slowest case median: 4.70 MB/s (nci, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:82.462687%" title="libdeflate · L11 · fastest case median: 26.80 MB/s (x-ray, case median); dark segment adds 22.10 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">11</span>
+          </div>
+          <div class="chart-level">
+            <div class="chart-pair">
+              <div class="chart-bar chart-bar-roc" style="height:3.000000%" tabindex="0" role="img" aria-label="Roc · level 12. Slowest case median: 3.30 MB/s (nci, case median). Fastest case median: 21.00 MB/s (x-ray, case median)." title="Roc · level 12. Slowest case median: 3.30 MB/s (nci, case median). Fastest case median: 21.00 MB/s (x-ray, case median).">
+                <span class="chart-low" style="height:15.714286%" title="Roc · L12 · slowest case median: 3.30 MB/s (nci, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:84.285714%" title="Roc · L12 · fastest case median: 21.00 MB/s (x-ray, case median); dark segment adds 17.70 MB/s" aria-hidden="true"></span>
+              </div>
+              <div class="chart-bar chart-bar-libdeflate" style="height:3.514286%" tabindex="0" role="img" aria-label="libdeflate · level 12. Slowest case median: 3.40 MB/s (nci, case median). Fastest case median: 24.60 MB/s (x-ray, case median)." title="libdeflate · level 12. Slowest case median: 3.40 MB/s (nci, case median). Fastest case median: 24.60 MB/s (x-ray, case median).">
+                <span class="chart-low" style="height:13.821138%" title="libdeflate · L12 · slowest case median: 3.40 MB/s (nci, case median)" aria-hidden="true"></span>
+                <span class="chart-high" style="height:86.178862%" title="libdeflate · L12 · fastest case median: 24.60 MB/s (x-ray, case median); dark segment adds 21.20 MB/s" aria-hidden="true"></span>
+              </div>
+            </div>
+            <span class="chart-level-label">12</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="chart-x-axis">Compression level</p>
+    <details class="chart-values">
+      <summary>Exact values <span>MB/s · slowest → fastest</span></summary>
+      <div class="chart-value-list">
+        <div class="chart-value-row"><strong>Level 1</strong><span>Roc: <b>130.80 → 428.60</b></span><span>libdeflate: <b>142.20 → 411.30</b></span></div>
+        <div class="chart-value-row"><strong>Level 2</strong><span>Roc: <b>94.10 → 326.40</b></span><span>libdeflate: <b>104.20 → 286.50</b></span></div>
+        <div class="chart-value-row"><strong>Level 3</strong><span>Roc: <b>84.80 → 301.90</b></span><span>libdeflate: <b>94.50 → 304.30</b></span></div>
+        <div class="chart-value-row"><strong>Level 4</strong><span>Roc: <b>81.50 → 282.80</b></span><span>libdeflate: <b>89.10 → 254.00</b></span></div>
+        <div class="chart-value-row"><strong>Level 5</strong><span>Roc: <b>68.10 → 247.90</b></span><span>libdeflate: <b>74.80 → 250.40</b></span></div>
+        <div class="chart-value-row"><strong>Level 6</strong><span>Roc: <b>57.80 → 188.20</b></span><span>libdeflate: <b>64.40 → 203.10</b></span></div>
+        <div class="chart-value-row"><strong>Level 7</strong><span>Roc: <b>36.20 → 141.70</b></span><span>libdeflate: <b>39.90 → 150.20</b></span></div>
+        <div class="chart-value-row"><strong>Level 8</strong><span>Roc: <b>19.50 → 90.20</b></span><span>libdeflate: <b>20.60 → 97.80</b></span></div>
+        <div class="chart-value-row"><strong>Level 9</strong><span>Roc: <b>15.90 → 90.80</b></span><span>libdeflate: <b>16.90 → 95.30</b></span></div>
+        <div class="chart-value-row"><strong>Level 10</strong><span>Roc: <b>6.80 → 29.40</b></span><span>libdeflate: <b>7.30 → 34.70</b></span></div>
+        <div class="chart-value-row"><strong>Level 11</strong><span>Roc: <b>4.50 → 23.00</b></span><span>libdeflate: <b>4.70 → 26.80</b></span></div>
+        <div class="chart-value-row"><strong>Level 12</strong><span>Roc: <b>3.30 → 21.00</b></span><span>libdeflate: <b>3.40 → 24.60</b></span></div>
+      </div>
+    </details>
+  </section>
+  <div class="chart-legend" aria-label="Chart legend">
+    <span><i class="legend-roc-low" aria-hidden="true"></i>Roc · slowest</span>
+    <span><i class="legend-roc-high" aria-hidden="true"></i>Roc · up to fastest</span>
+    <span><i class="legend-c-low" aria-hidden="true"></i>libdeflate · slowest</span>
+    <span><i class="legend-c-high" aria-hidden="true"></i>libdeflate · up to fastest</span>
+  </div>
+  <p class="chart-footnote">Light segments reach the slowest measurement; dark segments extend to the fastest. The endpoints can come from different files. Hover over a segment for its throughput and corpus file, or open “Exact values.”</p>
+  <p class="chart-footnote">The machines used different harnesses and library revisions; this is not a controlled comparison of CPU architectures.</p>
+</figure>
+<!-- END COMPRESSION CHART -->
+
 <p>roc-deflate ran these 144 benchmarks slower on average than libdeflate, in the median case 8.9% slower on the Ryzen 3900X, and 2.6% on the M1 Pro MacBook.</p>
 <p>So while we didn't outperform the champ on average, a median slowdown percentage in the single digits compared to such a carefully-tuned SIMD-powered C library is <em>wild.</em> It's frankly not a result I knew was achievable going in, since Roc is a functional language with automatic memory management racing against code that doesn't even have to do bounds checks. (Bounds checks certainly have a runtime cost, but then again, the last time a skipped bounds check in C compression code led to a major Remote Code Execution vulnerability <a href="https://nodejs.org/en/blog/vulnerability/october-2026-security-releases#nodejs-brotli-decoder-out-of-bounds-write-permits-remote-code-execution-cve-2026-111497---high">was yesterday</a>.)</p>
 <p>The graph shows more detail than just the median gap. On the worst-case inputs, roc-deflate was 18% slower than libdeflate, but on the best-case inputs, roc-deflate was slightly over 18% <em>faster!</em> That's not because Roc has some magical optimization that C can't access; it's just that the two implementations are different, and although on average roc-deflate is slower, for certain inputs it happens to be faster. So although it's <em>possible</em> to get a speedup by switching from libdeflate to roc-deflate, you shouldn't expect it on average.</p>
