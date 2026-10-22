@@ -54,9 +54,9 @@ for my $d (@datasets) {
                 die "Missing or incomplete case: $d->{id} $engine L$level $corpus\n"
                     unless ($counts{"$engine:$level:$corpus"} // 0) == $d->{samples};
                 # Mac: median of 15 runs. Linux: the supplied median of 7 runs.
-                # Only these per-file medians contribute to either chart's range.
                 my @speeds = sort { $a <=> $b } @{$case_speeds{"$engine:$level:$corpus"}};
                 my $median = $speeds[int(@speeds / 2)];
+                $d->{medians}{$level}{$engine}{$corpus} = $median;
                 my $range = ($d->{ranges}{$level}{$engine} //= {});
                 for my $end ('min', 'max') {
                     if (!exists($range->{$end}) || ($end eq 'min' ? $median < $range->{$end}{speed} : $median > $range->{$end}{speed})) {
@@ -117,26 +117,27 @@ for my $d (@datasets) {
             $html .= qq{              <div class="chart-engine">\n};
             my $range = $d->{ranges}{$level}{$engine};
             my ($min, $max) = @{$range}{'min', 'max'};
-            my $description = sprintf q{On the %s, %s's slowest L%d file was "%s" at %.2f MB/s, and its fastest was "%s" at %.2f MB/s. Each value is the median of %d runs for that file.},
-                $label, $engine, $level, $min->{corpus}, $min->{speed}, $max->{corpus}, $max->{speed}, $repetitions;
-            my $tooltip = escape_html($description);
-            my $class = $engine eq 'roc-deflate' ? 'roc' : 'libdeflate';
-            my $bar_id = "chart-$id-l$level-$class";
-            my $details_id = "$bar_id-details";
-            my $accessible_name = escape_html("$engine, level $level, $label");
-            $html .= sprintf qq{                <div class="chart-bar chart-bar-%s" style="bottom:%.6f%%;height:%.6f%%" id="%s" tabindex="0" role="img" aria-label="%s" aria-describedby="%s"></div>\n},
-                $class, 100 * $min->{speed} / $axis_max,
-                100 * ($max->{speed} - $min->{speed}) / $axis_max, $bar_id, $accessible_name, $details_id;
-            $readouts .= sprintf qq{        <div class="chart-tooltip" id="%s" role="tooltip" aria-label="%s">
+            for my $corpus (@corpora) {
+                my $speed = $d->{medians}{$level}{$engine}{$corpus};
+                my $description = sprintf q{On the %s, %s at L%d compression achieved %.2f MB/s compressing %s, the median of %d runs.},
+                    $label, $engine, $level, $speed, $corpus, $repetitions;
+                my $tooltip = escape_html($description);
+                my $class = $engine eq 'roc-deflate' ? 'roc' : 'libdeflate';
+                my $point_id = "chart-$id-l$level-$class-$corpus";
+                my $details_id = "$point_id-details";
+                my $accessible_name = escape_html("$engine, level $level, $corpus, $label");
+                $html .= sprintf qq{                <div class="chart-point chart-point-%s" style="bottom:%.6f%%" id="%s" tabindex="0" role="img" aria-label="%s" aria-describedby="%s"></div>\n},
+                    $class, 100 * $speed / $axis_max, $point_id, $accessible_name, $details_id;
+                $readouts .= sprintf qq{        <div class="chart-tooltip" id="%s" role="tooltip" aria-label="%s">
           <span class="chart-tooltip-heading" aria-hidden="true">%s at L%d compression</span>
-          <p aria-hidden="true"><strong>Slowest file:</strong> (median of %d runs)<br>%.2f MB/s compressing %s</p>
-          <p aria-hidden="true"><strong>Fastest file:</strong> (median of %d runs)<br>%.2f MB/s compressing %s</p>
+          <p aria-hidden="true"><strong>%s</strong> (median of %d runs)<br>%.2f MB/s compressing %s</p>
         </div>
-}, $details_id, $tooltip, $engine, $level, $repetitions, $min->{speed}, $min->{corpus}, $repetitions, $max->{speed}, $max->{corpus};
-            $hover_css .= qq{.chart-panel:has(#$bar_id:hover) #$details_id,
-.chart-panel:not(:has(.chart-bar:hover)):has(#$bar_id:focus) #$details_id,
+}, $details_id, $tooltip, $engine, $level, $corpus, $repetitions, $speed, $corpus;
+                $hover_css .= qq{.chart-panel:has(#$point_id:hover) #$details_id,
+.chart-panel:not(:has(.chart-point:hover)):has(#$point_id:focus) #$details_id,
 #$details_id:hover { visibility: visible; transition-delay: 0s; }
 };
+            }
             if ($level == 1 && $engine eq 'libdeflate') {
                 my $fast_label = 50 + 100 * ceil(($max->{speed} - 50) / 100);
                 my $slow_label = 50 + 100 * floor(($min->{speed} - 50) / 100);
@@ -228,18 +229,19 @@ my $css = <<'CSS';
 .chart-level { height: 100%; min-width: 0; position: relative; }
 .chart-pair { height: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 0; }
 .chart-engine { width: 50%; max-width: 22px; height: 100%; position: relative; }
-/* Each solid bar floats between the slowest and fastest measurements. */
-.chart-bar { position: absolute; left: 0; width: 100%; border-radius: 0; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bar-color) 85%, black); }
-.chart-bar:hover, .chart-bar:focus-visible { outline: 2px solid var(--heading-color); outline-offset: -2px; }
-.chart-bar-roc, .legend-roc { --bar-color: var(--roc-color); background: var(--bar-color); }
-.chart-bar-libdeflate, .legend-c { --bar-color: var(--c-color); background: var(--bar-color); }
+/* Each dot's center is the median throughput for one file. */
+.chart-point { position: absolute; left: 50%; bottom: 0; width: 10px; height: 10px; transform: translate(-50%, 50%); border-radius: 50%; background: color-mix(in srgb, var(--bar-color) 80%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bar-color) 85%, black); }
+.chart-point:hover, .chart-point:focus-visible { outline: 2px solid var(--heading-color); outline-offset: 1px; z-index: 1; }
+.chart-point-roc, .legend-roc { --bar-color: var(--roc-color); }
+.chart-point-libdeflate, .legend-c { --bar-color: var(--c-color); }
+.chart-legend i { background: var(--bar-color); }
 .chart-endpoint { position: absolute; left: calc(50% - 5px); width: 10px; color: var(--chart-muted); font-size: var(--chart-label-font-size); line-height: 1.3; pointer-events: none; }
 .chart-endpoint-text { position: absolute; left: 22px; width: max-content; background: var(--chart-surface); padding: 0 2px; }
 .chart-endpoint-max .chart-endpoint-text { top: 0; transform: translateY(-50%); }
 .chart-endpoint-min .chart-endpoint-text { bottom: 0; transform: translateY(50%); }
 .chart-endpoint-arrow { position: absolute; left: 0; width: 10px; }
-.chart-endpoint-max .chart-endpoint-arrow { top: 0; bottom: 8px; }
-.chart-endpoint-min .chart-endpoint-arrow { top: 8px; bottom: 0; }
+.chart-endpoint-max .chart-endpoint-arrow { top: 0; bottom: 13px; }
+.chart-endpoint-min .chart-endpoint-arrow { top: 13px; bottom: 0; }
 .chart-endpoint-arrow::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 10px; border-left: 1px solid currentColor; }
 .chart-endpoint-max .chart-endpoint-arrow::before { border-top: 1px solid currentColor; }
 .chart-endpoint-min .chart-endpoint-arrow::before { border-bottom: 1px solid currentColor; }
@@ -250,15 +252,15 @@ my $css = <<'CSS';
 .compression-chart .chart-x-axis { margin: 52px 0 8px var(--chart-axis-width); text-align: center; font-size: var(--chart-label-font-size); font-weight: 400; }
 .chart-legend { position: absolute; top: 0; right: 0; display: grid; grid-template-rows: repeat(2, 1fr); justify-items: end; align-items: center; font-size: var(--chart-label-font-size); }
 .chart-legend > span { display: flex; gap: 6px; align-items: center; justify-content: flex-end; text-align: right; white-space: nowrap; }
-.chart-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
+.chart-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 /* Readouts occupy unused graph space, never covering measurements or labels.
- * A brief hide delay lets the pointer travel from a bar onto its readout. */
+ * A brief hide delay lets the pointer travel from a dot onto its readout. */
 .chart-tooltip { position: absolute; top: 12px; right: 20%; width: 40%; padding: 10px 12px; border: 1px solid var(--chart-border); border-radius: 6px; background: var(--chart-surface); color: var(--text-color); font-size: var(--chart-label-font-size); line-height: 1.5; visibility: hidden; transition: visibility 0s .6s; z-index: 2; }
 .chart-tooltip-heading { display: block; font-weight: normal; }
 .compression-chart .chart-tooltip p { margin: 8px 0 0; line-height: 1.65; }
-/* Switching bars hides the preceding readout immediately. */
-.chart-panel:has(.chart-bar:hover) .chart-tooltip,
-.chart-panel:has(.chart-bar:focus) .chart-tooltip { visibility: hidden; transition: none; }
+/* Switching dots hides the preceding readout immediately. */
+.chart-panel:has(.chart-point:hover) .chart-tooltip,
+.chart-panel:has(.chart-point:focus) .chart-tooltip { visibility: hidden; transition: none; }
 @media (prefers-color-scheme: dark) {
     .compression-chart { --chart-surface: #1e1c23; --chart-border: #49434f; --chart-grid: #39353e; --chart-muted: #bbb4c7; --roc-color: #caadfb; --c-color: #9999a4; }
 }
