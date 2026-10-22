@@ -60,7 +60,7 @@ for my $d (@datasets) {
     }
     printf "%s: validated %d observations, 12 levels × 12 files × 2 engines\n", $d->{label}, scalar(@$rows);
 }
-# Both machine views share a linear scale, with round 100 MB/s ticks.
+# Both machines share a linear scale, with round 100 MB/s ticks.
 my $axis_max = ceil($maximum / 100) * 100;
 my $legend_height = sprintf '%.6f', 100 * 400 / $axis_max;
 my $html = <<'HTML';
@@ -69,17 +69,8 @@ my $html = <<'HTML';
   <figcaption>
     <h3 id="chart"><a class="heading-link" href="#chart">Compression on Silesia corpus</a></h3>
   </figcaption>
-  <input class="chart-radio" type="radio" name="compression-machine" id="chart-mac" checked />
-  <input class="chart-radio" type="radio" name="compression-machine" id="chart-linux" />
-  <div class="chart-controls" role="group" aria-label="Benchmark machine">
-    <label for="chart-mac">M1 MacBook Pro</label>
-    <label for="chart-linux">Ryzen 3900X Ubuntu</label>
-  </div>
 HTML
-for my $d (@datasets) {
-    my ($id, $label) = @{$d}{'id', 'label'};
-    my $qualifier = $id eq 'mac' ? 'run' : 'median result';
-    $html .= qq{  <section class="chart-panel chart-panel-$id" aria-label="$label throughput">
+    $html .= qq{  <section class="chart-panel" aria-label="Slowest to fastest compression speeds on both machines">
     <div class="chart-axis-title">MB/s <span class="chart-faster"><span class="chart-up-arrow" aria-hidden="true">↑</span> faster</span></div>
     <div class="chart-frame">
       <div class="chart-y-axis" aria-hidden="true">
@@ -102,20 +93,29 @@ for my $d (@datasets) {
             <div class="chart-pair">
 };
         for my $engine (@engines) {
-            my $range = $d->{ranges}{$level}{$engine};
-            my ($min, $max) = @{$range}{'min', 'max'};
-            my $name = $engine;
+            $html .= qq{              <div class="chart-engine">\n};
+            my @bars;
+            for my $d (@datasets) {
+                my ($id, $label) = @{$d}{'id', 'label'};
+                my $qualifier = $id eq 'mac' ? 'run' : 'median result';
+                my $range = $d->{ranges}{$level}{$engine};
+                my ($min, $max) = @{$range}{'min', 'max'};
+                my $description = sprintf q{On the %s, %s's slowest L%d %s was "%s" at %.2f MB/s, and its fastest was "%s" at %.2f MB/s.},
+                    $label, $engine, $level, $qualifier, $min->{corpus}, $min->{speed}, $max->{corpus}, $max->{speed};
+                push @bars, {
+                    id => $id, label => $description,
+                    bottom => 100 * $min->{speed} / $axis_max,
+                    height => 100 * ($max->{speed} - $min->{speed}) / $axis_max,
+                };
+            }
+            # Either layer's tooltip includes both machines, even if one range is contained.
+            my $tooltip = escape_html(join "\n", map { $_->{label} } @bars);
             my $class = $engine eq 'roc-deflate' ? 'roc' : 'libdeflate';
-            my $description = sprintf q{%s's slowest L%d %s was "%s" at %.2f MB/s, and its fastest was "%s" at %.2f MB/s.},
-                $name, $level, $qualifier, $min->{corpus}, $min->{speed}, $max->{corpus}, $max->{speed};
-            my $tooltip = escape_html($description);
-            $html .= sprintf qq{              <div class="chart-bar chart-bar-%s" style="height:%.6f%%" tabindex="0" role="img" aria-label="%s" title="%s">
-                <span class="chart-low" style="height:%.6f%%" title="%s" aria-hidden="true"></span>
-                <span class="chart-high" style="height:%.6f%%" title="%s" aria-hidden="true"></span>
-              </div>
-}, $class, 100 * $max->{speed} / $axis_max, $tooltip, $tooltip,
-                100 * $min->{speed} / $max->{speed}, $tooltip,
-                100 * ($max->{speed} - $min->{speed}) / $max->{speed}, $tooltip;
+            for my $bar (@bars) {
+                $html .= sprintf qq{                <div class="chart-bar chart-bar-%s chart-bar-%s" style="bottom:%.6f%%;height:%.6f%%" tabindex="0" role="img" aria-label="%s" title="%s"></div>\n},
+                    $class, $bar->{id}, $bar->{bottom}, $bar->{height}, escape_html($bar->{label}), $tooltip;
+            }
+            $html .= qq{              </div>\n};
         }
         $html .= qq{            </div>
             <span class="chart-level-label">L$level</span>
@@ -124,17 +124,16 @@ for my $d (@datasets) {
     }
     $html .= qq{        </div>
         <div class="chart-legend" style="height:$legend_height%" aria-label="Chart legend">
-          <span>slowest libdeflate run<i class="legend-c-low" aria-hidden="true"></i></span>
-          <span>gap with fastest libdeflate run<i class="legend-c-high" aria-hidden="true"></i></span>
-          <span>slowest roc-deflate run<i class="legend-roc-low" aria-hidden="true"></i></span>
-          <span>gap with fastest roc-deflate run<i class="legend-roc-high" aria-hidden="true"></i></span>
+          <span>libdeflate on M1<i class="legend-c-high" aria-hidden="true"></i></span>
+          <span>libdeflate on Ryzen<i class="legend-c-low" aria-hidden="true"></i></span>
+          <span>roc-deflate on M1<i class="legend-roc-high" aria-hidden="true"></i></span>
+          <span>roc-deflate on Ryzen<i class="legend-roc-low" aria-hidden="true"></i></span>
         </div>
       </div>
     </div>
     <p class="chart-x-axis">Compression Level</p>
   </section>
 };
-}
 $html .= <<'HTML';
 </figure>
 <!-- END COMPRESSION CHART -->
@@ -149,16 +148,16 @@ my $css = <<'CSS';
     --chart-border: #dedbe7;
     --chart-grid: #e6e3ec;
     --chart-muted: #605b6e;
-    --roc-low: #c5abf5;
-    --roc-high: #6426b5;
-    --c-low: #c8c8cc;
-    --c-high: #50515a;
+    --roc-color: 100, 38, 181;
+    --c-color: 80, 81, 90;
+    --mac-opacity: .65;
+    --linux-opacity: .35;
     --chart-height: 340px;
     --chart-axis-width: 38px;
     --chart-label-font-size: 13px;
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr);
     column-gap: 16px;
     align-items: center;
     margin: 1.75rem 0 2rem;
@@ -176,16 +175,7 @@ my $css = <<'CSS';
 .compression-chart h3 { margin: 0; font-size: 21px; line-height: 1.3; font-weight: 700; }
 .compression-chart p { line-height: 1.5; }
 .compression-chart figcaption { grid-column: 1; grid-row: 1; }
-.chart-radio { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.chart-controls { grid-column: 2; grid-row: 1; justify-self: end; display: flex; gap: 4px; padding: 4px; border: 1px solid var(--chart-border); border-radius: 9px; width: fit-content; max-width: 100%; }
-.chart-controls label { display: flex; min-width: 0; align-items: center; justify-content: center; min-height: 40px; padding: 7px 13px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 400; text-align: center; }
-#chart-mac:checked ~ .chart-controls label[for="chart-mac"],
-#chart-linux:checked ~ .chart-controls label[for="chart-linux"] { background: var(--heading-color); color: var(--body-bg-color); }
-#chart-mac:focus-visible ~ .chart-controls label[for="chart-mac"],
-#chart-linux:focus-visible ~ .chart-controls label[for="chart-linux"] { outline: 3px solid var(--link-color); outline-offset: 3px; }
-.chart-panel { display: none; grid-column: 1 / -1; }
-#chart-mac:checked ~ .chart-panel-mac, #chart-linux:checked ~ .chart-panel-linux { display: block; }
-.chart-panel { margin-top: 22px; }
+.chart-panel { grid-column: 1 / -1; margin-top: 22px; }
 .chart-axis-title { display: flex; justify-content: space-between; font-size: var(--chart-label-font-size); font-weight: 400; margin: 0 0 12px; }
 .chart-axis-title span { color: var(--chart-muted); font-weight: 400; }
 .chart-faster { display: inline-flex; align-items: center; gap: .25em; }
@@ -200,27 +190,25 @@ my $css = <<'CSS';
 .chart-groups { position: relative; height: 100%; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 8px; padding: 0 5px; }
 .chart-level { height: 100%; min-width: 0; position: relative; }
 .chart-pair { height: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 3px; }
-.chart-bar { width: 50%; max-width: 18px; display: flex; flex-direction: column-reverse; border-radius: 3px 3px 0 0; position: relative; }
-.chart-bar > span { display: block; width: 100%; flex: 0 0 auto; }
-.chart-bar > .chart-high { border-radius: 3px 3px 0 0; }
+.chart-engine { width: 50%; max-width: 22px; height: 100%; position: relative; }
+/* Equal widths and x positions; translucent fills reveal the shared interval. */
+.chart-bar { position: absolute; left: 0; width: 100%; border-radius: 2px; }
 .chart-bar:hover, .chart-bar:focus-visible { outline: 2px solid var(--heading-color); outline-offset: -2px; }
-.chart-bar-roc .chart-low, .legend-roc-low { background: var(--roc-low); }
-.chart-bar-roc .chart-high, .legend-roc-high { background: var(--roc-high); }
-.chart-bar-libdeflate .chart-low, .legend-c-low { background: var(--c-low); }
-.chart-bar-libdeflate .chart-high, .legend-c-high { background: var(--c-high); }
+.chart-bar:hover, .chart-bar:focus-visible { z-index: 1; }
+.chart-bar-roc.chart-bar-linux, .legend-roc-low { background: rgba(var(--roc-color), var(--linux-opacity)); }
+.chart-bar-roc.chart-bar-mac, .legend-roc-high { background: rgba(var(--roc-color), var(--mac-opacity)); }
+.chart-bar-libdeflate.chart-bar-linux, .legend-c-low { background: rgba(var(--c-color), var(--linux-opacity)); }
+.chart-bar-libdeflate.chart-bar-mac, .legend-c-high { background: rgba(var(--c-color), var(--mac-opacity)); }
 .chart-level-label { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--chart-muted); }
 .compression-chart .chart-x-axis { margin: 52px 0 8px var(--chart-axis-width); text-align: center; font-size: var(--chart-label-font-size); font-weight: 400; }
 .chart-legend { position: absolute; top: 0; right: 0; display: grid; grid-template-rows: repeat(4, 1fr); justify-items: end; align-items: center; font-size: var(--chart-label-font-size); }
 .chart-legend > span { display: flex; gap: 6px; align-items: center; justify-content: flex-end; text-align: right; white-space: nowrap; }
 .chart-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
 @media (prefers-color-scheme: dark) {
-    .compression-chart { --chart-surface: #1e1c23; --chart-border: #49434f; --chart-grid: #39353e; --chart-muted: #bbb4c7; --roc-low: #cfb5f5; --roc-high: #8245ce; --c-low: #c4c4ce; --c-high: #696974; }
+    .compression-chart { --chart-surface: #1e1c23; --chart-border: #49434f; --chart-grid: #39353e; --chart-muted: #bbb4c7; --roc-color: 185, 133, 255; --c-color: 218, 217, 226; }
 }
 @media (max-width: 540px) {
     .compression-chart { --chart-height: 560px; --chart-axis-width: 31px; --chart-label-font-size: 12px; display: block; padding: 18px 12px 14px; border-radius: 10px; }
-    .compression-chart figcaption { margin-bottom: 18px; }
-    .chart-controls { width: 100%; }
-    .chart-controls label { flex: 1; padding: 7px 6px; font-size: 12px; }
     .chart-groups { column-gap: 4px; padding: 0 2px; }
     .chart-pair { gap: 2px; }
     .chart-level-label { font-size: clamp(9px, 2.5vw, 10px); }
@@ -230,11 +218,6 @@ my $css = <<'CSS';
 }
 @media print {
     .compression-chart { break-inside: avoid; print-color-adjust: exact; }
-    .chart-controls, .chart-radio { display: none; }
-    .chart-panel { display: block; }
-    .chart-panel::before { display: block; font-weight: bold; margin-top: 16px; }
-    .chart-panel-mac::before { content: "M1 MacBook Pro"; }
-    .chart-panel-linux::before { content: "Ryzen 3900X Ubuntu"; }
 }
 </style>
 <!-- END COMPRESSION CHART STYLE -->
