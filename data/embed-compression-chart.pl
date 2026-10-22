@@ -45,8 +45,7 @@ for my $d (@datasets) {
         my $range = ($d->{ranges}{$level}{$engine} //= {});
         for my $end ('min', 'max') {
             if (!exists($range->{$end}) || ($end eq 'min' ? $speed < $range->{$end}{speed} : $speed > $range->{$end}{speed})) {
-                $range->{$end} = { speed => 0 + $speed, corpus => $corpus,
-                    source => $corpus . ($d->{id} eq 'mac' ? ", round $r->{round}, run $r->{rep}" : ', case median') };
+                $range->{$end} = { speed => 0 + $speed, corpus => $corpus };
             }
         }
         $maximum = $speed if $speed > $maximum;
@@ -79,7 +78,7 @@ my $html = <<'HTML';
 HTML
 for my $d (@datasets) {
     my ($id, $label) = @{$d}{'id', 'label'};
-    my $qualifier = $id eq 'mac' ? 'run' : 'case median';
+    my $qualifier = $id eq 'mac' ? 'run' : 'median result';
     $html .= qq{  <section class="chart-panel chart-panel-$id" aria-label="$label throughput">
     <div class="chart-axis-title">MB/s <span>↑ faster</span></div>
     <div class="chart-frame">
@@ -107,19 +106,16 @@ for my $d (@datasets) {
             my ($min, $max) = @{$range}{'min', 'max'};
             my $name = $engine eq 'roc-deflate' ? 'Roc' : 'libdeflate';
             my $class = $engine eq 'roc-deflate' ? 'roc' : 'libdeflate';
-            my $description = sprintf '%s · level %d. Slowest %s: %.2f MB/s (%s). Fastest %s: %.2f MB/s (%s).',
-                $name, $level, $qualifier, $min->{speed}, $min->{source}, $qualifier, $max->{speed}, $max->{source};
+            my $description = sprintf q{%s's slowest L%d %s was "%s" at %.2f MB/s, and its fastest was "%s" at %.2f MB/s.},
+                $name, $level, $qualifier, $min->{corpus}, $min->{speed}, $max->{corpus}, $max->{speed};
             my $tooltip = escape_html($description);
-            my $low_tip = escape_html(sprintf '%s · L%d · slowest %s: %.2f MB/s (%s)', $name, $level, $qualifier, $min->{speed}, $min->{source});
-            my $high_tip = escape_html(sprintf '%s · L%d · fastest %s: %.2f MB/s (%s); dark segment adds %.2f MB/s',
-                $name, $level, $qualifier, $max->{speed}, $max->{source}, $max->{speed} - $min->{speed});
             $html .= sprintf qq{              <div class="chart-bar chart-bar-%s" style="height:%.6f%%" tabindex="0" role="img" aria-label="%s" title="%s">
                 <span class="chart-low" style="height:%.6f%%" title="%s" aria-hidden="true"></span>
                 <span class="chart-high" style="height:%.6f%%" title="%s" aria-hidden="true"></span>
               </div>
 }, $class, 100 * $max->{speed} / $axis_max, $tooltip, $tooltip,
-                100 * $min->{speed} / $max->{speed}, $low_tip,
-                100 * ($max->{speed} - $min->{speed}) / $max->{speed}, $high_tip;
+                100 * $min->{speed} / $max->{speed}, $tooltip,
+                100 * ($max->{speed} - $min->{speed}) / $max->{speed}, $tooltip;
         }
         $html .= qq{            </div>
             <span class="chart-level-label">L$level</span>
