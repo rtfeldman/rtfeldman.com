@@ -166,13 +166,13 @@ my $css = <<'CSS';
     border-radius: 14px;
     background: var(--chart-surface);
     color: var(--text-color);
-    font-family: var(--font-sans);
+    font-family: inherit;
     font-size: 14px;
     font-variant-numeric: tabular-nums;
     line-height: 1.5;
 }
 .compression-chart *, .compression-chart *::before, .compression-chart *::after { box-sizing: border-box; }
-.compression-chart h3 { margin: 0; font: 700 21px/1.3 var(--font-sans); letter-spacing: -.025em; }
+.compression-chart h3 { margin: 0; font-size: 21px; line-height: 1.3; font-weight: 700; }
 .compression-chart p { line-height: 1.5; }
 .compression-chart figcaption { grid-column: 1; grid-row: 1; }
 .chart-radio { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
