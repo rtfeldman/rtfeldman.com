@@ -213,8 +213,8 @@ my $css = <<'CSS';
 .chart-endpoint-max .chart-endpoint-text { top: 0; transform: translateY(-50%); }
 .chart-endpoint-min .chart-endpoint-text { bottom: 0; transform: translateY(50%); }
 .chart-endpoint-arrow { position: absolute; left: 0; width: 10px; }
-.chart-endpoint-max .chart-endpoint-arrow { top: 0; bottom: 4px; }
-.chart-endpoint-min .chart-endpoint-arrow { top: 4px; bottom: 0; }
+.chart-endpoint-max .chart-endpoint-arrow { top: 0; bottom: 6px; }
+.chart-endpoint-min .chart-endpoint-arrow { top: 6px; bottom: 0; }
 .chart-endpoint-arrow::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 10px; border-left: 1px solid currentColor; }
 .chart-endpoint-max .chart-endpoint-arrow::before { border-top: 1px solid currentColor; }
 .chart-endpoint-min .chart-endpoint-arrow::before { border-bottom: 1px solid currentColor; }
