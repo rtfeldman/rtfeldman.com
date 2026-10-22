@@ -200,7 +200,6 @@ my $css = <<'CSS';
     color: var(--text-color);
     font-family: inherit;
     font-size: inherit;
-    font-variant-numeric: tabular-nums;
     line-height: 1.5;
 }
 .compression-chart *, .compression-chart *::before, .compression-chart *::after { box-sizing: border-box; }
