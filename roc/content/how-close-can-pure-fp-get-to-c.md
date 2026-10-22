@@ -36,7 +36,7 @@ Obviously we can't extrapolate from this one result about how close Roc can get 
 
 An obvious question is "Why settle for *any* amount slower?" If you *could* get C levels of performance, why not use libdeflate itself and close that remaining gap?
 
-A pure-Roc implementation has several advantages over a pure-C implementation:
+A pure-Roc implementation has several advantages over a pure-C one:
 
 - **Memory safety.** Roc code is 100% memory safe and has no language primitives that let you opt out of it. This code is only able to approach C levels of performance because Roc's optimization pipeline was able to determine that many bounds checks and reference counting operations were provably safe to optimize away. Compression packages written in pure Roc don't have access to the unchecked memory operation that caused yesterday's [Brotli Remote Code Execution vulnerability](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases#nodejs-brotli-decoder-out-of-bounds-write-permits-remote-code-execution-cve-2026-111497---high).
 - **No side effects.** Roc's type system tracks which functions are pure and which can perform side effects. Pure functions' types use a thin arrow, like `Bool -> Bool`, whereas [effectful functions](https://roc-lang.org/docs/main/langref/functions/) use a thick arrow, like `Bool => Bool`. (As with memory safety, Roc enforces this and supports no way to opt out.) So when you see that roc-deflate's functions have only thin arrows in their annotations, you know they really are pure functions with no side effects.
