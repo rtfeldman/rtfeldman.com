@@ -119,9 +119,9 @@
 <p>Here's where the benchmarks stand today, running on the 2021 M1 MacBook Pro where I did all the optimization work, as well as on an AMD Ryzen 9 3900X Ubuntu machine for an x64 comparison.</p>
 <p>roc-deflate ran these 144 benchmarks slower on average than libdeflate, in the median case <strong>8.9%</strong> slower on the Ryzen 3900X, and <strong>2.6%</strong> on the M1 MacBook Pro.</p>
 <!-- BEGIN COMPRESSION CHART -->
-<figure class="compression-chart" aria-labelledby="chart">
+<figure class="compression-chart" id="chart" aria-labelledby="chart-heading">
   <figcaption>
-    <h3 id="chart"><a class="heading-link" href="#chart">Compression on Silesia corpus</a></h3>
+    <h3 id="chart-heading"><a class="heading-link" href="#chart">Compression on Silesia corpus</a></h3>
   </figcaption>
   <input class="chart-radio" type="radio" name="compression-machine" id="chart-mac" checked />
   <input class="chart-radio" type="radio" name="compression-machine" id="chart-linux" />

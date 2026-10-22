@@ -148,6 +148,12 @@ h4 {
     font-weight: bold;
 }
 
+/* Keep fragment targets below the viewport edge without changing layout.
+ * This fits within the existing spacing above headings and figures. */
+:is(h1, h2, h3, h4, h5, h6, figure)[id] {
+    scroll-margin-top: 16px;
+}
+
 blockquote {
     margin-inline-end: 0;
     padding: 1rem 0;

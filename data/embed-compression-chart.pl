@@ -65,9 +65,9 @@ my $axis_max = ceil($maximum / 100) * 100;
 my $legend_height = sprintf '%.6f', 100 * 200 / $axis_max;
 my $html = <<'HTML';
 <!-- BEGIN COMPRESSION CHART -->
-<figure class="compression-chart" aria-labelledby="chart">
+<figure class="compression-chart" id="chart" aria-labelledby="chart-heading">
   <figcaption>
-    <h3 id="chart"><a class="heading-link" href="#chart">Compression on Silesia corpus</a></h3>
+    <h3 id="chart-heading"><a class="heading-link" href="#chart">Compression on Silesia corpus</a></h3>
   </figcaption>
   <input class="chart-radio" type="radio" name="compression-machine" id="chart-mac" checked />
   <input class="chart-radio" type="radio" name="compression-machine" id="chart-linux" />
