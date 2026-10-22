@@ -40,12 +40,13 @@
 .compression-chart p { line-height: 1.5; }
 .compression-chart figcaption { grid-column: 1; grid-row: 1; }
 .chart-radio { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.chart-controls { grid-column: 2; grid-row: 1; justify-self: end; display: flex; gap: 4px; padding: 4px; border: 1px solid var(--chart-border); border-radius: 9px; width: fit-content; max-width: 100%; }
-.chart-controls label { display: flex; min-width: 0; align-items: center; justify-content: center; min-height: 40px; padding: 7px 13px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 400; text-align: center; }
+.chart-controls { grid-column: 2; grid-row: 1; justify-self: end; display: flex; gap: 4px; border-bottom: 1px solid var(--chart-border); width: fit-content; max-width: 100%; }
+.chart-controls label { display: flex; min-width: 0; align-items: center; justify-content: center; min-height: 40px; padding: 7px 13px; margin-bottom: -1px; border-bottom: 2px solid transparent; color: var(--chart-muted); cursor: pointer; font-size: 13px; font-weight: 400; text-align: center; }
+.chart-controls label:hover { color: var(--text-color); border-bottom-color: var(--chart-muted); }
 #chart-mac:checked ~ .chart-controls label[for="chart-mac"],
-#chart-linux:checked ~ .chart-controls label[for="chart-linux"] { background: var(--heading-color); color: var(--body-bg-color); }
+#chart-linux:checked ~ .chart-controls label[for="chart-linux"] { border-bottom-color: var(--roc-color); color: var(--text-color); }
 #chart-mac:focus-visible ~ .chart-controls label[for="chart-mac"],
-#chart-linux:focus-visible ~ .chart-controls label[for="chart-linux"] { outline: 3px solid var(--link-color); outline-offset: 3px; }
+#chart-linux:focus-visible ~ .chart-controls label[for="chart-linux"] { outline: 2px solid var(--roc-color); outline-offset: 3px; }
 .chart-panel { display: none; grid-column: 1 / -1; margin-top: 22px; }
 #chart-mac:checked ~ .chart-panel-mac, #chart-linux:checked ~ .chart-panel-linux { display: block; }
 .chart-axis-title { display: flex; justify-content: space-between; font-size: var(--chart-label-font-size); font-weight: 400; margin: 0 0 12px; }
