@@ -18,7 +18,7 @@ So I spent a bunch of time grinding through performance optimizations on [roc-de
 
 ## Under 10% Slower
 
-Here's where the benchmarks stand today, running on the 2021 MacBook Pro with an M1 Pro where I did all the optimization work, as well as on an AMD Ryzen 9 3900X Ubuntu machine for an x64 comparison.
+Here's where the benchmarks stand today, running on the 2021 M1 MacBook Pro where I did all the optimization work, as well as on an AMD Ryzen 9 3900X Ubuntu machine for an x64 comparison.
 
 [graph goes here]
 
