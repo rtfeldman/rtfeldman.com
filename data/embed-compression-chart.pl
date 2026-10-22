@@ -63,11 +63,12 @@ for my $d (@datasets) {
 }
 # Both machine views share a linear scale, with round 100 MB/s ticks.
 my $axis_max = ceil($maximum / 100) * 100;
+my $legend_height = sprintf '%.6f', 100 * 400 / $axis_max;
 my $html = <<'HTML';
 <!-- BEGIN COMPRESSION CHART -->
 <figure class="compression-chart" aria-labelledby="compression-chart-title">
   <figcaption>
-    <h3 id="compression-chart-title">Compression throughput on Silesia corpus</h3>
+    <h3 id="compression-chart-title">Compression on Silesia corpus</h3>
   </figcaption>
   <input class="chart-radio" type="radio" name="compression-machine" id="chart-mac" checked />
   <input class="chart-radio" type="radio" name="compression-machine" id="chart-linux" />
@@ -126,6 +127,12 @@ for my $d (@datasets) {
 };
     }
     $html .= qq{        </div>
+        <div class="chart-legend" style="height:$legend_height%" aria-label="Chart legend">
+          <span>libdeflate · slowest<i class="legend-c-low" aria-hidden="true"></i></span>
+          <span>libdeflate · up to fastest<i class="legend-c-high" aria-hidden="true"></i></span>
+          <span>Roc · slowest<i class="legend-roc-low" aria-hidden="true"></i></span>
+          <span>Roc · up to fastest<i class="legend-roc-high" aria-hidden="true"></i></span>
+        </div>
       </div>
     </div>
     <p class="chart-x-axis">Compression level</p>
@@ -133,12 +140,6 @@ for my $d (@datasets) {
 };
 }
 $html .= <<'HTML';
-  <div class="chart-legend" aria-label="Chart legend">
-    <span><i class="legend-c-low" aria-hidden="true"></i>libdeflate · slowest</span>
-    <span><i class="legend-c-high" aria-hidden="true"></i>libdeflate · up to fastest</span>
-    <span><i class="legend-roc-low" aria-hidden="true"></i>Roc · slowest</span>
-    <span><i class="legend-roc-high" aria-hidden="true"></i>Roc · up to fastest</span>
-  </div>
 </figure>
 <!-- END COMPRESSION CHART -->
 HTML
@@ -206,8 +207,8 @@ my $css = <<'CSS';
 .chart-bar-libdeflate .chart-high, .legend-c-high { background: var(--c-high); }
 .chart-level-label { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--chart-muted); }
 .compression-chart .chart-x-axis { margin: 32px 0 18px var(--chart-axis-width); text-align: center; font-size: 12px; font-weight: 600; }
-.chart-legend { display: grid; grid-template-columns: repeat(4, auto); gap: 9px 12px; border-top: 1px solid var(--chart-border); margin-top: 10px; padding-top: 16px; font-size: 11px; }
-.chart-legend > span { display: flex; gap: 6px; align-items: center; }
+.chart-legend { position: absolute; top: 0; right: 0; display: grid; grid-template-rows: repeat(4, 1fr); justify-items: end; align-items: center; font-size: 11px; }
+.chart-legend > span { display: flex; gap: 6px; align-items: center; justify-content: flex-end; text-align: right; white-space: nowrap; }
 .chart-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
 @media (prefers-color-scheme: dark) {
     .compression-chart { --chart-surface: #1e1c23; --chart-border: #49434f; --chart-grid: #39353e; --chart-muted: #bbb4c7; --roc-low: #cfb5f5; --roc-high: #8245ce; --c-low: #c4c4ce; --c-high: #696974; }
@@ -219,7 +220,7 @@ my $css = <<'CSS';
     .chart-groups { column-gap: 4px; padding: 0 2px; }
     .chart-pair { gap: 2px; }
     .chart-level-label { font-size: clamp(9px, 2.5vw, 10px); }
-    .chart-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .chart-legend { font-size: 10px; }
 }
 @media print {
     .compression-chart { break-inside: avoid; print-color-adjust: exact; }
