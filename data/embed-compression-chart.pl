@@ -161,7 +161,7 @@ my $css = <<'CSS';
     column-gap: 16px;
     align-items: center;
     margin: 1.75rem 0 2rem;
-    padding: 22px 20px 18px;
+    padding: 22px 22px 18px 20px;
     border: 1px solid var(--chart-border);
     border-radius: 14px;
     background: var(--chart-surface);
