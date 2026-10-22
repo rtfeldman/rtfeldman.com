@@ -71,7 +71,7 @@ In Roc, `a + b` desugars to `a.plus(b)`. For an integer like [`U64`](https://www
 
 ## Room for Improvement
 
-I'm sure there are still opportunities to improve roc-deflate's performance—especially on x64 CPUs—as well as the optimization pipeline in Roc's compiler itself.
+I'm sure there are still opportunities to improve roc-deflate's performance—especially on x64 CPUs—as well as the optimization pipeline in Roc's compiler.
 
 At this point I feel reasonably confident that all the low-hanging fruit has been picked, but if anyone wants to try it out for themselves, [here's the script I ran to set up and run the benchmark suite on Linux](https://gist.github.com/rtfeldman/7b6830809149867b79761ffb8e0456c3). (Note that Claude Opus 5.5 generated this script, and I haven't vetted it for security; run it outside a sandbox at your own risk.) It pins both Roc compiler revisions and roc-deflate versions, so you'll want to adjust those commits if you're trying out potential improvements.
 
