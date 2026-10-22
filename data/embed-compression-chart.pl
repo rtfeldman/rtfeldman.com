@@ -25,7 +25,7 @@ my %known_corpus = map { $_ => 1 } @corpora;
 my $maximum = 0;
 for my $d (@datasets) {
     my $rows = read_csv("$root/data/$d->{file}");
-    my (%counts, %seen);
+    my (%counts, %seen, %case_speeds);
     for my $r (@$rows) {
         my ($engine, $level, $corpus, $speed) = @{$r}{'engine', 'level', 'corpus', $d->{field}};
         die "Unexpected engine in $d->{file}\n" unless defined($engine) && grep { $_ eq $engine } @engines;
@@ -38,23 +38,32 @@ for my $d (@datasets) {
         if ($d->{id} eq 'mac') {
             die "Invalid Mac repetition\n" unless ($r->{round} // '') =~ /\A[1-3]\z/ && ($r->{rep} // '') =~ /\A[1-5]\z/;
             $sample .= ":$r->{round}:$r->{rep}";
+            die "Invalid Mac timing\n" unless ($r->{ns} // '') =~ /\A[1-9]\d*\z/
+                && ($r->{input_bytes} // '') =~ /\A[1-9]\d*\z/;
+            # Preserve precision rather than using the rounded throughput column.
+            $speed = $r->{input_bytes} / $r->{ns} * 1000;
         } else {
             die "Unexpected Linux sampling\n" unless ($r->{reported_repetitions} // '') eq '7';
         }
         die "Duplicate sample: $sample\n" if $seen{$sample}++;
-        my $range = ($d->{ranges}{$level}{$engine} //= {});
-        for my $end ('min', 'max') {
-            if (!exists($range->{$end}) || ($end eq 'min' ? $speed < $range->{$end}{speed} : $speed > $range->{$end}{speed})) {
-                $range->{$end} = { speed => 0 + $speed, corpus => $corpus };
-            }
-        }
-        $maximum = $speed if $speed > $maximum;
+        push @{$case_speeds{$key}}, 0 + $speed;
     }
     for my $level (1 .. 12) {
         for my $engine (@engines) {
             for my $corpus (@corpora) {
                 die "Missing or incomplete case: $d->{id} $engine L$level $corpus\n"
                     unless ($counts{"$engine:$level:$corpus"} // 0) == $d->{samples};
+                # Mac: median of 15 runs. Linux: the supplied median of 7 runs.
+                # Only these per-file medians contribute to either chart's range.
+                my @speeds = sort { $a <=> $b } @{$case_speeds{"$engine:$level:$corpus"}};
+                my $median = $speeds[int(@speeds / 2)];
+                my $range = ($d->{ranges}{$level}{$engine} //= {});
+                for my $end ('min', 'max') {
+                    if (!exists($range->{$end}) || ($end eq 'min' ? $median < $range->{$end}{speed} : $median > $range->{$end}{speed})) {
+                        $range->{$end} = { speed => $median, corpus => $corpus };
+                    }
+                }
+                $maximum = $median if $median > $maximum;
             }
         }
     }
@@ -62,6 +71,7 @@ for my $d (@datasets) {
 }
 # Both machines share a linear scale, with round 100 MB/s ticks.
 my $axis_max = ceil($maximum / 100) * 100;
+$axis_max = 700 if $axis_max < 700; # Preserve the published scale and callout space.
 my $legend_height = sprintf '%.6f', 100 * 200 / $axis_max;
 my $html = <<'HTML';
 <!-- BEGIN COMPRESSION CHART -->
@@ -78,7 +88,7 @@ my $html = <<'HTML';
 HTML
 for my $d (@datasets) {
     my ($id, $label) = @{$d}{'id', 'label'};
-    my $qualifier = $id eq 'mac' ? 'run' : 'median result';
+    my $repetitions = $id eq 'mac' ? 15 : 7;
     $html .= qq{  <section class="chart-panel chart-panel-$id" aria-label="$label throughput">
     <div class="chart-axis-title">MB/s</div>
     <div class="chart-frame">
@@ -105,8 +115,8 @@ for my $d (@datasets) {
             $html .= qq{              <div class="chart-engine">\n};
             my $range = $d->{ranges}{$level}{$engine};
             my ($min, $max) = @{$range}{'min', 'max'};
-            my $description = sprintf q{On the %s, %s's slowest L%d %s was "%s" at %.2f MB/s, and its fastest was "%s" at %.2f MB/s.},
-                $label, $engine, $level, $qualifier, $min->{corpus}, $min->{speed}, $max->{corpus}, $max->{speed};
+            my $description = sprintf q{On the %s, %s's slowest L%d file was "%s" at %.2f MB/s, and its fastest was "%s" at %.2f MB/s. Each value is the median of %d runs for that file.},
+                $label, $engine, $level, $min->{corpus}, $min->{speed}, $max->{corpus}, $max->{speed}, $repetitions;
             my $tooltip = escape_html($description);
             my $class = $engine eq 'roc-deflate' ? 'roc' : 'libdeflate';
             $html .= sprintf qq{                <div class="chart-bar chart-bar-%s" style="bottom:%.6f%%;height:%.6f%%" tabindex="0" role="img" aria-label="%s" title="%s"></div>\n},
@@ -116,8 +126,8 @@ for my $d (@datasets) {
                 my $fast_label = 50 + 100 * ceil(($max->{speed} - 50) / 100);
                 my $slow_label = 50 + 100 * floor(($min->{speed} - 50) / 100);
                 for my $callout (
-                    ['max', $max->{speed}, $fast_label - $max->{speed}, 'fastest run'],
-                    ['min', $slow_label, $min->{speed} - $slow_label, 'slowest run'],
+                    ['max', $max->{speed}, $fast_label - $max->{speed}, 'fastest median'],
+                    ['min', $slow_label, $min->{speed} - $slow_label, 'slowest median'],
                 ) {
                     my ($end, $bottom, $height, $text) = @$callout;
                     $html .= sprintf qq{                <span class="chart-endpoint chart-endpoint-%s" style="bottom:%.6f%%;height:%.6f%%" aria-hidden="true"><span class="chart-endpoint-arrow"></span><span class="chart-endpoint-text">%s</span></span>\n},
@@ -235,6 +245,7 @@ my $css = <<'CSS';
     .chart-controls { width: 100%; }
     .chart-controls label { flex: 1; padding: 7px 6px; font-size: 12px; }
     .chart-groups { column-gap: 4px; padding: 0 2px; }
+    .chart-endpoint-text { max-width: 5em; }
     .chart-level-label { font-size: clamp(9px, 2.5vw, 10px); }
     .compression-chart .chart-x-axis { margin-top: 44px; }
     .chart-legend { max-width: 50%; }

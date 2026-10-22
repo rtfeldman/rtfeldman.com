@@ -19,17 +19,22 @@ shared linear 0–700 MB/s axis (the ceiling adjusts if future data requires it)
 The inputs are the latest published measurements, not investigation runs:
 
 - macOS: `data/macos-optimization-2026-10-22/roc-deflate-compression-timings.csv`.
-  Minimum and maximum of all individual samples per engine and level:
-  12 files × 15 repetitions = 180 observations per bar.
+  Calculate the median throughput of 15 repetitions for each file, engine,
+  and level, using input bytes and elapsed nanoseconds for full precision.
+  Then take the minimum and maximum of the 12 per-file medians for each bar.
 - Linux: `data/x64-2026-10-22-final/compression-medians.csv`.
   Minimum and maximum of the 12 file medians per engine and level. The archive
-  does not contain individual samples; the hover titles identify case medians.
+  supplies medians of 7 repetitions, rounded to 0.1 MB/s, without individual runs.
+
+Both charts show the same statistic: the range of per-file median throughputs.
+Hover text states each machine's repetition count. The callouts say “fastest
+median” and “slowest median” rather than describing individual runs.
 
 There are 12 levels and 12 corpus files. Each machine's range floats from
 `minimum / axis ceiling` to `maximum / axis ceiling`, with height
 `(maximum - minimum) / axis ceiling`. The corpus files providing those endpoints
 need not be the same. Bar length shows the spread; the top's position shows the
-fastest speed.
+fastest per-file median speed.
 
 CSS-only machine tabs switch between M1 MacBook Pro and Ryzen 3900X Ubuntu,
 using the same scale. Solid gray represents libdeflate on the left; solid purple
