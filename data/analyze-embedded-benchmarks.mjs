@@ -1,10 +1,10 @@
 // Recompute the latest embedded-input macOS comparison from retained raw samples.
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { analyze } from './analyze-timings.mjs';
+import { analyzeLinuxFinal, linuxDirectory } from './analyze-linux-final.mjs';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const beforeDir = 'macos-before-2026-10-22';
 const afterDir = 'macos-optimization-2026-10-22';
@@ -14,7 +14,9 @@ const after = analyze(afterDir, 'Apple M1 Pro / macOS aarch64 — latest', sampl
 const getJSON = (dir, file) => JSON.parse(fs.readFileSync(path.join(root, dir, file), 'utf8'));
 const meta = getJSON(afterDir, 'provenance.json');
 const beforeMeta = getJSON(beforeDir, 'provenance.json');
-const linux = getJSON('x64-2026-10-21-final', 'summary.json');
+const linuxResult = analyzeLinuxFinal();
+const linux = linuxResult.summary;
+const previousLinux = getJSON('x64-2026-10-21-final', 'summary.json');
 const q = (xs, p) => { const a = [...xs].sort((x,y) => x-y), i=(a.length-1)*p; return a[Math.floor(i)] + (a[Math.ceil(i)]-a[Math.floor(i)])*(i-Math.floor(i)); };
 const med = xs => q(xs,.5);
 const fmt = n => n.toFixed(2);
@@ -41,15 +43,18 @@ for(let round=1;round<=3;round++) for(const c of after.cases) {
 }
 csv('per-round-gaps.csv',perRound);
 const s=after.summary,b=before.summary;
-const linuxMeta = getJSON('x64-2026-10-21-final', 'archive-provenance.json');
-for (const [file,expected] of Object.entries(linuxMeta.files_sha256)) assert.equal(createHash('sha256').update(fs.readFileSync(path.join(root,'x64-2026-10-21-final',file))).digest('hex'),expected,'Linux raw file changed since the archive audit');
+const linuxMeta = linuxResult.provenance;
 const current = [
  {dataset:afterDir,machine:'Apple M1 Pro / macOS aarch64',compiler_commit:meta.compiler_commit,library_commit:meta.library_commit,...Object.fromEntries(['median_roc_extra_time_percent','max_roc_extra_time_percent','max_case','min_roc_extra_time_percent','min_case','roc_faster_cases'].map(k=>[k,s[k]]))},
- {dataset:'x64-2026-10-21-final',machine:'AMD Ryzen 9 3900X / Linux x64',compiler_commit:linuxMeta.sources.roc,library_commit:linuxMeta.sources['roc-deflate'],...Object.fromEntries(['median_roc_extra_time_percent','max_roc_extra_time_percent','max_case','min_roc_extra_time_percent','min_case','roc_faster_cases'].map(k=>[k,linux[k]]))},
+ {dataset:linuxDirectory,machine:'AMD Ryzen 9 3900X / Linux x64',compiler_commit:linuxMeta.sources.roc,library_commit:linuxMeta.sources['roc-deflate'],...Object.fromEntries(['median_roc_extra_time_percent','max_roc_extra_time_percent','max_case','min_roc_extra_time_percent','min_case','roc_faster_cases'].map(k=>[k,linux[k]]))},
 ];
 const currentCols=Object.keys(current[0]);
 fs.writeFileSync(path.join(root,'current-comparison-summary.csv'), [currentCols.join(','),...current.map(r=>currentCols.map(c=>JSON.stringify(r[c])).join(','))].join('\n')+'\n');
 fs.copyFileSync(path.join(root,'current-comparison-summary.csv'),path.join(root,'comparison-summary.csv'));
+const currentCases = [...after.cases.map(c=>({dataset:afterDir,data_basis:'raw elapsed ns',...c})),
+ ...linuxResult.cases.map(c=>({dataset:linuxDirectory,data_basis:'median MB/s rounded to 0.1',...c}))];
+const caseCols=['dataset','data_basis','level','corpus','c_median_mb_per_s','roc_median_mb_per_s','roc_extra_time_percent'];
+fs.writeFileSync(path.join(root,'current-per-file-summary.csv'),[caseCols.join(','),...currentCases.map(c=>caseCols.map(k=>JSON.stringify(c[k])).join(','))].join('\n')+'\n');
 const ranked=[...after.cases].sort((a,b)=>b.roc_extra_time_percent-a.roc_extra_time_percent);
 const comparison={ before:b, after:s, median_roc_time_change_percent:med(changes.map(c=>c.roc_time_change_percent)),
  geometric_mean_roc_time_change_percent:(Math.exp(changes.reduce((sum,c)=>sum+Math.log(c.after_roc_ns/c.before_roc_ns),0)/changes.length)-1)*100,
@@ -60,7 +65,12 @@ const comparison={ before:b, after:s, median_roc_time_change_percent:med(changes
  rounded_up_worst_gap_percent:Math.ceil(s.max_roc_extra_time_percent*10)/10 };
 fs.writeFileSync(path.join(root,afterDir,'comparison.json'),JSON.stringify(comparison,null,2)+'\n');
 const report=[
- 'Roc versus libdeflate — latest macOS embedded-input benchmarks, 2026-10-22','',
+ 'Roc versus libdeflate — current macOS and Linux benchmarks, 2026-10-22','',
+ `Current Mac median: ${fmt(s.median_roc_extra_time_percent)}%; range ${fmt(s.min_roc_extra_time_percent)}% to +${fmt(s.max_roc_extra_time_percent)}%; Roc wins ${s.roc_faster_cases}/144.`,
+ `Current Linux median: ${fmt(linux.median_roc_extra_time_percent)}%; range ${fmt(linux.min_roc_extra_time_percent)}% to +${fmt(linux.max_roc_extra_time_percent)}%; Roc wins ${linux.roc_faster_cases}/144.`,
+ 'Linux values are calculated from rounded median throughputs; macOS values use retained raw times.',
+ 'These datasets share a compiler version but differ in library version, harness and sampling protocol.',
+ '', 'LATEST MACOS', '',
  `Across these 144 Silesia file/level cases on this Apple M1 Pro, Roc's median elapsed time was no more than ${comparison.rounded_up_worst_gap_percent.toFixed(1)}% above libdeflate's.`,
  `This is a bound on the measured case medians, not on every individual repetition or all macOS workloads.`,
  '', 'CURRENT SOURCES',
@@ -124,10 +134,12 @@ report.push('','PROTOCOL AND LIMITS',
  'Each case gap is (median Roc ns / median C ns - 1) * 100; positive means more elapsed time. Throughput is decimal MB/s.',
  'The machine is a shared desktop, without CPU pinning or frequency controls. Our own builds/tests/profiling did not overlap this final run.',
  'These samples form a new series. Earlier basic-cli/preload timings and exploratory per-file batches use different platforms or process protocols, so their maxima are not controlled before/after comparisons.',
- '', 'LINUX DATA',
- 'The latest supplied Linux results remain x64-2026-10-21-final/. They have not been rerun with these later compiler/library changes.',
- `Linux median gap: ${fmt(linux.median_roc_extra_time_percent)}%; worst ${fmt(linux.max_roc_extra_time_percent)}% (${linux.max_case}); best ${fmt(linux.min_roc_extra_time_percent)}% (${linux.min_case}); Roc faster in ${linux.roc_faster_cases}/144 cases.`,
- 'The earlier matched-version comparison is preserved in reference-report.txt and macos-aarch64-2026-10-21/. Do not attribute a difference between current Linux and current Mac numbers solely to CPU architecture.',
+ '', ...linuxResult.report,
+ 'HISTORICAL COMPARISONS',
+ `Supplied Linux series: median gap ${fmt(previousLinux.median_roc_extra_time_percent)}% -> ${fmt(linux.median_roc_extra_time_percent)}%; maximum ${fmt(previousLinux.max_roc_extra_time_percent)}% -> ${fmt(linux.max_roc_extra_time_percent)}%; Roc wins ${previousLinux.roc_faster_cases} -> ${linux.roc_faster_cases}/144.`,
+ 'The Linux change is descriptive only: compiler, library, CPU pinning and sampling changed; the new archive retains rounded medians rather than raw samples.',
+ 'The superseded Linux archive is retained at x64-2026-10-21-final/ solely for the historical matched-version reference and previous reports.',
+ 'The earlier matched-version comparison is preserved in reference-report.txt and macos-aarch64-2026-10-21/.',
  '','Recompute: node data/analyze-embedded-benchmarks.mjs','');
 fs.writeFileSync(path.join(root,afterDir,'report.txt'),report.join('\n'));
 fs.copyFileSync(path.join(root,afterDir,'report.txt'),path.join(root,'report.txt'));

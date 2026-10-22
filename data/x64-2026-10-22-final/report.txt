@@ -1,0 +1,92 @@
+LATEST LINUX X64 — AMD Ryzen 9 3900X, 2026-10-22
+
+Source: deflate-final.tzr.gz; SHA-256 88c3b186990340f29bc04ad984e61f2bc6be153ae51106c62c131509d5179774.
+Roc d99c7b838f; roc-deflate 04cb55f; libdeflate b122c8b; mimalloc v2.1.7.
+12 Silesia files x 12 compression levels; 7 repetitions per engine per case, pinned to core 6.
+scripts/abp.sh runs each engine in turn for each case, computes median elapsed ns, converts to MB/s and rounds to one decimal.
+Only these rounded medians are retained: 288 engine/case aggregates representing 2,016 reported repetitions. No raw repetitions are supplied.
+Gap = (C median MB/s / Roc median MB/s - 1) * 100: extra Roc elapsed time. Positive is slower; negative is less time.
+All overall statistics weight the 144 cases equally. Extra displayed digits are calculations from rounded inputs, not extra measurement precision.
+
+Median gap: 8.87%; mean 7.76%; geometric mean 7.54%.
+Worst: L10 x-ray, 18.03% extra time. Best: L2 nci, -12.22% extra time.
+Roc faster: 16/144; C faster: 127; ties: 1.
+Percentiles: p10 -1.75%; p25 5.22%; p75 12.60%; p90 15.03%; p95 16.23%; p99 17.62%.
+Within +/-5%: 25; +/-10%: 78; +/-15%: 129; +/-20%: 144.
+No more than 10% slower: 81/144; no more than 15% slower: 129/144.
+Median rounding interval: 8.70% to 8.98%; worst-case rounding interval: 17.87% to 18.40%. These are rounding limits, not confidence intervals.
+
+VALIDATION AND COMPARABILITY
+All 144 unique expected keys present; all 144 supplied gap rows agree with the medians at their stated precision; all seven archive files match their recorded SHA-256 hashes.
+The README reports byte-identical compressed output, but output files and check execution logs are absent; this import cannot independently recheck that claim.
+The README flags L1 dickens as bimodal (+9% to +21% across other pinned passes). The supplied row is +4.8%; those other passes are not included. No universal worst-case or stability guarantee follows from this one table.
+The unpinned repro-deflate-mimalloc.sh is a rebuild recipe, not the exact pinned measurement procedure; use scripts/abp.sh for the latter.
+Linux uses the basic-cli/musl harness, preloaded mimalloc for C and statically linked mimalloc for Roc. macOS uses embedded inputs and the minimal C platform, with static mimalloc for both.
+The current platforms share compiler d99c7b838f but use different roc-deflate commits (Linux 04cb55f; Mac 6710774) and measurement protocols. Differences cannot be attributed solely to CPU architecture.
+Linux lacks raw repetitions, so IQR, run-to-run variation and statistical confidence intervals cannot be recomputed.
+
+TEN LARGEST RELATIVE GAPS
+case | gap % | C MB/s | Roc MB/s
+L10 x-ray | 18.03 | 34.7 | 29.4
+L3 x-ray | 17.98 | 112.2 | 95.1
+L12 x-ray | 17.14 | 24.6 | 21.0
+L2 x-ray | 16.86 | 111.6 | 95.5
+L6 reymont | 16.58 | 71.0 | 60.9
+L11 x-ray | 16.52 | 26.8 | 23.0
+L4 x-ray | 16.42 | 111.3 | 95.6
+L1 xml | 16.25 | 411.3 | 353.8
+L1 ooffice | 16.11 | 167.9 | 144.6
+L7 x-ray | 15.44 | 94.2 | 81.6
+
+TEN SMALLEST RELATIVE GAPS
+case | gap % | C MB/s | Roc MB/s
+L2 nci | -12.22 | 286.5 | 326.4
+L12 reymont | -11.11 | 5.6 | 6.3
+L4 nci | -10.18 | 254.0 | 282.8
+L1 nci | -9.64 | 387.3 | 428.6
+L3 xml | -9.41 | 209.9 | 231.7
+L12 webster | -9.38 | 5.8 | 6.4
+L12 dickens | -8.64 | 7.4 | 8.1
+L11 reymont | -8.45 | 6.5 | 7.1
+L11 webster | -8.22 | 6.7 | 7.3
+L11 dickens | -7.37 | 8.8 | 9.5
+
+FASTEST ROC THROUGHPUT
+case | gap % | C MB/s | Roc MB/s
+L1 nci | -9.64 | 387.3 | 428.6
+L1 xml | 16.25 | 411.3 | 353.8
+L2 nci | -12.22 | 286.5 | 326.4
+
+SLOWEST ROC THROUGHPUT
+case | gap % | C MB/s | Roc MB/s
+L12 nci | 3.03 | 3.4 | 3.3
+L12 xml | 2.56 | 4.0 | 3.9
+L12 mr | 14.63 | 4.7 | 4.1
+
+PER LEVEL: level | median gap % | worst gap % | Roc wins / 12
+1 | 11.18 | 16.25 | 2/12
+2 | 11.23 | 16.86 | 1/12
+3 | 10.83 | 17.98 | 1/12
+4 | 9.88 | 16.42 | 2/12
+5 | 11.28 | 15.23 | 0/12
+6 | 12.75 | 16.58 | 0/12
+7 | 10.41 | 15.44 | 0/12
+8 | 8.12 | 12.50 | 0/12
+9 | 6.98 | 10.65 | 0/12
+10 | 7.69 | 18.03 | 3/12
+11 | 3.69 | 16.52 | 3/12
+12 | 2.56 | 17.14 | 4/12
+
+PER CORPUS: corpus | median gap % | worst gap % | Roc wins / 12
+dickens | 8.35 | 14.27 | 3/12
+mozilla | 12.95 | 15.32 | 0/12
+mr | 7.09 | 14.63 | 0/12
+nci | 3.74 | 7.92 | 3/12
+ooffice | 12.14 | 16.11 | 0/12
+osdb | 9.25 | 14.57 | 1/12
+reymont | 6.12 | 16.58 | 3/12
+samba | 10.35 | 14.36 | 0/12
+sao | 10.29 | 13.65 | 0/12
+webster | 7.13 | 12.92 | 4/12
+x-ray | 15.93 | 18.03 | 0/12
+xml | 7.30 | 16.25 | 2/12
