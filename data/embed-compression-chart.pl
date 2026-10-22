@@ -191,7 +191,7 @@ my $css = <<'CSS';
 .chart-grid span:first-child { border-color: var(--chart-border); }
 .chart-groups { position: relative; height: 100%; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 8px; padding: 0 5px; }
 .chart-level { height: 100%; min-width: 0; position: relative; }
-.chart-pair { height: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 3px; }
+.chart-pair { height: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 0; }
 .chart-engine { width: 50%; max-width: 22px; height: 100%; position: relative; }
 /* Each solid bar floats between the slowest and fastest measurements. */
 .chart-bar { position: absolute; left: 0; width: 100%; border-radius: 2px; }
@@ -212,7 +212,6 @@ my $css = <<'CSS';
     .chart-controls { width: 100%; }
     .chart-controls label { flex: 1; padding: 7px 6px; font-size: 12px; }
     .chart-groups { column-gap: 4px; padding: 0 2px; }
-    .chart-pair { gap: 2px; }
     .chart-level-label { font-size: clamp(9px, 2.5vw, 10px); }
     .compression-chart .chart-x-axis { margin-top: 44px; }
     .chart-legend { max-width: 50%; }
