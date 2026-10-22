@@ -104,7 +104,7 @@ for my $d (@datasets) {
         for my $engine (@engines) {
             my $range = $d->{ranges}{$level}{$engine};
             my ($min, $max) = @{$range}{'min', 'max'};
-            my $name = $engine eq 'roc-deflate' ? 'Roc' : 'libdeflate';
+            my $name = $engine;
             my $class = $engine eq 'roc-deflate' ? 'roc' : 'libdeflate';
             my $description = sprintf q{%s's slowest L%d %s was "%s" at %.2f MB/s, and its fastest was "%s" at %.2f MB/s.},
                 $name, $level, $qualifier, $min->{corpus}, $min->{speed}, $max->{corpus}, $max->{speed};
@@ -126,8 +126,8 @@ for my $d (@datasets) {
         <div class="chart-legend" style="height:$legend_height%" aria-label="Chart legend">
           <span>slowest libdeflate run<i class="legend-c-low" aria-hidden="true"></i></span>
           <span>gap with fastest libdeflate run<i class="legend-c-high" aria-hidden="true"></i></span>
-          <span>slowest Roc run<i class="legend-roc-low" aria-hidden="true"></i></span>
-          <span>gap with fastest Roc run<i class="legend-roc-high" aria-hidden="true"></i></span>
+          <span>slowest roc-deflate run<i class="legend-roc-low" aria-hidden="true"></i></span>
+          <span>gap with fastest roc-deflate run<i class="legend-roc-high" aria-hidden="true"></i></span>
         </div>
       </div>
     </div>
@@ -155,6 +155,7 @@ my $css = <<'CSS';
     --c-high: #50515a;
     --chart-height: 340px;
     --chart-axis-width: 38px;
+    --chart-label-font-size: 13px;
     position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -185,7 +186,7 @@ my $css = <<'CSS';
 .chart-panel { display: none; grid-column: 1 / -1; }
 #chart-mac:checked ~ .chart-panel-mac, #chart-linux:checked ~ .chart-panel-linux { display: block; }
 .chart-panel { margin-top: 22px; }
-.chart-axis-title { display: flex; justify-content: space-between; font-size: 1em; font-weight: 400; margin: 0 0 12px; }
+.chart-axis-title { display: flex; justify-content: space-between; font-size: var(--chart-label-font-size); font-weight: 400; margin: 0 0 12px; }
 .chart-axis-title span { color: var(--chart-muted); font-weight: 400; }
 .chart-faster { display: inline-flex; align-items: center; gap: .25em; }
 .chart-up-arrow { display: inline-block; line-height: 1; transform: translateY(-.12em); }
@@ -208,22 +209,23 @@ my $css = <<'CSS';
 .chart-bar-libdeflate .chart-low, .legend-c-low { background: var(--c-low); }
 .chart-bar-libdeflate .chart-high, .legend-c-high { background: var(--c-high); }
 .chart-level-label { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--chart-muted); }
-.compression-chart .chart-x-axis { margin: 32px 0 18px var(--chart-axis-width); text-align: center; font-size: 1em; font-weight: 400; }
-.chart-legend { position: absolute; top: 0; right: 0; display: grid; grid-template-rows: repeat(4, 1fr); justify-items: end; align-items: center; font-size: 13px; }
+.compression-chart .chart-x-axis { margin: 52px 0 8px var(--chart-axis-width); text-align: center; font-size: var(--chart-label-font-size); font-weight: 400; }
+.chart-legend { position: absolute; top: 0; right: 0; display: grid; grid-template-rows: repeat(4, 1fr); justify-items: end; align-items: center; font-size: var(--chart-label-font-size); }
 .chart-legend > span { display: flex; gap: 6px; align-items: center; justify-content: flex-end; text-align: right; white-space: nowrap; }
 .chart-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
 @media (prefers-color-scheme: dark) {
     .compression-chart { --chart-surface: #1e1c23; --chart-border: #49434f; --chart-grid: #39353e; --chart-muted: #bbb4c7; --roc-low: #cfb5f5; --roc-high: #8245ce; --c-low: #c4c4ce; --c-high: #696974; }
 }
 @media (max-width: 540px) {
-    .compression-chart { --chart-height: 560px; --chart-axis-width: 31px; display: block; padding: 18px 12px 14px; border-radius: 10px; }
+    .compression-chart { --chart-height: 560px; --chart-axis-width: 31px; --chart-label-font-size: 12px; display: block; padding: 18px 12px 14px; border-radius: 10px; }
     .compression-chart figcaption { margin-bottom: 18px; }
     .chart-controls { width: 100%; }
     .chart-controls label { flex: 1; padding: 7px 6px; font-size: 12px; }
     .chart-groups { column-gap: 4px; padding: 0 2px; }
     .chart-pair { gap: 2px; }
     .chart-level-label { font-size: clamp(9px, 2.5vw, 10px); }
-    .chart-legend { max-width: 50%; font-size: 12px; }
+    .compression-chart .chart-x-axis { margin-top: 44px; }
+    .chart-legend { max-width: 50%; }
     .chart-legend > span { max-width: 100%; white-space: normal; line-height: 1.1; }
 }
 @media print {

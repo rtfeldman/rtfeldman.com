@@ -20,6 +20,7 @@
     --c-high: #50515a;
     --chart-height: 340px;
     --chart-axis-width: 38px;
+    --chart-label-font-size: 13px;
     position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -50,7 +51,7 @@
 .chart-panel { display: none; grid-column: 1 / -1; }
 #chart-mac:checked ~ .chart-panel-mac, #chart-linux:checked ~ .chart-panel-linux { display: block; }
 .chart-panel { margin-top: 22px; }
-.chart-axis-title { display: flex; justify-content: space-between; font-size: 1em; font-weight: 400; margin: 0 0 12px; }
+.chart-axis-title { display: flex; justify-content: space-between; font-size: var(--chart-label-font-size); font-weight: 400; margin: 0 0 12px; }
 .chart-axis-title span { color: var(--chart-muted); font-weight: 400; }
 .chart-faster { display: inline-flex; align-items: center; gap: .25em; }
 .chart-up-arrow { display: inline-block; line-height: 1; transform: translateY(-.12em); }
@@ -73,22 +74,23 @@
 .chart-bar-libdeflate .chart-low, .legend-c-low { background: var(--c-low); }
 .chart-bar-libdeflate .chart-high, .legend-c-high { background: var(--c-high); }
 .chart-level-label { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--chart-muted); }
-.compression-chart .chart-x-axis { margin: 32px 0 18px var(--chart-axis-width); text-align: center; font-size: 1em; font-weight: 400; }
-.chart-legend { position: absolute; top: 0; right: 0; display: grid; grid-template-rows: repeat(4, 1fr); justify-items: end; align-items: center; font-size: 13px; }
+.compression-chart .chart-x-axis { margin: 52px 0 8px var(--chart-axis-width); text-align: center; font-size: var(--chart-label-font-size); font-weight: 400; }
+.chart-legend { position: absolute; top: 0; right: 0; display: grid; grid-template-rows: repeat(4, 1fr); justify-items: end; align-items: center; font-size: var(--chart-label-font-size); }
 .chart-legend > span { display: flex; gap: 6px; align-items: center; justify-content: flex-end; text-align: right; white-space: nowrap; }
 .chart-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
 @media (prefers-color-scheme: dark) {
     .compression-chart { --chart-surface: #1e1c23; --chart-border: #49434f; --chart-grid: #39353e; --chart-muted: #bbb4c7; --roc-low: #cfb5f5; --roc-high: #8245ce; --c-low: #c4c4ce; --c-high: #696974; }
 }
 @media (max-width: 540px) {
-    .compression-chart { --chart-height: 560px; --chart-axis-width: 31px; display: block; padding: 18px 12px 14px; border-radius: 10px; }
+    .compression-chart { --chart-height: 560px; --chart-axis-width: 31px; --chart-label-font-size: 12px; display: block; padding: 18px 12px 14px; border-radius: 10px; }
     .compression-chart figcaption { margin-bottom: 18px; }
     .chart-controls { width: 100%; }
     .chart-controls label { flex: 1; padding: 7px 6px; font-size: 12px; }
     .chart-groups { column-gap: 4px; padding: 0 2px; }
     .chart-pair { gap: 2px; }
     .chart-level-label { font-size: clamp(9px, 2.5vw, 10px); }
-    .chart-legend { max-width: 50%; font-size: 12px; }
+    .compression-chart .chart-x-axis { margin-top: 44px; }
+    .chart-legend { max-width: 50%; }
     .chart-legend > span { max-width: 100%; white-space: normal; line-height: 1.1; }
 }
 @media print {
@@ -162,9 +164,9 @@
                 <span class="chart-low" style="height:23.531932%" title="libdeflate's slowest L1 run was &quot;x-ray&quot; at 142.82 MB/s, and its fastest was &quot;nci&quot; at 606.92 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:76.468068%" title="libdeflate's slowest L1 run was &quot;x-ray&quot; at 142.82 MB/s, and its fastest was &quot;nci&quot; at 606.92 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:76.251429%" tabindex="0" role="img" aria-label="Roc's slowest L1 run was &quot;x-ray&quot; at 132.91 MB/s, and its fastest was &quot;nci&quot; at 533.76 MB/s." title="Roc's slowest L1 run was &quot;x-ray&quot; at 132.91 MB/s, and its fastest was &quot;nci&quot; at 533.76 MB/s.">
-                <span class="chart-low" style="height:24.900704%" title="Roc's slowest L1 run was &quot;x-ray&quot; at 132.91 MB/s, and its fastest was &quot;nci&quot; at 533.76 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:75.099296%" title="Roc's slowest L1 run was &quot;x-ray&quot; at 132.91 MB/s, and its fastest was &quot;nci&quot; at 533.76 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:76.251429%" tabindex="0" role="img" aria-label="roc-deflate's slowest L1 run was &quot;x-ray&quot; at 132.91 MB/s, and its fastest was &quot;nci&quot; at 533.76 MB/s." title="roc-deflate's slowest L1 run was &quot;x-ray&quot; at 132.91 MB/s, and its fastest was &quot;nci&quot; at 533.76 MB/s.">
+                <span class="chart-low" style="height:24.900704%" title="roc-deflate's slowest L1 run was &quot;x-ray&quot; at 132.91 MB/s, and its fastest was &quot;nci&quot; at 533.76 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:75.099296%" title="roc-deflate's slowest L1 run was &quot;x-ray&quot; at 132.91 MB/s, and its fastest was &quot;nci&quot; at 533.76 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L1</span>
@@ -175,9 +177,9 @@
                 <span class="chart-low" style="height:24.359059%" title="libdeflate's slowest L2 run was &quot;sao&quot; at 110.88 MB/s, and its fastest was &quot;nci&quot; at 455.19 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:75.640941%" title="libdeflate's slowest L2 run was &quot;sao&quot; at 110.88 MB/s, and its fastest was &quot;nci&quot; at 455.19 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:59.105714%" tabindex="0" role="img" aria-label="Roc's slowest L2 run was &quot;sao&quot; at 103.28 MB/s, and its fastest was &quot;nci&quot; at 413.74 MB/s." title="Roc's slowest L2 run was &quot;sao&quot; at 103.28 MB/s, and its fastest was &quot;nci&quot; at 413.74 MB/s.">
-                <span class="chart-low" style="height:24.962537%" title="Roc's slowest L2 run was &quot;sao&quot; at 103.28 MB/s, and its fastest was &quot;nci&quot; at 413.74 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:75.037463%" title="Roc's slowest L2 run was &quot;sao&quot; at 103.28 MB/s, and its fastest was &quot;nci&quot; at 413.74 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:59.105714%" tabindex="0" role="img" aria-label="roc-deflate's slowest L2 run was &quot;sao&quot; at 103.28 MB/s, and its fastest was &quot;nci&quot; at 413.74 MB/s." title="roc-deflate's slowest L2 run was &quot;sao&quot; at 103.28 MB/s, and its fastest was &quot;nci&quot; at 413.74 MB/s.">
+                <span class="chart-low" style="height:24.962537%" title="roc-deflate's slowest L2 run was &quot;sao&quot; at 103.28 MB/s, and its fastest was &quot;nci&quot; at 413.74 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:75.037463%" title="roc-deflate's slowest L2 run was &quot;sao&quot; at 103.28 MB/s, and its fastest was &quot;nci&quot; at 413.74 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L2</span>
@@ -188,9 +190,9 @@
                 <span class="chart-low" style="height:23.772739%" title="libdeflate's slowest L3 run was &quot;sao&quot; at 99.71 MB/s, and its fastest was &quot;nci&quot; at 419.43 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:76.227261%" title="libdeflate's slowest L3 run was &quot;sao&quot; at 99.71 MB/s, and its fastest was &quot;nci&quot; at 419.43 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:54.868571%" tabindex="0" role="img" aria-label="Roc's slowest L3 run was &quot;sao&quot; at 93.67 MB/s, and its fastest was &quot;nci&quot; at 384.08 MB/s." title="Roc's slowest L3 run was &quot;sao&quot; at 93.67 MB/s, and its fastest was &quot;nci&quot; at 384.08 MB/s.">
-                <span class="chart-low" style="height:24.388148%" title="Roc's slowest L3 run was &quot;sao&quot; at 93.67 MB/s, and its fastest was &quot;nci&quot; at 384.08 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:75.611852%" title="Roc's slowest L3 run was &quot;sao&quot; at 93.67 MB/s, and its fastest was &quot;nci&quot; at 384.08 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:54.868571%" tabindex="0" role="img" aria-label="roc-deflate's slowest L3 run was &quot;sao&quot; at 93.67 MB/s, and its fastest was &quot;nci&quot; at 384.08 MB/s." title="roc-deflate's slowest L3 run was &quot;sao&quot; at 93.67 MB/s, and its fastest was &quot;nci&quot; at 384.08 MB/s.">
+                <span class="chart-low" style="height:24.388148%" title="roc-deflate's slowest L3 run was &quot;sao&quot; at 93.67 MB/s, and its fastest was &quot;nci&quot; at 384.08 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:75.611852%" title="roc-deflate's slowest L3 run was &quot;sao&quot; at 93.67 MB/s, and its fastest was &quot;nci&quot; at 384.08 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L3</span>
@@ -201,9 +203,9 @@
                 <span class="chart-low" style="height:24.588173%" title="libdeflate's slowest L4 run was &quot;sao&quot; at 93.14 MB/s, and its fastest was &quot;nci&quot; at 378.80 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:75.411827%" title="libdeflate's slowest L4 run was &quot;sao&quot; at 93.14 MB/s, and its fastest was &quot;nci&quot; at 378.80 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:51.177143%" tabindex="0" role="img" aria-label="Roc's slowest L4 run was &quot;sao&quot; at 88.22 MB/s, and its fastest was &quot;nci&quot; at 358.24 MB/s." title="Roc's slowest L4 run was &quot;sao&quot; at 88.22 MB/s, and its fastest was &quot;nci&quot; at 358.24 MB/s.">
-                <span class="chart-low" style="height:24.625949%" title="Roc's slowest L4 run was &quot;sao&quot; at 88.22 MB/s, and its fastest was &quot;nci&quot; at 358.24 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:75.374051%" title="Roc's slowest L4 run was &quot;sao&quot; at 88.22 MB/s, and its fastest was &quot;nci&quot; at 358.24 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:51.177143%" tabindex="0" role="img" aria-label="roc-deflate's slowest L4 run was &quot;sao&quot; at 88.22 MB/s, and its fastest was &quot;nci&quot; at 358.24 MB/s." title="roc-deflate's slowest L4 run was &quot;sao&quot; at 88.22 MB/s, and its fastest was &quot;nci&quot; at 358.24 MB/s.">
+                <span class="chart-low" style="height:24.625949%" title="roc-deflate's slowest L4 run was &quot;sao&quot; at 88.22 MB/s, and its fastest was &quot;nci&quot; at 358.24 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:75.374051%" title="roc-deflate's slowest L4 run was &quot;sao&quot; at 88.22 MB/s, and its fastest was &quot;nci&quot; at 358.24 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L4</span>
@@ -214,9 +216,9 @@
                 <span class="chart-low" style="height:28.570935%" title="libdeflate's slowest L5 run was &quot;sao&quot; at 82.65 MB/s, and its fastest was &quot;nci&quot; at 289.28 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:71.429065%" title="libdeflate's slowest L5 run was &quot;sao&quot; at 82.65 MB/s, and its fastest was &quot;nci&quot; at 289.28 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:44.834286%" tabindex="0" role="img" aria-label="Roc's slowest L5 run was &quot;sao&quot; at 76.43 MB/s, and its fastest was &quot;nci&quot; at 313.84 MB/s." title="Roc's slowest L5 run was &quot;sao&quot; at 76.43 MB/s, and its fastest was &quot;nci&quot; at 313.84 MB/s.">
-                <span class="chart-low" style="height:24.353174%" title="Roc's slowest L5 run was &quot;sao&quot; at 76.43 MB/s, and its fastest was &quot;nci&quot; at 313.84 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:75.646826%" title="Roc's slowest L5 run was &quot;sao&quot; at 76.43 MB/s, and its fastest was &quot;nci&quot; at 313.84 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:44.834286%" tabindex="0" role="img" aria-label="roc-deflate's slowest L5 run was &quot;sao&quot; at 76.43 MB/s, and its fastest was &quot;nci&quot; at 313.84 MB/s." title="roc-deflate's slowest L5 run was &quot;sao&quot; at 76.43 MB/s, and its fastest was &quot;nci&quot; at 313.84 MB/s.">
+                <span class="chart-low" style="height:24.353174%" title="roc-deflate's slowest L5 run was &quot;sao&quot; at 76.43 MB/s, and its fastest was &quot;nci&quot; at 313.84 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:75.646826%" title="roc-deflate's slowest L5 run was &quot;sao&quot; at 76.43 MB/s, and its fastest was &quot;nci&quot; at 313.84 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L5</span>
@@ -227,9 +229,9 @@
                 <span class="chart-low" style="height:30.267543%" title="libdeflate's slowest L6 run was &quot;sao&quot; at 67.20 MB/s, and its fastest was &quot;nci&quot; at 222.02 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:69.732457%" title="libdeflate's slowest L6 run was &quot;sao&quot; at 67.20 MB/s, and its fastest was &quot;nci&quot; at 222.02 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:35.372857%" tabindex="0" role="img" aria-label="Roc's slowest L6 run was &quot;sao&quot; at 65.37 MB/s, and its fastest was &quot;nci&quot; at 247.61 MB/s." title="Roc's slowest L6 run was &quot;sao&quot; at 65.37 MB/s, and its fastest was &quot;nci&quot; at 247.61 MB/s.">
-                <span class="chart-low" style="height:26.400388%" title="Roc's slowest L6 run was &quot;sao&quot; at 65.37 MB/s, and its fastest was &quot;nci&quot; at 247.61 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:73.599612%" title="Roc's slowest L6 run was &quot;sao&quot; at 65.37 MB/s, and its fastest was &quot;nci&quot; at 247.61 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:35.372857%" tabindex="0" role="img" aria-label="roc-deflate's slowest L6 run was &quot;sao&quot; at 65.37 MB/s, and its fastest was &quot;nci&quot; at 247.61 MB/s." title="roc-deflate's slowest L6 run was &quot;sao&quot; at 65.37 MB/s, and its fastest was &quot;nci&quot; at 247.61 MB/s.">
+                <span class="chart-low" style="height:26.400388%" title="roc-deflate's slowest L6 run was &quot;sao&quot; at 65.37 MB/s, and its fastest was &quot;nci&quot; at 247.61 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:73.599612%" title="roc-deflate's slowest L6 run was &quot;sao&quot; at 65.37 MB/s, and its fastest was &quot;nci&quot; at 247.61 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L6</span>
@@ -240,9 +242,9 @@
                 <span class="chart-low" style="height:29.428138%" title="libdeflate's slowest L7 run was &quot;reymont&quot; at 46.52 MB/s, and its fastest was &quot;nci&quot; at 158.08 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:70.571862%" title="libdeflate's slowest L7 run was &quot;reymont&quot; at 46.52 MB/s, and its fastest was &quot;nci&quot; at 158.08 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:25.190000%" tabindex="0" role="img" aria-label="Roc's slowest L7 run was &quot;reymont&quot; at 50.06 MB/s, and its fastest was &quot;nci&quot; at 176.33 MB/s." title="Roc's slowest L7 run was &quot;reymont&quot; at 50.06 MB/s, and its fastest was &quot;nci&quot; at 176.33 MB/s.">
-                <span class="chart-low" style="height:28.389951%" title="Roc's slowest L7 run was &quot;reymont&quot; at 50.06 MB/s, and its fastest was &quot;nci&quot; at 176.33 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:71.610049%" title="Roc's slowest L7 run was &quot;reymont&quot; at 50.06 MB/s, and its fastest was &quot;nci&quot; at 176.33 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:25.190000%" tabindex="0" role="img" aria-label="roc-deflate's slowest L7 run was &quot;reymont&quot; at 50.06 MB/s, and its fastest was &quot;nci&quot; at 176.33 MB/s." title="roc-deflate's slowest L7 run was &quot;reymont&quot; at 50.06 MB/s, and its fastest was &quot;nci&quot; at 176.33 MB/s.">
+                <span class="chart-low" style="height:28.389951%" title="roc-deflate's slowest L7 run was &quot;reymont&quot; at 50.06 MB/s, and its fastest was &quot;nci&quot; at 176.33 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:71.610049%" title="roc-deflate's slowest L7 run was &quot;reymont&quot; at 50.06 MB/s, and its fastest was &quot;nci&quot; at 176.33 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L7</span>
@@ -253,9 +255,9 @@
                 <span class="chart-low" style="height:22.483346%" title="libdeflate's slowest L8 run was &quot;reymont&quot; at 24.30 MB/s, and its fastest was &quot;osdb&quot; at 108.08 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:77.516654%" title="libdeflate's slowest L8 run was &quot;reymont&quot; at 24.30 MB/s, and its fastest was &quot;osdb&quot; at 108.08 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:14.832857%" tabindex="0" role="img" aria-label="Roc's slowest L8 run was &quot;reymont&quot; at 27.58 MB/s, and its fastest was &quot;osdb&quot; at 103.83 MB/s." title="Roc's slowest L8 run was &quot;reymont&quot; at 27.58 MB/s, and its fastest was &quot;osdb&quot; at 103.83 MB/s.">
-                <span class="chart-low" style="height:26.562650%" title="Roc's slowest L8 run was &quot;reymont&quot; at 27.58 MB/s, and its fastest was &quot;osdb&quot; at 103.83 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:73.437350%" title="Roc's slowest L8 run was &quot;reymont&quot; at 27.58 MB/s, and its fastest was &quot;osdb&quot; at 103.83 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:14.832857%" tabindex="0" role="img" aria-label="roc-deflate's slowest L8 run was &quot;reymont&quot; at 27.58 MB/s, and its fastest was &quot;osdb&quot; at 103.83 MB/s." title="roc-deflate's slowest L8 run was &quot;reymont&quot; at 27.58 MB/s, and its fastest was &quot;osdb&quot; at 103.83 MB/s.">
+                <span class="chart-low" style="height:26.562650%" title="roc-deflate's slowest L8 run was &quot;reymont&quot; at 27.58 MB/s, and its fastest was &quot;osdb&quot; at 103.83 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:73.437350%" title="roc-deflate's slowest L8 run was &quot;reymont&quot; at 27.58 MB/s, and its fastest was &quot;osdb&quot; at 103.83 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L8</span>
@@ -266,9 +268,9 @@
                 <span class="chart-low" style="height:19.155087%" title="libdeflate's slowest L9 run was &quot;reymont&quot; at 20.54 MB/s, and its fastest was &quot;osdb&quot; at 107.23 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:80.844913%" title="libdeflate's slowest L9 run was &quot;reymont&quot; at 20.54 MB/s, and its fastest was &quot;osdb&quot; at 107.23 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:14.767143%" tabindex="0" role="img" aria-label="Roc's slowest L9 run was &quot;reymont&quot; at 22.42 MB/s, and its fastest was &quot;osdb&quot; at 103.37 MB/s." title="Roc's slowest L9 run was &quot;reymont&quot; at 22.42 MB/s, and its fastest was &quot;osdb&quot; at 103.37 MB/s.">
-                <span class="chart-low" style="height:21.689078%" title="Roc's slowest L9 run was &quot;reymont&quot; at 22.42 MB/s, and its fastest was &quot;osdb&quot; at 103.37 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:78.310922%" title="Roc's slowest L9 run was &quot;reymont&quot; at 22.42 MB/s, and its fastest was &quot;osdb&quot; at 103.37 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:14.767143%" tabindex="0" role="img" aria-label="roc-deflate's slowest L9 run was &quot;reymont&quot; at 22.42 MB/s, and its fastest was &quot;osdb&quot; at 103.37 MB/s." title="roc-deflate's slowest L9 run was &quot;reymont&quot; at 22.42 MB/s, and its fastest was &quot;osdb&quot; at 103.37 MB/s.">
+                <span class="chart-low" style="height:21.689078%" title="roc-deflate's slowest L9 run was &quot;reymont&quot; at 22.42 MB/s, and its fastest was &quot;osdb&quot; at 103.37 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:78.310922%" title="roc-deflate's slowest L9 run was &quot;reymont&quot; at 22.42 MB/s, and its fastest was &quot;osdb&quot; at 103.37 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L9</span>
@@ -279,9 +281,9 @@
                 <span class="chart-low" style="height:21.566369%" title="libdeflate's slowest L10 run was &quot;nci&quot; at 7.49 MB/s, and its fastest was &quot;x-ray&quot; at 34.73 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:78.433631%" title="libdeflate's slowest L10 run was &quot;nci&quot; at 7.49 MB/s, and its fastest was &quot;x-ray&quot; at 34.73 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:4.627143%" tabindex="0" role="img" aria-label="Roc's slowest L10 run was &quot;nci&quot; at 7.17 MB/s, and its fastest was &quot;x-ray&quot; at 32.39 MB/s." title="Roc's slowest L10 run was &quot;nci&quot; at 7.17 MB/s, and its fastest was &quot;x-ray&quot; at 32.39 MB/s.">
-                <span class="chart-low" style="height:22.136462%" title="Roc's slowest L10 run was &quot;nci&quot; at 7.17 MB/s, and its fastest was &quot;x-ray&quot; at 32.39 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:77.863538%" title="Roc's slowest L10 run was &quot;nci&quot; at 7.17 MB/s, and its fastest was &quot;x-ray&quot; at 32.39 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:4.627143%" tabindex="0" role="img" aria-label="roc-deflate's slowest L10 run was &quot;nci&quot; at 7.17 MB/s, and its fastest was &quot;x-ray&quot; at 32.39 MB/s." title="roc-deflate's slowest L10 run was &quot;nci&quot; at 7.17 MB/s, and its fastest was &quot;x-ray&quot; at 32.39 MB/s.">
+                <span class="chart-low" style="height:22.136462%" title="roc-deflate's slowest L10 run was &quot;nci&quot; at 7.17 MB/s, and its fastest was &quot;x-ray&quot; at 32.39 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:77.863538%" title="roc-deflate's slowest L10 run was &quot;nci&quot; at 7.17 MB/s, and its fastest was &quot;x-ray&quot; at 32.39 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L10</span>
@@ -292,9 +294,9 @@
                 <span class="chart-low" style="height:18.303401%" title="libdeflate's slowest L11 run was &quot;nci&quot; at 4.79 MB/s, and its fastest was &quot;x-ray&quot; at 26.17 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:81.696599%" title="libdeflate's slowest L11 run was &quot;nci&quot; at 4.79 MB/s, and its fastest was &quot;x-ray&quot; at 26.17 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:3.590000%" tabindex="0" role="img" aria-label="Roc's slowest L11 run was &quot;nci&quot; at 4.74 MB/s, and its fastest was &quot;x-ray&quot; at 25.13 MB/s." title="Roc's slowest L11 run was &quot;nci&quot; at 4.74 MB/s, and its fastest was &quot;x-ray&quot; at 25.13 MB/s.">
-                <span class="chart-low" style="height:18.861918%" title="Roc's slowest L11 run was &quot;nci&quot; at 4.74 MB/s, and its fastest was &quot;x-ray&quot; at 25.13 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:81.138082%" title="Roc's slowest L11 run was &quot;nci&quot; at 4.74 MB/s, and its fastest was &quot;x-ray&quot; at 25.13 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:3.590000%" tabindex="0" role="img" aria-label="roc-deflate's slowest L11 run was &quot;nci&quot; at 4.74 MB/s, and its fastest was &quot;x-ray&quot; at 25.13 MB/s." title="roc-deflate's slowest L11 run was &quot;nci&quot; at 4.74 MB/s, and its fastest was &quot;x-ray&quot; at 25.13 MB/s.">
+                <span class="chart-low" style="height:18.861918%" title="roc-deflate's slowest L11 run was &quot;nci&quot; at 4.74 MB/s, and its fastest was &quot;x-ray&quot; at 25.13 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:81.138082%" title="roc-deflate's slowest L11 run was &quot;nci&quot; at 4.74 MB/s, and its fastest was &quot;x-ray&quot; at 25.13 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L11</span>
@@ -305,9 +307,9 @@
                 <span class="chart-low" style="height:14.664981%" title="libdeflate's slowest L12 run was &quot;nci&quot; at 3.48 MB/s, and its fastest was &quot;x-ray&quot; at 23.73 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:85.335019%" title="libdeflate's slowest L12 run was &quot;nci&quot; at 3.48 MB/s, and its fastest was &quot;x-ray&quot; at 23.73 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:3.261429%" tabindex="0" role="img" aria-label="Roc's slowest L12 run was &quot;nci&quot; at 3.45 MB/s, and its fastest was &quot;x-ray&quot; at 22.83 MB/s." title="Roc's slowest L12 run was &quot;nci&quot; at 3.45 MB/s, and its fastest was &quot;x-ray&quot; at 22.83 MB/s.">
-                <span class="chart-low" style="height:15.111695%" title="Roc's slowest L12 run was &quot;nci&quot; at 3.45 MB/s, and its fastest was &quot;x-ray&quot; at 22.83 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:84.888305%" title="Roc's slowest L12 run was &quot;nci&quot; at 3.45 MB/s, and its fastest was &quot;x-ray&quot; at 22.83 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:3.261429%" tabindex="0" role="img" aria-label="roc-deflate's slowest L12 run was &quot;nci&quot; at 3.45 MB/s, and its fastest was &quot;x-ray&quot; at 22.83 MB/s." title="roc-deflate's slowest L12 run was &quot;nci&quot; at 3.45 MB/s, and its fastest was &quot;x-ray&quot; at 22.83 MB/s.">
+                <span class="chart-low" style="height:15.111695%" title="roc-deflate's slowest L12 run was &quot;nci&quot; at 3.45 MB/s, and its fastest was &quot;x-ray&quot; at 22.83 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:84.888305%" title="roc-deflate's slowest L12 run was &quot;nci&quot; at 3.45 MB/s, and its fastest was &quot;x-ray&quot; at 22.83 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L12</span>
@@ -316,8 +318,8 @@
         <div class="chart-legend" style="height:57.142857%" aria-label="Chart legend">
           <span>slowest libdeflate run<i class="legend-c-low" aria-hidden="true"></i></span>
           <span>gap with fastest libdeflate run<i class="legend-c-high" aria-hidden="true"></i></span>
-          <span>slowest Roc run<i class="legend-roc-low" aria-hidden="true"></i></span>
-          <span>gap with fastest Roc run<i class="legend-roc-high" aria-hidden="true"></i></span>
+          <span>slowest roc-deflate run<i class="legend-roc-low" aria-hidden="true"></i></span>
+          <span>gap with fastest roc-deflate run<i class="legend-roc-high" aria-hidden="true"></i></span>
         </div>
       </div>
     </div>
@@ -354,9 +356,9 @@
                 <span class="chart-low" style="height:34.573304%" title="libdeflate's slowest L1 median result was &quot;x-ray&quot; at 142.20 MB/s, and its fastest was &quot;xml&quot; at 411.30 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:65.426696%" title="libdeflate's slowest L1 median result was &quot;x-ray&quot; at 142.20 MB/s, and its fastest was &quot;xml&quot; at 411.30 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:61.228571%" tabindex="0" role="img" aria-label="Roc's slowest L1 median result was &quot;x-ray&quot; at 130.80 MB/s, and its fastest was &quot;nci&quot; at 428.60 MB/s." title="Roc's slowest L1 median result was &quot;x-ray&quot; at 130.80 MB/s, and its fastest was &quot;nci&quot; at 428.60 MB/s.">
-                <span class="chart-low" style="height:30.517965%" title="Roc's slowest L1 median result was &quot;x-ray&quot; at 130.80 MB/s, and its fastest was &quot;nci&quot; at 428.60 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:69.482035%" title="Roc's slowest L1 median result was &quot;x-ray&quot; at 130.80 MB/s, and its fastest was &quot;nci&quot; at 428.60 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:61.228571%" tabindex="0" role="img" aria-label="roc-deflate's slowest L1 median result was &quot;x-ray&quot; at 130.80 MB/s, and its fastest was &quot;nci&quot; at 428.60 MB/s." title="roc-deflate's slowest L1 median result was &quot;x-ray&quot; at 130.80 MB/s, and its fastest was &quot;nci&quot; at 428.60 MB/s.">
+                <span class="chart-low" style="height:30.517965%" title="roc-deflate's slowest L1 median result was &quot;x-ray&quot; at 130.80 MB/s, and its fastest was &quot;nci&quot; at 428.60 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:69.482035%" title="roc-deflate's slowest L1 median result was &quot;x-ray&quot; at 130.80 MB/s, and its fastest was &quot;nci&quot; at 428.60 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L1</span>
@@ -367,9 +369,9 @@
                 <span class="chart-low" style="height:36.369983%" title="libdeflate's slowest L2 median result was &quot;sao&quot; at 104.20 MB/s, and its fastest was &quot;nci&quot; at 286.50 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:63.630017%" title="libdeflate's slowest L2 median result was &quot;sao&quot; at 104.20 MB/s, and its fastest was &quot;nci&quot; at 286.50 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:46.628571%" tabindex="0" role="img" aria-label="Roc's slowest L2 median result was &quot;sao&quot; at 94.10 MB/s, and its fastest was &quot;nci&quot; at 326.40 MB/s." title="Roc's slowest L2 median result was &quot;sao&quot; at 94.10 MB/s, and its fastest was &quot;nci&quot; at 326.40 MB/s.">
-                <span class="chart-low" style="height:28.829657%" title="Roc's slowest L2 median result was &quot;sao&quot; at 94.10 MB/s, and its fastest was &quot;nci&quot; at 326.40 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:71.170343%" title="Roc's slowest L2 median result was &quot;sao&quot; at 94.10 MB/s, and its fastest was &quot;nci&quot; at 326.40 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:46.628571%" tabindex="0" role="img" aria-label="roc-deflate's slowest L2 median result was &quot;sao&quot; at 94.10 MB/s, and its fastest was &quot;nci&quot; at 326.40 MB/s." title="roc-deflate's slowest L2 median result was &quot;sao&quot; at 94.10 MB/s, and its fastest was &quot;nci&quot; at 326.40 MB/s.">
+                <span class="chart-low" style="height:28.829657%" title="roc-deflate's slowest L2 median result was &quot;sao&quot; at 94.10 MB/s, and its fastest was &quot;nci&quot; at 326.40 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:71.170343%" title="roc-deflate's slowest L2 median result was &quot;sao&quot; at 94.10 MB/s, and its fastest was &quot;nci&quot; at 326.40 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L2</span>
@@ -380,9 +382,9 @@
                 <span class="chart-low" style="height:31.054880%" title="libdeflate's slowest L3 median result was &quot;sao&quot; at 94.50 MB/s, and its fastest was &quot;nci&quot; at 304.30 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:68.945120%" title="libdeflate's slowest L3 median result was &quot;sao&quot; at 94.50 MB/s, and its fastest was &quot;nci&quot; at 304.30 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:43.128571%" tabindex="0" role="img" aria-label="Roc's slowest L3 median result was &quot;sao&quot; at 84.80 MB/s, and its fastest was &quot;nci&quot; at 301.90 MB/s." title="Roc's slowest L3 median result was &quot;sao&quot; at 84.80 MB/s, and its fastest was &quot;nci&quot; at 301.90 MB/s.">
-                <span class="chart-low" style="height:28.088771%" title="Roc's slowest L3 median result was &quot;sao&quot; at 84.80 MB/s, and its fastest was &quot;nci&quot; at 301.90 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:71.911229%" title="Roc's slowest L3 median result was &quot;sao&quot; at 84.80 MB/s, and its fastest was &quot;nci&quot; at 301.90 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:43.128571%" tabindex="0" role="img" aria-label="roc-deflate's slowest L3 median result was &quot;sao&quot; at 84.80 MB/s, and its fastest was &quot;nci&quot; at 301.90 MB/s." title="roc-deflate's slowest L3 median result was &quot;sao&quot; at 84.80 MB/s, and its fastest was &quot;nci&quot; at 301.90 MB/s.">
+                <span class="chart-low" style="height:28.088771%" title="roc-deflate's slowest L3 median result was &quot;sao&quot; at 84.80 MB/s, and its fastest was &quot;nci&quot; at 301.90 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:71.911229%" title="roc-deflate's slowest L3 median result was &quot;sao&quot; at 84.80 MB/s, and its fastest was &quot;nci&quot; at 301.90 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L3</span>
@@ -393,9 +395,9 @@
                 <span class="chart-low" style="height:35.078740%" title="libdeflate's slowest L4 median result was &quot;sao&quot; at 89.10 MB/s, and its fastest was &quot;nci&quot; at 254.00 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:64.921260%" title="libdeflate's slowest L4 median result was &quot;sao&quot; at 89.10 MB/s, and its fastest was &quot;nci&quot; at 254.00 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:40.400000%" tabindex="0" role="img" aria-label="Roc's slowest L4 median result was &quot;sao&quot; at 81.50 MB/s, and its fastest was &quot;nci&quot; at 282.80 MB/s." title="Roc's slowest L4 median result was &quot;sao&quot; at 81.50 MB/s, and its fastest was &quot;nci&quot; at 282.80 MB/s.">
-                <span class="chart-low" style="height:28.818953%" title="Roc's slowest L4 median result was &quot;sao&quot; at 81.50 MB/s, and its fastest was &quot;nci&quot; at 282.80 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:71.181047%" title="Roc's slowest L4 median result was &quot;sao&quot; at 81.50 MB/s, and its fastest was &quot;nci&quot; at 282.80 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:40.400000%" tabindex="0" role="img" aria-label="roc-deflate's slowest L4 median result was &quot;sao&quot; at 81.50 MB/s, and its fastest was &quot;nci&quot; at 282.80 MB/s." title="roc-deflate's slowest L4 median result was &quot;sao&quot; at 81.50 MB/s, and its fastest was &quot;nci&quot; at 282.80 MB/s.">
+                <span class="chart-low" style="height:28.818953%" title="roc-deflate's slowest L4 median result was &quot;sao&quot; at 81.50 MB/s, and its fastest was &quot;nci&quot; at 282.80 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:71.181047%" title="roc-deflate's slowest L4 median result was &quot;sao&quot; at 81.50 MB/s, and its fastest was &quot;nci&quot; at 282.80 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L4</span>
@@ -406,9 +408,9 @@
                 <span class="chart-low" style="height:29.872204%" title="libdeflate's slowest L5 median result was &quot;sao&quot; at 74.80 MB/s, and its fastest was &quot;nci&quot; at 250.40 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:70.127796%" title="libdeflate's slowest L5 median result was &quot;sao&quot; at 74.80 MB/s, and its fastest was &quot;nci&quot; at 250.40 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:35.414286%" tabindex="0" role="img" aria-label="Roc's slowest L5 median result was &quot;sao&quot; at 68.10 MB/s, and its fastest was &quot;nci&quot; at 247.90 MB/s." title="Roc's slowest L5 median result was &quot;sao&quot; at 68.10 MB/s, and its fastest was &quot;nci&quot; at 247.90 MB/s.">
-                <span class="chart-low" style="height:27.470754%" title="Roc's slowest L5 median result was &quot;sao&quot; at 68.10 MB/s, and its fastest was &quot;nci&quot; at 247.90 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:72.529246%" title="Roc's slowest L5 median result was &quot;sao&quot; at 68.10 MB/s, and its fastest was &quot;nci&quot; at 247.90 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:35.414286%" tabindex="0" role="img" aria-label="roc-deflate's slowest L5 median result was &quot;sao&quot; at 68.10 MB/s, and its fastest was &quot;nci&quot; at 247.90 MB/s." title="roc-deflate's slowest L5 median result was &quot;sao&quot; at 68.10 MB/s, and its fastest was &quot;nci&quot; at 247.90 MB/s.">
+                <span class="chart-low" style="height:27.470754%" title="roc-deflate's slowest L5 median result was &quot;sao&quot; at 68.10 MB/s, and its fastest was &quot;nci&quot; at 247.90 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:72.529246%" title="roc-deflate's slowest L5 median result was &quot;sao&quot; at 68.10 MB/s, and its fastest was &quot;nci&quot; at 247.90 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L5</span>
@@ -419,9 +421,9 @@
                 <span class="chart-low" style="height:31.708518%" title="libdeflate's slowest L6 median result was &quot;sao&quot; at 64.40 MB/s, and its fastest was &quot;nci&quot; at 203.10 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:68.291482%" title="libdeflate's slowest L6 median result was &quot;sao&quot; at 64.40 MB/s, and its fastest was &quot;nci&quot; at 203.10 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:26.885714%" tabindex="0" role="img" aria-label="Roc's slowest L6 median result was &quot;dickens&quot; at 57.80 MB/s, and its fastest was &quot;nci&quot; at 188.20 MB/s." title="Roc's slowest L6 median result was &quot;dickens&quot; at 57.80 MB/s, and its fastest was &quot;nci&quot; at 188.20 MB/s.">
-                <span class="chart-low" style="height:30.712009%" title="Roc's slowest L6 median result was &quot;dickens&quot; at 57.80 MB/s, and its fastest was &quot;nci&quot; at 188.20 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:69.287991%" title="Roc's slowest L6 median result was &quot;dickens&quot; at 57.80 MB/s, and its fastest was &quot;nci&quot; at 188.20 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:26.885714%" tabindex="0" role="img" aria-label="roc-deflate's slowest L6 median result was &quot;dickens&quot; at 57.80 MB/s, and its fastest was &quot;nci&quot; at 188.20 MB/s." title="roc-deflate's slowest L6 median result was &quot;dickens&quot; at 57.80 MB/s, and its fastest was &quot;nci&quot; at 188.20 MB/s.">
+                <span class="chart-low" style="height:30.712009%" title="roc-deflate's slowest L6 median result was &quot;dickens&quot; at 57.80 MB/s, and its fastest was &quot;nci&quot; at 188.20 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:69.287991%" title="roc-deflate's slowest L6 median result was &quot;dickens&quot; at 57.80 MB/s, and its fastest was &quot;nci&quot; at 188.20 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L6</span>
@@ -432,9 +434,9 @@
                 <span class="chart-low" style="height:26.564581%" title="libdeflate's slowest L7 median result was &quot;reymont&quot; at 39.90 MB/s, and its fastest was &quot;nci&quot; at 150.20 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:73.435419%" title="libdeflate's slowest L7 median result was &quot;reymont&quot; at 39.90 MB/s, and its fastest was &quot;nci&quot; at 150.20 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:20.242857%" tabindex="0" role="img" aria-label="Roc's slowest L7 median result was &quot;reymont&quot; at 36.20 MB/s, and its fastest was &quot;nci&quot; at 141.70 MB/s." title="Roc's slowest L7 median result was &quot;reymont&quot; at 36.20 MB/s, and its fastest was &quot;nci&quot; at 141.70 MB/s.">
-                <span class="chart-low" style="height:25.546930%" title="Roc's slowest L7 median result was &quot;reymont&quot; at 36.20 MB/s, and its fastest was &quot;nci&quot; at 141.70 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:74.453070%" title="Roc's slowest L7 median result was &quot;reymont&quot; at 36.20 MB/s, and its fastest was &quot;nci&quot; at 141.70 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:20.242857%" tabindex="0" role="img" aria-label="roc-deflate's slowest L7 median result was &quot;reymont&quot; at 36.20 MB/s, and its fastest was &quot;nci&quot; at 141.70 MB/s." title="roc-deflate's slowest L7 median result was &quot;reymont&quot; at 36.20 MB/s, and its fastest was &quot;nci&quot; at 141.70 MB/s.">
+                <span class="chart-low" style="height:25.546930%" title="roc-deflate's slowest L7 median result was &quot;reymont&quot; at 36.20 MB/s, and its fastest was &quot;nci&quot; at 141.70 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:74.453070%" title="roc-deflate's slowest L7 median result was &quot;reymont&quot; at 36.20 MB/s, and its fastest was &quot;nci&quot; at 141.70 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L7</span>
@@ -445,9 +447,9 @@
                 <span class="chart-low" style="height:21.063395%" title="libdeflate's slowest L8 median result was &quot;reymont&quot; at 20.60 MB/s, and its fastest was &quot;osdb&quot; at 97.80 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:78.936605%" title="libdeflate's slowest L8 median result was &quot;reymont&quot; at 20.60 MB/s, and its fastest was &quot;osdb&quot; at 97.80 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:12.885714%" tabindex="0" role="img" aria-label="Roc's slowest L8 median result was &quot;reymont&quot; at 19.50 MB/s, and its fastest was &quot;osdb&quot; at 90.20 MB/s." title="Roc's slowest L8 median result was &quot;reymont&quot; at 19.50 MB/s, and its fastest was &quot;osdb&quot; at 90.20 MB/s.">
-                <span class="chart-low" style="height:21.618625%" title="Roc's slowest L8 median result was &quot;reymont&quot; at 19.50 MB/s, and its fastest was &quot;osdb&quot; at 90.20 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:78.381375%" title="Roc's slowest L8 median result was &quot;reymont&quot; at 19.50 MB/s, and its fastest was &quot;osdb&quot; at 90.20 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:12.885714%" tabindex="0" role="img" aria-label="roc-deflate's slowest L8 median result was &quot;reymont&quot; at 19.50 MB/s, and its fastest was &quot;osdb&quot; at 90.20 MB/s." title="roc-deflate's slowest L8 median result was &quot;reymont&quot; at 19.50 MB/s, and its fastest was &quot;osdb&quot; at 90.20 MB/s.">
+                <span class="chart-low" style="height:21.618625%" title="roc-deflate's slowest L8 median result was &quot;reymont&quot; at 19.50 MB/s, and its fastest was &quot;osdb&quot; at 90.20 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:78.381375%" title="roc-deflate's slowest L8 median result was &quot;reymont&quot; at 19.50 MB/s, and its fastest was &quot;osdb&quot; at 90.20 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L8</span>
@@ -458,9 +460,9 @@
                 <span class="chart-low" style="height:17.733473%" title="libdeflate's slowest L9 median result was &quot;reymont&quot; at 16.90 MB/s, and its fastest was &quot;osdb&quot; at 95.30 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:82.266527%" title="libdeflate's slowest L9 median result was &quot;reymont&quot; at 16.90 MB/s, and its fastest was &quot;osdb&quot; at 95.30 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:12.971429%" tabindex="0" role="img" aria-label="Roc's slowest L9 median result was &quot;reymont&quot; at 15.90 MB/s, and its fastest was &quot;osdb&quot; at 90.80 MB/s." title="Roc's slowest L9 median result was &quot;reymont&quot; at 15.90 MB/s, and its fastest was &quot;osdb&quot; at 90.80 MB/s.">
-                <span class="chart-low" style="height:17.511013%" title="Roc's slowest L9 median result was &quot;reymont&quot; at 15.90 MB/s, and its fastest was &quot;osdb&quot; at 90.80 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:82.488987%" title="Roc's slowest L9 median result was &quot;reymont&quot; at 15.90 MB/s, and its fastest was &quot;osdb&quot; at 90.80 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:12.971429%" tabindex="0" role="img" aria-label="roc-deflate's slowest L9 median result was &quot;reymont&quot; at 15.90 MB/s, and its fastest was &quot;osdb&quot; at 90.80 MB/s." title="roc-deflate's slowest L9 median result was &quot;reymont&quot; at 15.90 MB/s, and its fastest was &quot;osdb&quot; at 90.80 MB/s.">
+                <span class="chart-low" style="height:17.511013%" title="roc-deflate's slowest L9 median result was &quot;reymont&quot; at 15.90 MB/s, and its fastest was &quot;osdb&quot; at 90.80 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:82.488987%" title="roc-deflate's slowest L9 median result was &quot;reymont&quot; at 15.90 MB/s, and its fastest was &quot;osdb&quot; at 90.80 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L9</span>
@@ -471,9 +473,9 @@
                 <span class="chart-low" style="height:21.037464%" title="libdeflate's slowest L10 median result was &quot;nci&quot; at 7.30 MB/s, and its fastest was &quot;x-ray&quot; at 34.70 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:78.962536%" title="libdeflate's slowest L10 median result was &quot;nci&quot; at 7.30 MB/s, and its fastest was &quot;x-ray&quot; at 34.70 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:4.200000%" tabindex="0" role="img" aria-label="Roc's slowest L10 median result was &quot;nci&quot; at 6.80 MB/s, and its fastest was &quot;x-ray&quot; at 29.40 MB/s." title="Roc's slowest L10 median result was &quot;nci&quot; at 6.80 MB/s, and its fastest was &quot;x-ray&quot; at 29.40 MB/s.">
-                <span class="chart-low" style="height:23.129252%" title="Roc's slowest L10 median result was &quot;nci&quot; at 6.80 MB/s, and its fastest was &quot;x-ray&quot; at 29.40 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:76.870748%" title="Roc's slowest L10 median result was &quot;nci&quot; at 6.80 MB/s, and its fastest was &quot;x-ray&quot; at 29.40 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:4.200000%" tabindex="0" role="img" aria-label="roc-deflate's slowest L10 median result was &quot;nci&quot; at 6.80 MB/s, and its fastest was &quot;x-ray&quot; at 29.40 MB/s." title="roc-deflate's slowest L10 median result was &quot;nci&quot; at 6.80 MB/s, and its fastest was &quot;x-ray&quot; at 29.40 MB/s.">
+                <span class="chart-low" style="height:23.129252%" title="roc-deflate's slowest L10 median result was &quot;nci&quot; at 6.80 MB/s, and its fastest was &quot;x-ray&quot; at 29.40 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:76.870748%" title="roc-deflate's slowest L10 median result was &quot;nci&quot; at 6.80 MB/s, and its fastest was &quot;x-ray&quot; at 29.40 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L10</span>
@@ -484,9 +486,9 @@
                 <span class="chart-low" style="height:17.537313%" title="libdeflate's slowest L11 median result was &quot;nci&quot; at 4.70 MB/s, and its fastest was &quot;x-ray&quot; at 26.80 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:82.462687%" title="libdeflate's slowest L11 median result was &quot;nci&quot; at 4.70 MB/s, and its fastest was &quot;x-ray&quot; at 26.80 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:3.285714%" tabindex="0" role="img" aria-label="Roc's slowest L11 median result was &quot;nci&quot; at 4.50 MB/s, and its fastest was &quot;x-ray&quot; at 23.00 MB/s." title="Roc's slowest L11 median result was &quot;nci&quot; at 4.50 MB/s, and its fastest was &quot;x-ray&quot; at 23.00 MB/s.">
-                <span class="chart-low" style="height:19.565217%" title="Roc's slowest L11 median result was &quot;nci&quot; at 4.50 MB/s, and its fastest was &quot;x-ray&quot; at 23.00 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:80.434783%" title="Roc's slowest L11 median result was &quot;nci&quot; at 4.50 MB/s, and its fastest was &quot;x-ray&quot; at 23.00 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:3.285714%" tabindex="0" role="img" aria-label="roc-deflate's slowest L11 median result was &quot;nci&quot; at 4.50 MB/s, and its fastest was &quot;x-ray&quot; at 23.00 MB/s." title="roc-deflate's slowest L11 median result was &quot;nci&quot; at 4.50 MB/s, and its fastest was &quot;x-ray&quot; at 23.00 MB/s.">
+                <span class="chart-low" style="height:19.565217%" title="roc-deflate's slowest L11 median result was &quot;nci&quot; at 4.50 MB/s, and its fastest was &quot;x-ray&quot; at 23.00 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:80.434783%" title="roc-deflate's slowest L11 median result was &quot;nci&quot; at 4.50 MB/s, and its fastest was &quot;x-ray&quot; at 23.00 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L11</span>
@@ -497,9 +499,9 @@
                 <span class="chart-low" style="height:13.821138%" title="libdeflate's slowest L12 median result was &quot;nci&quot; at 3.40 MB/s, and its fastest was &quot;x-ray&quot; at 24.60 MB/s." aria-hidden="true"></span>
                 <span class="chart-high" style="height:86.178862%" title="libdeflate's slowest L12 median result was &quot;nci&quot; at 3.40 MB/s, and its fastest was &quot;x-ray&quot; at 24.60 MB/s." aria-hidden="true"></span>
               </div>
-              <div class="chart-bar chart-bar-roc" style="height:3.000000%" tabindex="0" role="img" aria-label="Roc's slowest L12 median result was &quot;nci&quot; at 3.30 MB/s, and its fastest was &quot;x-ray&quot; at 21.00 MB/s." title="Roc's slowest L12 median result was &quot;nci&quot; at 3.30 MB/s, and its fastest was &quot;x-ray&quot; at 21.00 MB/s.">
-                <span class="chart-low" style="height:15.714286%" title="Roc's slowest L12 median result was &quot;nci&quot; at 3.30 MB/s, and its fastest was &quot;x-ray&quot; at 21.00 MB/s." aria-hidden="true"></span>
-                <span class="chart-high" style="height:84.285714%" title="Roc's slowest L12 median result was &quot;nci&quot; at 3.30 MB/s, and its fastest was &quot;x-ray&quot; at 21.00 MB/s." aria-hidden="true"></span>
+              <div class="chart-bar chart-bar-roc" style="height:3.000000%" tabindex="0" role="img" aria-label="roc-deflate's slowest L12 median result was &quot;nci&quot; at 3.30 MB/s, and its fastest was &quot;x-ray&quot; at 21.00 MB/s." title="roc-deflate's slowest L12 median result was &quot;nci&quot; at 3.30 MB/s, and its fastest was &quot;x-ray&quot; at 21.00 MB/s.">
+                <span class="chart-low" style="height:15.714286%" title="roc-deflate's slowest L12 median result was &quot;nci&quot; at 3.30 MB/s, and its fastest was &quot;x-ray&quot; at 21.00 MB/s." aria-hidden="true"></span>
+                <span class="chart-high" style="height:84.285714%" title="roc-deflate's slowest L12 median result was &quot;nci&quot; at 3.30 MB/s, and its fastest was &quot;x-ray&quot; at 21.00 MB/s." aria-hidden="true"></span>
               </div>
             </div>
             <span class="chart-level-label">L12</span>
@@ -508,8 +510,8 @@
         <div class="chart-legend" style="height:57.142857%" aria-label="Chart legend">
           <span>slowest libdeflate run<i class="legend-c-low" aria-hidden="true"></i></span>
           <span>gap with fastest libdeflate run<i class="legend-c-high" aria-hidden="true"></i></span>
-          <span>slowest Roc run<i class="legend-roc-low" aria-hidden="true"></i></span>
-          <span>gap with fastest Roc run<i class="legend-roc-high" aria-hidden="true"></i></span>
+          <span>slowest roc-deflate run<i class="legend-roc-low" aria-hidden="true"></i></span>
+          <span>gap with fastest roc-deflate run<i class="legend-roc-high" aria-hidden="true"></i></span>
         </div>
       </div>
     </div>
