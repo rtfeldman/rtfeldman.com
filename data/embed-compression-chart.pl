@@ -128,7 +128,7 @@ for my $d (@datasets) {
                 $class, 100 * $min->{speed} / $axis_max,
                 100 * ($max->{speed} - $min->{speed}) / $axis_max, $bar_id, $accessible_name, $details_id;
             $readouts .= sprintf qq{        <div class="chart-tooltip" id="%s" role="tooltip" aria-label="%s">
-          <strong class="chart-tooltip-heading" aria-hidden="true">%s, L%d</strong>
+          <span class="chart-tooltip-heading" aria-hidden="true">%s at L%d compression</span>
           <p aria-hidden="true"><strong>Slowest file:</strong> (median of %d runs)<br>%.2f MB/s compressing %s</p>
           <p aria-hidden="true"><strong>Fastest file:</strong> (median of %d runs)<br>%.2f MB/s compressing %s</p>
         </div>
@@ -255,7 +255,7 @@ my $css = <<'CSS';
 /* Readouts occupy unused graph space, never covering measurements or labels.
  * A brief hide delay lets the pointer travel from a bar onto its readout. */
 .chart-tooltip { position: absolute; top: 12px; right: 20%; width: 40%; padding: 10px 12px; border: 1px solid var(--chart-border); border-radius: 6px; background: var(--chart-surface); color: var(--text-color); font-size: var(--chart-label-font-size); line-height: 1.5; visibility: hidden; transition: visibility 0s .6s; z-index: 2; }
-.chart-tooltip-heading { display: block; font-weight: 600; }
+.chart-tooltip-heading { display: block; font-weight: normal; }
 .compression-chart .chart-tooltip p { margin: 6px 0 0; }
 /* Switching bars hides the preceding readout immediately. */
 .chart-panel:has(.chart-bar:hover) .chart-tooltip,
