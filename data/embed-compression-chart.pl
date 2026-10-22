@@ -145,7 +145,7 @@ my $css = <<'CSS';
     --chart-grid: #e6e3ec;
     --chart-muted: #605b6e;
     --roc-color: #7c38f5;
-    --c-color: #50515a;
+    --c-color: #9999a4;
     --chart-height: 340px;
     --chart-axis-width: 38px;
     --chart-label-font-size: 13px;
