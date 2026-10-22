@@ -73,6 +73,7 @@ for my $d (@datasets) {
 my $axis_max = ceil($maximum / 100) * 100;
 $axis_max = 700 if $axis_max < 700; # Preserve the published scale and callout space.
 my $legend_height = sprintf '%.6f', 100 * 200 / $axis_max;
+my $hover_css = '';
 my $html = <<'HTML';
 <!-- BEGIN COMPRESSION CHART -->
 <figure class="compression-chart" id="chart" aria-labelledby="chart-heading">
@@ -89,7 +90,8 @@ HTML
 for my $d (@datasets) {
     my ($id, $label) = @{$d}{'id', 'label'};
     my $repetitions = $id eq 'mac' ? 15 : 7;
-    $html .= qq{  <section class="chart-panel chart-panel-$id" aria-label="$label throughput">
+    my $readouts = '';
+    $html .= qq{  <section class="chart-panel chart-panel-$id" aria-label="$label throughput" style="--chart-legend-height:$legend_height%">
     <div class="chart-axis-title">MB/s</div>
     <div class="chart-frame">
       <div class="chart-y-axis" aria-hidden="true">
@@ -119,9 +121,23 @@ for my $d (@datasets) {
                 $label, $engine, $level, $min->{corpus}, $min->{speed}, $max->{corpus}, $max->{speed}, $repetitions;
             my $tooltip = escape_html($description);
             my $class = $engine eq 'roc-deflate' ? 'roc' : 'libdeflate';
-            $html .= sprintf qq{                <div class="chart-bar chart-bar-%s" style="bottom:%.6f%%;height:%.6f%%" tabindex="0" role="img" aria-label="%s" title="%s"></div>\n},
+            my $bar_id = "chart-$id-l$level-$class";
+            my $details_id = "$bar_id-details";
+            my $accessible_name = escape_html("$engine, level $level, $label");
+            $html .= sprintf qq{                <div class="chart-bar chart-bar-%s" style="bottom:%.6f%%;height:%.6f%%" id="%s" tabindex="0" role="img" aria-label="%s" aria-describedby="%s"></div>\n},
                 $class, 100 * $min->{speed} / $axis_max,
-                100 * ($max->{speed} - $min->{speed}) / $axis_max, $tooltip, $tooltip;
+                100 * ($max->{speed} - $min->{speed}) / $axis_max, $bar_id, $accessible_name, $details_id;
+            $readouts .= sprintf qq{        <div class="chart-tooltip" id="%s" role="tooltip" aria-label="%s">
+          <strong class="chart-tooltip-heading" aria-hidden="true">%s, L%d</strong>
+          <p aria-hidden="true">Slowest: <strong>%s</strong><br>%.2f MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>%s</strong><br>%.2f MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of %d runs.</p>
+        </div>
+}, $details_id, $tooltip, $engine, $level, $min->{corpus}, $min->{speed}, $max->{corpus}, $max->{speed}, $repetitions;
+            $hover_css .= qq{.chart-panel:has(#$bar_id:hover) #$details_id,
+.chart-panel:not(:has(.chart-bar:hover)):has(#$bar_id:focus) #$details_id,
+#$details_id:hover { visibility: visible; transition-delay: 0s; }
+};
             if ($level == 1 && $engine eq 'libdeflate') {
                 my $fast_label = 50 + 100 * ceil(($max->{speed} - 50) / 100);
                 my $slow_label = 50 + 100 * floor(($min->{speed} - 50) / 100);
@@ -146,6 +162,7 @@ for my $d (@datasets) {
           <span>libdeflate<i class="legend-c" aria-hidden="true"></i></span>
           <span>roc-deflate<i class="legend-roc" aria-hidden="true"></i></span>
         </div>
+$readouts
       </div>
     </div>
     <p class="chart-x-axis">Compression Level</p>
@@ -236,8 +253,21 @@ my $css = <<'CSS';
 .chart-legend { position: absolute; top: 0; right: 0; display: grid; grid-template-rows: repeat(2, 1fr); justify-items: end; align-items: center; font-size: var(--chart-label-font-size); }
 .chart-legend > span { display: flex; gap: 6px; align-items: center; justify-content: flex-end; text-align: right; white-space: nowrap; }
 .chart-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
+/* Readouts occupy unused graph space, never covering measurements or labels.
+ * A brief hide delay lets the pointer travel from a bar onto its readout. */
+.chart-tooltip { position: absolute; top: 0; right: 20%; width: 40%; padding: 10px 12px; border: 1px solid var(--chart-border); border-radius: 6px; background: var(--chart-surface); color: var(--text-color); font-size: var(--chart-label-font-size); line-height: 1.5; visibility: hidden; transition: visibility 0s .6s; z-index: 2; }
+.chart-tooltip-heading { display: block; font-weight: 600; }
+.compression-chart .chart-tooltip p { margin: 6px 0 0; }
+.chart-tooltip-method { color: var(--chart-muted); }
+/* Switching bars hides the preceding readout immediately. */
+.chart-panel:has(.chart-bar:hover) .chart-tooltip,
+.chart-panel:has(.chart-bar:focus) .chart-tooltip { visibility: hidden; transition: none; }
 @media (prefers-color-scheme: dark) {
     .compression-chart { --chart-surface: #1e1c23; --chart-border: #49434f; --chart-grid: #39353e; --chart-muted: #bbb4c7; --roc-color: #caadfb; --c-color: #9999a4; }
+}
+@media (max-width: 700px) {
+    .compression-chart { --chart-height: 560px; }
+    .chart-tooltip { top: calc(var(--chart-legend-height) + 12px); right: 0; width: 50%; padding: 8px; }
 }
 @media (max-width: 540px) {
     .compression-chart { --chart-height: 560px; --chart-axis-width: 31px; --chart-label-font-size: 12px; display: block; padding: 18px 12px 14px; border-radius: 10px; }
@@ -254,6 +284,7 @@ my $css = <<'CSS';
 @media print {
     .compression-chart { break-inside: avoid; print-color-adjust: exact; }
     .chart-controls, .chart-radio { display: none; }
+    .chart-tooltip { display: none; }
     .chart-panel { display: block; }
     .chart-panel::before { display: block; font-weight: bold; margin-top: 16px; }
     .chart-panel-mac::before { content: "M1 MacBook Pro"; }
@@ -262,6 +293,7 @@ my $css = <<'CSS';
 </style>
 <!-- END COMPRESSION CHART STYLE -->
 CSS
+$css =~ s{</style>}{$hover_css</style>};
 
 my $page = slurp($article);
 if ($page =~ /<!-- BEGIN COMPRESSION CHART -->/) {

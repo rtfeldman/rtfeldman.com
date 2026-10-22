@@ -84,8 +84,21 @@
 .chart-legend { position: absolute; top: 0; right: 0; display: grid; grid-template-rows: repeat(2, 1fr); justify-items: end; align-items: center; font-size: var(--chart-label-font-size); }
 .chart-legend > span { display: flex; gap: 6px; align-items: center; justify-content: flex-end; text-align: right; white-space: nowrap; }
 .chart-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
+/* Readouts occupy unused graph space, never covering measurements or labels.
+ * A brief hide delay lets the pointer travel from a bar onto its readout. */
+.chart-tooltip { position: absolute; top: 0; right: 20%; width: 40%; padding: 10px 12px; border: 1px solid var(--chart-border); border-radius: 6px; background: var(--chart-surface); color: var(--text-color); font-size: var(--chart-label-font-size); line-height: 1.5; visibility: hidden; transition: visibility 0s .6s; z-index: 2; }
+.chart-tooltip-heading { display: block; font-weight: 600; }
+.compression-chart .chart-tooltip p { margin: 6px 0 0; }
+.chart-tooltip-method { color: var(--chart-muted); }
+/* Switching bars hides the preceding readout immediately. */
+.chart-panel:has(.chart-bar:hover) .chart-tooltip,
+.chart-panel:has(.chart-bar:focus) .chart-tooltip { visibility: hidden; transition: none; }
 @media (prefers-color-scheme: dark) {
     .compression-chart { --chart-surface: #1e1c23; --chart-border: #49434f; --chart-grid: #39353e; --chart-muted: #bbb4c7; --roc-color: #caadfb; --c-color: #9999a4; }
+}
+@media (max-width: 700px) {
+    .compression-chart { --chart-height: 560px; }
+    .chart-tooltip { top: calc(var(--chart-legend-height) + 12px); right: 0; width: 50%; padding: 8px; }
 }
 @media (max-width: 540px) {
     .compression-chart { --chart-height: 560px; --chart-axis-width: 31px; --chart-label-font-size: 12px; display: block; padding: 18px 12px 14px; border-radius: 10px; }
@@ -102,11 +115,156 @@
 @media print {
     .compression-chart { break-inside: avoid; print-color-adjust: exact; }
     .chart-controls, .chart-radio { display: none; }
+    .chart-tooltip { display: none; }
     .chart-panel { display: block; }
     .chart-panel::before { display: block; font-weight: bold; margin-top: 16px; }
     .chart-panel-mac::before { content: "M1 MacBook Pro"; }
     .chart-panel-linux::before { content: "Ryzen 3900X Ubuntu"; }
 }
+.chart-panel:has(#chart-mac-l1-libdeflate:hover) #chart-mac-l1-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l1-libdeflate:focus) #chart-mac-l1-libdeflate-details,
+#chart-mac-l1-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l1-roc:hover) #chart-mac-l1-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l1-roc:focus) #chart-mac-l1-roc-details,
+#chart-mac-l1-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l2-libdeflate:hover) #chart-mac-l2-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l2-libdeflate:focus) #chart-mac-l2-libdeflate-details,
+#chart-mac-l2-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l2-roc:hover) #chart-mac-l2-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l2-roc:focus) #chart-mac-l2-roc-details,
+#chart-mac-l2-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l3-libdeflate:hover) #chart-mac-l3-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l3-libdeflate:focus) #chart-mac-l3-libdeflate-details,
+#chart-mac-l3-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l3-roc:hover) #chart-mac-l3-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l3-roc:focus) #chart-mac-l3-roc-details,
+#chart-mac-l3-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l4-libdeflate:hover) #chart-mac-l4-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l4-libdeflate:focus) #chart-mac-l4-libdeflate-details,
+#chart-mac-l4-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l4-roc:hover) #chart-mac-l4-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l4-roc:focus) #chart-mac-l4-roc-details,
+#chart-mac-l4-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l5-libdeflate:hover) #chart-mac-l5-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l5-libdeflate:focus) #chart-mac-l5-libdeflate-details,
+#chart-mac-l5-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l5-roc:hover) #chart-mac-l5-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l5-roc:focus) #chart-mac-l5-roc-details,
+#chart-mac-l5-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l6-libdeflate:hover) #chart-mac-l6-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l6-libdeflate:focus) #chart-mac-l6-libdeflate-details,
+#chart-mac-l6-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l6-roc:hover) #chart-mac-l6-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l6-roc:focus) #chart-mac-l6-roc-details,
+#chart-mac-l6-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l7-libdeflate:hover) #chart-mac-l7-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l7-libdeflate:focus) #chart-mac-l7-libdeflate-details,
+#chart-mac-l7-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l7-roc:hover) #chart-mac-l7-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l7-roc:focus) #chart-mac-l7-roc-details,
+#chart-mac-l7-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l8-libdeflate:hover) #chart-mac-l8-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l8-libdeflate:focus) #chart-mac-l8-libdeflate-details,
+#chart-mac-l8-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l8-roc:hover) #chart-mac-l8-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l8-roc:focus) #chart-mac-l8-roc-details,
+#chart-mac-l8-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l9-libdeflate:hover) #chart-mac-l9-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l9-libdeflate:focus) #chart-mac-l9-libdeflate-details,
+#chart-mac-l9-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l9-roc:hover) #chart-mac-l9-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l9-roc:focus) #chart-mac-l9-roc-details,
+#chart-mac-l9-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l10-libdeflate:hover) #chart-mac-l10-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l10-libdeflate:focus) #chart-mac-l10-libdeflate-details,
+#chart-mac-l10-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l10-roc:hover) #chart-mac-l10-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l10-roc:focus) #chart-mac-l10-roc-details,
+#chart-mac-l10-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l11-libdeflate:hover) #chart-mac-l11-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l11-libdeflate:focus) #chart-mac-l11-libdeflate-details,
+#chart-mac-l11-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l11-roc:hover) #chart-mac-l11-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l11-roc:focus) #chart-mac-l11-roc-details,
+#chart-mac-l11-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l12-libdeflate:hover) #chart-mac-l12-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l12-libdeflate:focus) #chart-mac-l12-libdeflate-details,
+#chart-mac-l12-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-mac-l12-roc:hover) #chart-mac-l12-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-mac-l12-roc:focus) #chart-mac-l12-roc-details,
+#chart-mac-l12-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l1-libdeflate:hover) #chart-linux-l1-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l1-libdeflate:focus) #chart-linux-l1-libdeflate-details,
+#chart-linux-l1-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l1-roc:hover) #chart-linux-l1-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l1-roc:focus) #chart-linux-l1-roc-details,
+#chart-linux-l1-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l2-libdeflate:hover) #chart-linux-l2-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l2-libdeflate:focus) #chart-linux-l2-libdeflate-details,
+#chart-linux-l2-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l2-roc:hover) #chart-linux-l2-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l2-roc:focus) #chart-linux-l2-roc-details,
+#chart-linux-l2-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l3-libdeflate:hover) #chart-linux-l3-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l3-libdeflate:focus) #chart-linux-l3-libdeflate-details,
+#chart-linux-l3-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l3-roc:hover) #chart-linux-l3-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l3-roc:focus) #chart-linux-l3-roc-details,
+#chart-linux-l3-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l4-libdeflate:hover) #chart-linux-l4-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l4-libdeflate:focus) #chart-linux-l4-libdeflate-details,
+#chart-linux-l4-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l4-roc:hover) #chart-linux-l4-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l4-roc:focus) #chart-linux-l4-roc-details,
+#chart-linux-l4-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l5-libdeflate:hover) #chart-linux-l5-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l5-libdeflate:focus) #chart-linux-l5-libdeflate-details,
+#chart-linux-l5-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l5-roc:hover) #chart-linux-l5-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l5-roc:focus) #chart-linux-l5-roc-details,
+#chart-linux-l5-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l6-libdeflate:hover) #chart-linux-l6-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l6-libdeflate:focus) #chart-linux-l6-libdeflate-details,
+#chart-linux-l6-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l6-roc:hover) #chart-linux-l6-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l6-roc:focus) #chart-linux-l6-roc-details,
+#chart-linux-l6-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l7-libdeflate:hover) #chart-linux-l7-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l7-libdeflate:focus) #chart-linux-l7-libdeflate-details,
+#chart-linux-l7-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l7-roc:hover) #chart-linux-l7-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l7-roc:focus) #chart-linux-l7-roc-details,
+#chart-linux-l7-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l8-libdeflate:hover) #chart-linux-l8-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l8-libdeflate:focus) #chart-linux-l8-libdeflate-details,
+#chart-linux-l8-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l8-roc:hover) #chart-linux-l8-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l8-roc:focus) #chart-linux-l8-roc-details,
+#chart-linux-l8-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l9-libdeflate:hover) #chart-linux-l9-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l9-libdeflate:focus) #chart-linux-l9-libdeflate-details,
+#chart-linux-l9-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l9-roc:hover) #chart-linux-l9-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l9-roc:focus) #chart-linux-l9-roc-details,
+#chart-linux-l9-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l10-libdeflate:hover) #chart-linux-l10-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l10-libdeflate:focus) #chart-linux-l10-libdeflate-details,
+#chart-linux-l10-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l10-roc:hover) #chart-linux-l10-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l10-roc:focus) #chart-linux-l10-roc-details,
+#chart-linux-l10-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l11-libdeflate:hover) #chart-linux-l11-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l11-libdeflate:focus) #chart-linux-l11-libdeflate-details,
+#chart-linux-l11-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l11-roc:hover) #chart-linux-l11-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l11-roc:focus) #chart-linux-l11-roc-details,
+#chart-linux-l11-roc-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l12-libdeflate:hover) #chart-linux-l12-libdeflate-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l12-libdeflate:focus) #chart-linux-l12-libdeflate-details,
+#chart-linux-l12-libdeflate-details:hover { visibility: visible; transition-delay: 0s; }
+.chart-panel:has(#chart-linux-l12-roc:hover) #chart-linux-l12-roc-details,
+.chart-panel:not(:has(.chart-bar:hover)):has(#chart-linux-l12-roc:focus) #chart-linux-l12-roc-details,
+#chart-linux-l12-roc-details:hover { visibility: visible; transition-delay: 0s; }
 </style>
 <!-- END COMPRESSION CHART STYLE -->
 
@@ -140,7 +298,7 @@
     <label for="chart-mac">M1 MacBook Pro</label>
     <label for="chart-linux">Ryzen 3900X Ubuntu</label>
   </div>
-  <section class="chart-panel chart-panel-mac" aria-label="M1 MacBook Pro throughput">
+  <section class="chart-panel chart-panel-mac" aria-label="M1 MacBook Pro throughput" style="--chart-legend-height:28.571429%">
     <div class="chart-axis-title">MB/s</div>
     <div class="chart-frame">
       <div class="chart-y-axis" aria-hidden="true">
@@ -168,12 +326,12 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:20.847352%;height:65.013420%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, libdeflate's slowest L1 file was &quot;x-ray&quot; at 145.93 MB/s, and its fastest was &quot;nci&quot; at 601.03 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, libdeflate's slowest L1 file was &quot;x-ray&quot; at 145.93 MB/s, and its fastest was &quot;nci&quot; at 601.03 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:20.847352%;height:65.013420%" id="chart-mac-l1-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 1, M1 MacBook Pro" aria-describedby="chart-mac-l1-libdeflate-details"></div>
                 <span class="chart-endpoint chart-endpoint-max" style="bottom:85.860771%;height:6.996371%" aria-hidden="true"><span class="chart-endpoint-arrow"></span><span class="chart-endpoint-text">fastest run</span></span>
                 <span class="chart-endpoint chart-endpoint-min" style="bottom:7.142857%;height:13.704495%" aria-hidden="true"><span class="chart-endpoint-arrow"></span><span class="chart-endpoint-text">slowest run</span></span>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:19.237339%;height:56.404526%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L1 file was &quot;x-ray&quot; at 134.66 MB/s, and its fastest was &quot;nci&quot; at 529.49 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, roc-deflate's slowest L1 file was &quot;x-ray&quot; at 134.66 MB/s, and its fastest was &quot;nci&quot; at 529.49 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:19.237339%;height:56.404526%" id="chart-mac-l1-roc" tabindex="0" role="img" aria-label="roc-deflate, level 1, M1 MacBook Pro" aria-describedby="chart-mac-l1-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L1</span>
@@ -181,10 +339,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:16.111099%;height:48.623651%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, libdeflate's slowest L2 file was &quot;sao&quot; at 112.78 MB/s, and its fastest was &quot;nci&quot; at 453.14 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, libdeflate's slowest L2 file was &quot;sao&quot; at 112.78 MB/s, and its fastest was &quot;nci&quot; at 453.14 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:16.111099%;height:48.623651%" id="chart-mac-l2-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 2, M1 MacBook Pro" aria-describedby="chart-mac-l2-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:15.097743%;height:43.448412%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L2 file was &quot;sao&quot; at 105.68 MB/s, and its fastest was &quot;nci&quot; at 409.82 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, roc-deflate's slowest L2 file was &quot;sao&quot; at 105.68 MB/s, and its fastest was &quot;nci&quot; at 409.82 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:15.097743%;height:43.448412%" id="chart-mac-l2-roc" tabindex="0" role="img" aria-label="roc-deflate, level 2, M1 MacBook Pro" aria-describedby="chart-mac-l2-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L2</span>
@@ -192,10 +350,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:14.371213%;height:44.955354%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, libdeflate's slowest L3 file was &quot;sao&quot; at 100.60 MB/s, and its fastest was &quot;nci&quot; at 415.29 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, libdeflate's slowest L3 file was &quot;sao&quot; at 100.60 MB/s, and its fastest was &quot;nci&quot; at 415.29 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:14.371213%;height:44.955354%" id="chart-mac-l3-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 3, M1 MacBook Pro" aria-describedby="chart-mac-l3-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:13.644580%;height:40.957460%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L3 file was &quot;sao&quot; at 95.51 MB/s, and its fastest was &quot;nci&quot; at 382.21 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, roc-deflate's slowest L3 file was &quot;sao&quot; at 95.51 MB/s, and its fastest was &quot;nci&quot; at 382.21 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:13.644580%;height:40.957460%" id="chart-mac-l3-roc" tabindex="0" role="img" aria-label="roc-deflate, level 3, M1 MacBook Pro" aria-describedby="chart-mac-l3-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L3</span>
@@ -203,10 +361,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:13.497388%;height:40.316934%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, libdeflate's slowest L4 file was &quot;sao&quot; at 94.48 MB/s, and its fastest was &quot;nci&quot; at 376.70 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, libdeflate's slowest L4 file was &quot;sao&quot; at 94.48 MB/s, and its fastest was &quot;nci&quot; at 376.70 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:13.497388%;height:40.316934%" id="chart-mac-l4-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 4, M1 MacBook Pro" aria-describedby="chart-mac-l4-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:12.767013%;height:38.157263%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L4 file was &quot;sao&quot; at 89.37 MB/s, and its fastest was &quot;nci&quot; at 356.47 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, roc-deflate's slowest L4 file was &quot;sao&quot; at 89.37 MB/s, and its fastest was &quot;nci&quot; at 356.47 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:12.767013%;height:38.157263%" id="chart-mac-l4-roc" tabindex="0" role="img" aria-label="roc-deflate, level 4, M1 MacBook Pro" aria-describedby="chart-mac-l4-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L4</span>
@@ -214,10 +372,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:11.889232%;height:29.123382%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, libdeflate's slowest L5 file was &quot;sao&quot; at 83.22 MB/s, and its fastest was &quot;nci&quot; at 287.09 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, libdeflate's slowest L5 file was &quot;sao&quot; at 83.22 MB/s, and its fastest was &quot;nci&quot; at 287.09 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:11.889232%;height:29.123382%" id="chart-mac-l5-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 5, M1 MacBook Pro" aria-describedby="chart-mac-l5-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:10.998376%;height:33.480447%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L5 file was &quot;sao&quot; at 76.99 MB/s, and its fastest was &quot;nci&quot; at 311.35 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, roc-deflate's slowest L5 file was &quot;sao&quot; at 76.99 MB/s, and its fastest was &quot;nci&quot; at 311.35 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:10.998376%;height:33.480447%" id="chart-mac-l5-roc" tabindex="0" role="img" aria-label="roc-deflate, level 5, M1 MacBook Pro" aria-describedby="chart-mac-l5-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L5</span>
@@ -225,10 +383,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:9.639556%;height:21.978217%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, libdeflate's slowest L6 file was &quot;sao&quot; at 67.48 MB/s, and its fastest was &quot;nci&quot; at 221.32 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, libdeflate's slowest L6 file was &quot;sao&quot; at 67.48 MB/s, and its fastest was &quot;nci&quot; at 221.32 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:9.639556%;height:21.978217%" id="chart-mac-l6-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 6, M1 MacBook Pro" aria-describedby="chart-mac-l6-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:9.479554%;height:25.747530%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L6 file was &quot;sao&quot; at 66.36 MB/s, and its fastest was &quot;nci&quot; at 246.59 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, roc-deflate's slowest L6 file was &quot;sao&quot; at 66.36 MB/s, and its fastest was &quot;nci&quot; at 246.59 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:9.479554%;height:25.747530%" id="chart-mac-l6-roc" tabindex="0" role="img" aria-label="roc-deflate, level 6, M1 MacBook Pro" aria-describedby="chart-mac-l6-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L6</span>
@@ -236,10 +394,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:6.681462%;height:15.778028%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, libdeflate's slowest L7 file was &quot;reymont&quot; at 46.77 MB/s, and its fastest was &quot;nci&quot; at 157.22 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, libdeflate's slowest L7 file was &quot;reymont&quot; at 46.77 MB/s, and its fastest was &quot;nci&quot; at 157.22 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:6.681462%;height:15.778028%" id="chart-mac-l7-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 7, M1 MacBook Pro" aria-describedby="chart-mac-l7-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:7.314147%;height:17.672687%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L7 file was &quot;reymont&quot; at 51.20 MB/s, and its fastest was &quot;nci&quot; at 174.91 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, roc-deflate's slowest L7 file was &quot;reymont&quot; at 51.20 MB/s, and its fastest was &quot;nci&quot; at 174.91 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:7.314147%;height:17.672687%" id="chart-mac-l7-roc" tabindex="0" role="img" aria-label="roc-deflate, level 7, M1 MacBook Pro" aria-describedby="chart-mac-l7-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L7</span>
@@ -247,10 +405,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:3.553227%;height:11.698141%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, libdeflate's slowest L8 file was &quot;reymont&quot; at 24.87 MB/s, and its fastest was &quot;osdb&quot; at 106.76 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, libdeflate's slowest L8 file was &quot;reymont&quot; at 24.87 MB/s, and its fastest was &quot;osdb&quot; at 106.76 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:3.553227%;height:11.698141%" id="chart-mac-l8-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 8, M1 MacBook Pro" aria-describedby="chart-mac-l8-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:3.972921%;height:10.549490%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L8 file was &quot;reymont&quot; at 27.81 MB/s, and its fastest was &quot;osdb&quot; at 101.66 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, roc-deflate's slowest L8 file was &quot;reymont&quot; at 27.81 MB/s, and its fastest was &quot;osdb&quot; at 101.66 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:3.972921%;height:10.549490%" id="chart-mac-l8-roc" tabindex="0" role="img" aria-label="roc-deflate, level 8, M1 MacBook Pro" aria-describedby="chart-mac-l8-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L8</span>
@@ -258,10 +416,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:2.950220%;height:12.207607%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, libdeflate's slowest L9 file was &quot;reymont&quot; at 20.65 MB/s, and its fastest was &quot;osdb&quot; at 106.10 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, libdeflate's slowest L9 file was &quot;reymont&quot; at 20.65 MB/s, and its fastest was &quot;osdb&quot; at 106.10 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:2.950220%;height:12.207607%" id="chart-mac-l9-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 9, M1 MacBook Pro" aria-describedby="chart-mac-l9-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:3.264609%;height:11.229898%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L9 file was &quot;reymont&quot; at 22.85 MB/s, and its fastest was &quot;osdb&quot; at 101.46 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, roc-deflate's slowest L9 file was &quot;reymont&quot; at 22.85 MB/s, and its fastest was &quot;osdb&quot; at 101.46 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:3.264609%;height:11.229898%" id="chart-mac-l9-roc" tabindex="0" role="img" aria-label="roc-deflate, level 9, M1 MacBook Pro" aria-describedby="chart-mac-l9-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L9</span>
@@ -269,10 +427,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:1.073049%;height:3.805495%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, libdeflate's slowest L10 file was &quot;nci&quot; at 7.51 MB/s, and its fastest was &quot;x-ray&quot; at 34.15 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, libdeflate's slowest L10 file was &quot;nci&quot; at 7.51 MB/s, and its fastest was &quot;x-ray&quot; at 34.15 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:1.073049%;height:3.805495%" id="chart-mac-l10-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 10, M1 MacBook Pro" aria-describedby="chart-mac-l10-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:1.027160%;height:3.565095%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L10 file was &quot;nci&quot; at 7.19 MB/s, and its fastest was &quot;x-ray&quot; at 32.15 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, roc-deflate's slowest L10 file was &quot;nci&quot; at 7.19 MB/s, and its fastest was &quot;x-ray&quot; at 32.15 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:1.027160%;height:3.565095%" id="chart-mac-l10-roc" tabindex="0" role="img" aria-label="roc-deflate, level 10, M1 MacBook Pro" aria-describedby="chart-mac-l10-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L10</span>
@@ -280,10 +438,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:0.688786%;height:3.033028%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, libdeflate's slowest L11 file was &quot;nci&quot; at 4.82 MB/s, and its fastest was &quot;x-ray&quot; at 26.05 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, libdeflate's slowest L11 file was &quot;nci&quot; at 4.82 MB/s, and its fastest was &quot;x-ray&quot; at 26.05 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:0.688786%;height:3.033028%" id="chart-mac-l11-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 11, M1 MacBook Pro" aria-describedby="chart-mac-l11-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:0.677670%;height:2.883155%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L11 file was &quot;nci&quot; at 4.74 MB/s, and its fastest was &quot;x-ray&quot; at 24.93 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, roc-deflate's slowest L11 file was &quot;nci&quot; at 4.74 MB/s, and its fastest was &quot;x-ray&quot; at 24.93 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:0.677670%;height:2.883155%" id="chart-mac-l11-roc" tabindex="0" role="img" aria-label="roc-deflate, level 11, M1 MacBook Pro" aria-describedby="chart-mac-l11-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L11</span>
@@ -291,10 +449,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:0.501900%;height:2.854609%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, libdeflate's slowest L12 file was &quot;nci&quot; at 3.51 MB/s, and its fastest was &quot;x-ray&quot; at 23.50 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, libdeflate's slowest L12 file was &quot;nci&quot; at 3.51 MB/s, and its fastest was &quot;x-ray&quot; at 23.50 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:0.501900%;height:2.854609%" id="chart-mac-l12-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 12, M1 MacBook Pro" aria-describedby="chart-mac-l12-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:0.497763%;height:2.730484%" tabindex="0" role="img" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L12 file was &quot;nci&quot; at 3.48 MB/s, and its fastest was &quot;x-ray&quot; at 22.60 MB/s. Each value is the median of 15 runs for that file." title="On the M1 MacBook Pro, roc-deflate's slowest L12 file was &quot;nci&quot; at 3.48 MB/s, and its fastest was &quot;x-ray&quot; at 22.60 MB/s. Each value is the median of 15 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:0.497763%;height:2.730484%" id="chart-mac-l12-roc" tabindex="0" role="img" aria-label="roc-deflate, level 12, M1 MacBook Pro" aria-describedby="chart-mac-l12-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L12</span>
@@ -304,11 +462,156 @@
           <span>libdeflate<i class="legend-c" aria-hidden="true"></i></span>
           <span>roc-deflate<i class="legend-roc" aria-hidden="true"></i></span>
         </div>
+        <div class="chart-tooltip" id="chart-mac-l1-libdeflate-details" role="tooltip" aria-label="On the M1 MacBook Pro, libdeflate's slowest L1 file was &quot;x-ray&quot; at 145.93 MB/s, and its fastest was &quot;nci&quot; at 601.03 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L1</strong>
+          <p aria-hidden="true">Slowest: <strong>x-ray</strong><br>145.93 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>601.03 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l1-roc-details" role="tooltip" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L1 file was &quot;x-ray&quot; at 134.66 MB/s, and its fastest was &quot;nci&quot; at 529.49 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L1</strong>
+          <p aria-hidden="true">Slowest: <strong>x-ray</strong><br>134.66 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>529.49 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l2-libdeflate-details" role="tooltip" aria-label="On the M1 MacBook Pro, libdeflate's slowest L2 file was &quot;sao&quot; at 112.78 MB/s, and its fastest was &quot;nci&quot; at 453.14 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L2</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>112.78 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>453.14 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l2-roc-details" role="tooltip" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L2 file was &quot;sao&quot; at 105.68 MB/s, and its fastest was &quot;nci&quot; at 409.82 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L2</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>105.68 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>409.82 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l3-libdeflate-details" role="tooltip" aria-label="On the M1 MacBook Pro, libdeflate's slowest L3 file was &quot;sao&quot; at 100.60 MB/s, and its fastest was &quot;nci&quot; at 415.29 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L3</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>100.60 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>415.29 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l3-roc-details" role="tooltip" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L3 file was &quot;sao&quot; at 95.51 MB/s, and its fastest was &quot;nci&quot; at 382.21 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L3</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>95.51 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>382.21 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l4-libdeflate-details" role="tooltip" aria-label="On the M1 MacBook Pro, libdeflate's slowest L4 file was &quot;sao&quot; at 94.48 MB/s, and its fastest was &quot;nci&quot; at 376.70 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L4</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>94.48 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>376.70 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l4-roc-details" role="tooltip" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L4 file was &quot;sao&quot; at 89.37 MB/s, and its fastest was &quot;nci&quot; at 356.47 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L4</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>89.37 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>356.47 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l5-libdeflate-details" role="tooltip" aria-label="On the M1 MacBook Pro, libdeflate's slowest L5 file was &quot;sao&quot; at 83.22 MB/s, and its fastest was &quot;nci&quot; at 287.09 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L5</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>83.22 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>287.09 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l5-roc-details" role="tooltip" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L5 file was &quot;sao&quot; at 76.99 MB/s, and its fastest was &quot;nci&quot; at 311.35 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L5</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>76.99 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>311.35 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l6-libdeflate-details" role="tooltip" aria-label="On the M1 MacBook Pro, libdeflate's slowest L6 file was &quot;sao&quot; at 67.48 MB/s, and its fastest was &quot;nci&quot; at 221.32 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L6</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>67.48 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>221.32 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l6-roc-details" role="tooltip" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L6 file was &quot;sao&quot; at 66.36 MB/s, and its fastest was &quot;nci&quot; at 246.59 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L6</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>66.36 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>246.59 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l7-libdeflate-details" role="tooltip" aria-label="On the M1 MacBook Pro, libdeflate's slowest L7 file was &quot;reymont&quot; at 46.77 MB/s, and its fastest was &quot;nci&quot; at 157.22 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L7</strong>
+          <p aria-hidden="true">Slowest: <strong>reymont</strong><br>46.77 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>157.22 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l7-roc-details" role="tooltip" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L7 file was &quot;reymont&quot; at 51.20 MB/s, and its fastest was &quot;nci&quot; at 174.91 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L7</strong>
+          <p aria-hidden="true">Slowest: <strong>reymont</strong><br>51.20 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>174.91 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l8-libdeflate-details" role="tooltip" aria-label="On the M1 MacBook Pro, libdeflate's slowest L8 file was &quot;reymont&quot; at 24.87 MB/s, and its fastest was &quot;osdb&quot; at 106.76 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L8</strong>
+          <p aria-hidden="true">Slowest: <strong>reymont</strong><br>24.87 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>osdb</strong><br>106.76 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l8-roc-details" role="tooltip" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L8 file was &quot;reymont&quot; at 27.81 MB/s, and its fastest was &quot;osdb&quot; at 101.66 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L8</strong>
+          <p aria-hidden="true">Slowest: <strong>reymont</strong><br>27.81 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>osdb</strong><br>101.66 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l9-libdeflate-details" role="tooltip" aria-label="On the M1 MacBook Pro, libdeflate's slowest L9 file was &quot;reymont&quot; at 20.65 MB/s, and its fastest was &quot;osdb&quot; at 106.10 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L9</strong>
+          <p aria-hidden="true">Slowest: <strong>reymont</strong><br>20.65 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>osdb</strong><br>106.10 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l9-roc-details" role="tooltip" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L9 file was &quot;reymont&quot; at 22.85 MB/s, and its fastest was &quot;osdb&quot; at 101.46 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L9</strong>
+          <p aria-hidden="true">Slowest: <strong>reymont</strong><br>22.85 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>osdb</strong><br>101.46 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l10-libdeflate-details" role="tooltip" aria-label="On the M1 MacBook Pro, libdeflate's slowest L10 file was &quot;nci&quot; at 7.51 MB/s, and its fastest was &quot;x-ray&quot; at 34.15 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L10</strong>
+          <p aria-hidden="true">Slowest: <strong>nci</strong><br>7.51 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>x-ray</strong><br>34.15 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l10-roc-details" role="tooltip" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L10 file was &quot;nci&quot; at 7.19 MB/s, and its fastest was &quot;x-ray&quot; at 32.15 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L10</strong>
+          <p aria-hidden="true">Slowest: <strong>nci</strong><br>7.19 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>x-ray</strong><br>32.15 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l11-libdeflate-details" role="tooltip" aria-label="On the M1 MacBook Pro, libdeflate's slowest L11 file was &quot;nci&quot; at 4.82 MB/s, and its fastest was &quot;x-ray&quot; at 26.05 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L11</strong>
+          <p aria-hidden="true">Slowest: <strong>nci</strong><br>4.82 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>x-ray</strong><br>26.05 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l11-roc-details" role="tooltip" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L11 file was &quot;nci&quot; at 4.74 MB/s, and its fastest was &quot;x-ray&quot; at 24.93 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L11</strong>
+          <p aria-hidden="true">Slowest: <strong>nci</strong><br>4.74 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>x-ray</strong><br>24.93 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l12-libdeflate-details" role="tooltip" aria-label="On the M1 MacBook Pro, libdeflate's slowest L12 file was &quot;nci&quot; at 3.51 MB/s, and its fastest was &quot;x-ray&quot; at 23.50 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L12</strong>
+          <p aria-hidden="true">Slowest: <strong>nci</strong><br>3.51 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>x-ray</strong><br>23.50 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-mac-l12-roc-details" role="tooltip" aria-label="On the M1 MacBook Pro, roc-deflate's slowest L12 file was &quot;nci&quot; at 3.48 MB/s, and its fastest was &quot;x-ray&quot; at 22.60 MB/s. Each value is the median of 15 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L12</strong>
+          <p aria-hidden="true">Slowest: <strong>nci</strong><br>3.48 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>x-ray</strong><br>22.60 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 15 runs.</p>
+        </div>
+
       </div>
     </div>
     <p class="chart-x-axis">Compression Level</p>
   </section>
-  <section class="chart-panel chart-panel-linux" aria-label="Ryzen 3900X Ubuntu throughput">
+  <section class="chart-panel chart-panel-linux" aria-label="Ryzen 3900X Ubuntu throughput" style="--chart-legend-height:28.571429%">
     <div class="chart-axis-title">MB/s</div>
     <div class="chart-frame">
       <div class="chart-y-axis" aria-hidden="true">
@@ -336,12 +639,12 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:20.314286%;height:38.442857%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L1 file was &quot;x-ray&quot; at 142.20 MB/s, and its fastest was &quot;xml&quot; at 411.30 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, libdeflate's slowest L1 file was &quot;x-ray&quot; at 142.20 MB/s, and its fastest was &quot;xml&quot; at 411.30 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:20.314286%;height:38.442857%" id="chart-linux-l1-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 1, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l1-libdeflate-details"></div>
                 <span class="chart-endpoint chart-endpoint-max" style="bottom:58.757143%;height:5.528571%" aria-hidden="true"><span class="chart-endpoint-arrow"></span><span class="chart-endpoint-text">fastest run</span></span>
                 <span class="chart-endpoint chart-endpoint-min" style="bottom:7.142857%;height:13.171429%" aria-hidden="true"><span class="chart-endpoint-arrow"></span><span class="chart-endpoint-text">slowest run</span></span>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:18.685714%;height:42.542857%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L1 file was &quot;x-ray&quot; at 130.80 MB/s, and its fastest was &quot;nci&quot; at 428.60 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L1 file was &quot;x-ray&quot; at 130.80 MB/s, and its fastest was &quot;nci&quot; at 428.60 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:18.685714%;height:42.542857%" id="chart-linux-l1-roc" tabindex="0" role="img" aria-label="roc-deflate, level 1, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l1-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L1</span>
@@ -349,10 +652,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:14.885714%;height:26.042857%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L2 file was &quot;sao&quot; at 104.20 MB/s, and its fastest was &quot;nci&quot; at 286.50 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, libdeflate's slowest L2 file was &quot;sao&quot; at 104.20 MB/s, and its fastest was &quot;nci&quot; at 286.50 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:14.885714%;height:26.042857%" id="chart-linux-l2-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 2, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l2-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:13.442857%;height:33.185714%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L2 file was &quot;sao&quot; at 94.10 MB/s, and its fastest was &quot;nci&quot; at 326.40 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L2 file was &quot;sao&quot; at 94.10 MB/s, and its fastest was &quot;nci&quot; at 326.40 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:13.442857%;height:33.185714%" id="chart-linux-l2-roc" tabindex="0" role="img" aria-label="roc-deflate, level 2, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l2-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L2</span>
@@ -360,10 +663,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:13.500000%;height:29.971429%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L3 file was &quot;sao&quot; at 94.50 MB/s, and its fastest was &quot;nci&quot; at 304.30 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, libdeflate's slowest L3 file was &quot;sao&quot; at 94.50 MB/s, and its fastest was &quot;nci&quot; at 304.30 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:13.500000%;height:29.971429%" id="chart-linux-l3-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 3, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l3-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:12.114286%;height:31.014286%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L3 file was &quot;sao&quot; at 84.80 MB/s, and its fastest was &quot;nci&quot; at 301.90 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L3 file was &quot;sao&quot; at 84.80 MB/s, and its fastest was &quot;nci&quot; at 301.90 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:12.114286%;height:31.014286%" id="chart-linux-l3-roc" tabindex="0" role="img" aria-label="roc-deflate, level 3, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l3-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L3</span>
@@ -371,10 +674,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:12.728571%;height:23.557143%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L4 file was &quot;sao&quot; at 89.10 MB/s, and its fastest was &quot;nci&quot; at 254.00 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, libdeflate's slowest L4 file was &quot;sao&quot; at 89.10 MB/s, and its fastest was &quot;nci&quot; at 254.00 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:12.728571%;height:23.557143%" id="chart-linux-l4-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 4, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l4-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:11.642857%;height:28.757143%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L4 file was &quot;sao&quot; at 81.50 MB/s, and its fastest was &quot;nci&quot; at 282.80 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L4 file was &quot;sao&quot; at 81.50 MB/s, and its fastest was &quot;nci&quot; at 282.80 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:11.642857%;height:28.757143%" id="chart-linux-l4-roc" tabindex="0" role="img" aria-label="roc-deflate, level 4, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l4-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L4</span>
@@ -382,10 +685,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:10.685714%;height:25.085714%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L5 file was &quot;sao&quot; at 74.80 MB/s, and its fastest was &quot;nci&quot; at 250.40 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, libdeflate's slowest L5 file was &quot;sao&quot; at 74.80 MB/s, and its fastest was &quot;nci&quot; at 250.40 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:10.685714%;height:25.085714%" id="chart-linux-l5-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 5, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l5-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:9.728571%;height:25.685714%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L5 file was &quot;sao&quot; at 68.10 MB/s, and its fastest was &quot;nci&quot; at 247.90 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L5 file was &quot;sao&quot; at 68.10 MB/s, and its fastest was &quot;nci&quot; at 247.90 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:9.728571%;height:25.685714%" id="chart-linux-l5-roc" tabindex="0" role="img" aria-label="roc-deflate, level 5, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l5-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L5</span>
@@ -393,10 +696,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:9.200000%;height:19.814286%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L6 file was &quot;sao&quot; at 64.40 MB/s, and its fastest was &quot;nci&quot; at 203.10 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, libdeflate's slowest L6 file was &quot;sao&quot; at 64.40 MB/s, and its fastest was &quot;nci&quot; at 203.10 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:9.200000%;height:19.814286%" id="chart-linux-l6-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 6, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l6-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:8.257143%;height:18.628571%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L6 file was &quot;dickens&quot; at 57.80 MB/s, and its fastest was &quot;nci&quot; at 188.20 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L6 file was &quot;dickens&quot; at 57.80 MB/s, and its fastest was &quot;nci&quot; at 188.20 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:8.257143%;height:18.628571%" id="chart-linux-l6-roc" tabindex="0" role="img" aria-label="roc-deflate, level 6, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l6-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L6</span>
@@ -404,10 +707,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:5.700000%;height:15.757143%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L7 file was &quot;reymont&quot; at 39.90 MB/s, and its fastest was &quot;nci&quot; at 150.20 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, libdeflate's slowest L7 file was &quot;reymont&quot; at 39.90 MB/s, and its fastest was &quot;nci&quot; at 150.20 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:5.700000%;height:15.757143%" id="chart-linux-l7-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 7, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l7-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:5.171429%;height:15.071429%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L7 file was &quot;reymont&quot; at 36.20 MB/s, and its fastest was &quot;nci&quot; at 141.70 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L7 file was &quot;reymont&quot; at 36.20 MB/s, and its fastest was &quot;nci&quot; at 141.70 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:5.171429%;height:15.071429%" id="chart-linux-l7-roc" tabindex="0" role="img" aria-label="roc-deflate, level 7, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l7-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L7</span>
@@ -415,10 +718,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:2.942857%;height:11.028571%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L8 file was &quot;reymont&quot; at 20.60 MB/s, and its fastest was &quot;osdb&quot; at 97.80 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, libdeflate's slowest L8 file was &quot;reymont&quot; at 20.60 MB/s, and its fastest was &quot;osdb&quot; at 97.80 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:2.942857%;height:11.028571%" id="chart-linux-l8-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 8, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l8-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:2.785714%;height:10.100000%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L8 file was &quot;reymont&quot; at 19.50 MB/s, and its fastest was &quot;osdb&quot; at 90.20 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L8 file was &quot;reymont&quot; at 19.50 MB/s, and its fastest was &quot;osdb&quot; at 90.20 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:2.785714%;height:10.100000%" id="chart-linux-l8-roc" tabindex="0" role="img" aria-label="roc-deflate, level 8, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l8-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L8</span>
@@ -426,10 +729,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:2.414286%;height:11.200000%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L9 file was &quot;reymont&quot; at 16.90 MB/s, and its fastest was &quot;osdb&quot; at 95.30 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, libdeflate's slowest L9 file was &quot;reymont&quot; at 16.90 MB/s, and its fastest was &quot;osdb&quot; at 95.30 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:2.414286%;height:11.200000%" id="chart-linux-l9-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 9, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l9-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:2.271429%;height:10.700000%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L9 file was &quot;reymont&quot; at 15.90 MB/s, and its fastest was &quot;osdb&quot; at 90.80 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L9 file was &quot;reymont&quot; at 15.90 MB/s, and its fastest was &quot;osdb&quot; at 90.80 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:2.271429%;height:10.700000%" id="chart-linux-l9-roc" tabindex="0" role="img" aria-label="roc-deflate, level 9, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l9-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L9</span>
@@ -437,10 +740,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:1.042857%;height:3.914286%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L10 file was &quot;nci&quot; at 7.30 MB/s, and its fastest was &quot;x-ray&quot; at 34.70 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, libdeflate's slowest L10 file was &quot;nci&quot; at 7.30 MB/s, and its fastest was &quot;x-ray&quot; at 34.70 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:1.042857%;height:3.914286%" id="chart-linux-l10-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 10, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l10-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:0.971429%;height:3.228571%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L10 file was &quot;nci&quot; at 6.80 MB/s, and its fastest was &quot;x-ray&quot; at 29.40 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L10 file was &quot;nci&quot; at 6.80 MB/s, and its fastest was &quot;x-ray&quot; at 29.40 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:0.971429%;height:3.228571%" id="chart-linux-l10-roc" tabindex="0" role="img" aria-label="roc-deflate, level 10, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l10-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L10</span>
@@ -448,10 +751,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:0.671429%;height:3.157143%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L11 file was &quot;nci&quot; at 4.70 MB/s, and its fastest was &quot;x-ray&quot; at 26.80 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, libdeflate's slowest L11 file was &quot;nci&quot; at 4.70 MB/s, and its fastest was &quot;x-ray&quot; at 26.80 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:0.671429%;height:3.157143%" id="chart-linux-l11-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 11, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l11-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:0.642857%;height:2.642857%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L11 file was &quot;nci&quot; at 4.50 MB/s, and its fastest was &quot;x-ray&quot; at 23.00 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L11 file was &quot;nci&quot; at 4.50 MB/s, and its fastest was &quot;x-ray&quot; at 23.00 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:0.642857%;height:2.642857%" id="chart-linux-l11-roc" tabindex="0" role="img" aria-label="roc-deflate, level 11, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l11-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L11</span>
@@ -459,10 +762,10 @@
           <div class="chart-level">
             <div class="chart-pair">
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-libdeflate" style="bottom:0.485714%;height:3.028571%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L12 file was &quot;nci&quot; at 3.40 MB/s, and its fastest was &quot;x-ray&quot; at 24.60 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, libdeflate's slowest L12 file was &quot;nci&quot; at 3.40 MB/s, and its fastest was &quot;x-ray&quot; at 24.60 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-libdeflate" style="bottom:0.485714%;height:3.028571%" id="chart-linux-l12-libdeflate" tabindex="0" role="img" aria-label="libdeflate, level 12, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l12-libdeflate-details"></div>
               </div>
               <div class="chart-engine">
-                <div class="chart-bar chart-bar-roc" style="bottom:0.471429%;height:2.528571%" tabindex="0" role="img" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L12 file was &quot;nci&quot; at 3.30 MB/s, and its fastest was &quot;x-ray&quot; at 21.00 MB/s. Each value is the median of 7 runs for that file." title="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L12 file was &quot;nci&quot; at 3.30 MB/s, and its fastest was &quot;x-ray&quot; at 21.00 MB/s. Each value is the median of 7 runs for that file."></div>
+                <div class="chart-bar chart-bar-roc" style="bottom:0.471429%;height:2.528571%" id="chart-linux-l12-roc" tabindex="0" role="img" aria-label="roc-deflate, level 12, Ryzen 3900X Ubuntu" aria-describedby="chart-linux-l12-roc-details"></div>
               </div>
             </div>
             <span class="chart-level-label">L12</span>
@@ -472,6 +775,151 @@
           <span>libdeflate<i class="legend-c" aria-hidden="true"></i></span>
           <span>roc-deflate<i class="legend-roc" aria-hidden="true"></i></span>
         </div>
+        <div class="chart-tooltip" id="chart-linux-l1-libdeflate-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L1 file was &quot;x-ray&quot; at 142.20 MB/s, and its fastest was &quot;xml&quot; at 411.30 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L1</strong>
+          <p aria-hidden="true">Slowest: <strong>x-ray</strong><br>142.20 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>xml</strong><br>411.30 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l1-roc-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L1 file was &quot;x-ray&quot; at 130.80 MB/s, and its fastest was &quot;nci&quot; at 428.60 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L1</strong>
+          <p aria-hidden="true">Slowest: <strong>x-ray</strong><br>130.80 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>428.60 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l2-libdeflate-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L2 file was &quot;sao&quot; at 104.20 MB/s, and its fastest was &quot;nci&quot; at 286.50 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L2</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>104.20 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>286.50 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l2-roc-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L2 file was &quot;sao&quot; at 94.10 MB/s, and its fastest was &quot;nci&quot; at 326.40 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L2</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>94.10 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>326.40 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l3-libdeflate-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L3 file was &quot;sao&quot; at 94.50 MB/s, and its fastest was &quot;nci&quot; at 304.30 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L3</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>94.50 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>304.30 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l3-roc-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L3 file was &quot;sao&quot; at 84.80 MB/s, and its fastest was &quot;nci&quot; at 301.90 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L3</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>84.80 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>301.90 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l4-libdeflate-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L4 file was &quot;sao&quot; at 89.10 MB/s, and its fastest was &quot;nci&quot; at 254.00 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L4</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>89.10 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>254.00 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l4-roc-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L4 file was &quot;sao&quot; at 81.50 MB/s, and its fastest was &quot;nci&quot; at 282.80 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L4</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>81.50 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>282.80 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l5-libdeflate-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L5 file was &quot;sao&quot; at 74.80 MB/s, and its fastest was &quot;nci&quot; at 250.40 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L5</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>74.80 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>250.40 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l5-roc-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L5 file was &quot;sao&quot; at 68.10 MB/s, and its fastest was &quot;nci&quot; at 247.90 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L5</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>68.10 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>247.90 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l6-libdeflate-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L6 file was &quot;sao&quot; at 64.40 MB/s, and its fastest was &quot;nci&quot; at 203.10 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L6</strong>
+          <p aria-hidden="true">Slowest: <strong>sao</strong><br>64.40 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>203.10 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l6-roc-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L6 file was &quot;dickens&quot; at 57.80 MB/s, and its fastest was &quot;nci&quot; at 188.20 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L6</strong>
+          <p aria-hidden="true">Slowest: <strong>dickens</strong><br>57.80 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>188.20 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l7-libdeflate-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L7 file was &quot;reymont&quot; at 39.90 MB/s, and its fastest was &quot;nci&quot; at 150.20 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L7</strong>
+          <p aria-hidden="true">Slowest: <strong>reymont</strong><br>39.90 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>150.20 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l7-roc-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L7 file was &quot;reymont&quot; at 36.20 MB/s, and its fastest was &quot;nci&quot; at 141.70 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L7</strong>
+          <p aria-hidden="true">Slowest: <strong>reymont</strong><br>36.20 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>nci</strong><br>141.70 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l8-libdeflate-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L8 file was &quot;reymont&quot; at 20.60 MB/s, and its fastest was &quot;osdb&quot; at 97.80 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L8</strong>
+          <p aria-hidden="true">Slowest: <strong>reymont</strong><br>20.60 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>osdb</strong><br>97.80 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l8-roc-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L8 file was &quot;reymont&quot; at 19.50 MB/s, and its fastest was &quot;osdb&quot; at 90.20 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L8</strong>
+          <p aria-hidden="true">Slowest: <strong>reymont</strong><br>19.50 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>osdb</strong><br>90.20 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l9-libdeflate-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L9 file was &quot;reymont&quot; at 16.90 MB/s, and its fastest was &quot;osdb&quot; at 95.30 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L9</strong>
+          <p aria-hidden="true">Slowest: <strong>reymont</strong><br>16.90 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>osdb</strong><br>95.30 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l9-roc-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L9 file was &quot;reymont&quot; at 15.90 MB/s, and its fastest was &quot;osdb&quot; at 90.80 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L9</strong>
+          <p aria-hidden="true">Slowest: <strong>reymont</strong><br>15.90 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>osdb</strong><br>90.80 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l10-libdeflate-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L10 file was &quot;nci&quot; at 7.30 MB/s, and its fastest was &quot;x-ray&quot; at 34.70 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L10</strong>
+          <p aria-hidden="true">Slowest: <strong>nci</strong><br>7.30 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>x-ray</strong><br>34.70 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l10-roc-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L10 file was &quot;nci&quot; at 6.80 MB/s, and its fastest was &quot;x-ray&quot; at 29.40 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L10</strong>
+          <p aria-hidden="true">Slowest: <strong>nci</strong><br>6.80 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>x-ray</strong><br>29.40 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l11-libdeflate-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L11 file was &quot;nci&quot; at 4.70 MB/s, and its fastest was &quot;x-ray&quot; at 26.80 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L11</strong>
+          <p aria-hidden="true">Slowest: <strong>nci</strong><br>4.70 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>x-ray</strong><br>26.80 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l11-roc-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L11 file was &quot;nci&quot; at 4.50 MB/s, and its fastest was &quot;x-ray&quot; at 23.00 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L11</strong>
+          <p aria-hidden="true">Slowest: <strong>nci</strong><br>4.50 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>x-ray</strong><br>23.00 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l12-libdeflate-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, libdeflate's slowest L12 file was &quot;nci&quot; at 3.40 MB/s, and its fastest was &quot;x-ray&quot; at 24.60 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">libdeflate, L12</strong>
+          <p aria-hidden="true">Slowest: <strong>nci</strong><br>3.40 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>x-ray</strong><br>24.60 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+        <div class="chart-tooltip" id="chart-linux-l12-roc-details" role="tooltip" aria-label="On the Ryzen 3900X Ubuntu, roc-deflate's slowest L12 file was &quot;nci&quot; at 3.30 MB/s, and its fastest was &quot;x-ray&quot; at 21.00 MB/s. Each value is the median of 7 runs for that file.">
+          <strong class="chart-tooltip-heading" aria-hidden="true">roc-deflate, L12</strong>
+          <p aria-hidden="true">Slowest: <strong>nci</strong><br>3.30 MB/s</p>
+          <p aria-hidden="true">Fastest: <strong>x-ray</strong><br>21.00 MB/s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of 7 runs.</p>
+        </div>
+
       </div>
     </div>
     <p class="chart-x-axis">Compression Level</p>

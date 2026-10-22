@@ -38,9 +38,19 @@ fastest per-file median speed.
 
 CSS-only machine tabs switch between M1 MacBook Pro and Ryzen 3900X Ubuntu,
 using the same scale. Solid gray represents libdeflate on the left; solid purple
-represents roc-deflate on the right. Native `title` tooltips and accessible bar
-labels identify the machine, endpoints, corpus names, and sampling method.
-The article contains no JavaScript.
+represents roc-deflate on the right. Hovering or focusing a bar reveals its
+details in the empty graph area beside the legend (below it on narrow screens).
+The readout stays visible while hovered, with a brief delay when leaving a bar
+to allow the pointer to travel to it. Switching bars replaces the readout.
+
+Each bar has a concise accessible name and `aria-describedby` pointing to a
+`role="tooltip"` element whose accessible name contains the complete data
+description, including the machine, endpoints, files, and repetition count.
+Visible formatting is hidden from assistive technology to avoid repeating it.
+There are no native `title` tooltips. The readouts do not cover meaningful chart
+content, so the WCAG 1.4.13 exception for non-obscuring content applies to
+dismissal; no Escape handler or JavaScript is required. Keyboard focus and
+mouse hover both reveal the same data. The article contains no JavaScript.
 
 Preview the whole rendered site, including shared CSS, fonts and assets:
 
