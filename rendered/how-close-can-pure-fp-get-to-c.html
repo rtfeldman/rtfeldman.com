@@ -21,6 +21,10 @@
     --chart-height: 340px;
     --chart-axis-width: 38px;
     position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 16px;
+    align-items: center;
     margin: 1.75rem 0 2rem;
     padding: 22px 20px 18px;
     border: 1px solid var(--chart-border);
@@ -35,15 +39,15 @@
 .compression-chart *, .compression-chart *::before, .compression-chart *::after { box-sizing: border-box; }
 .compression-chart h3 { margin: 0; font: 700 21px/1.3 var(--font-sans); letter-spacing: -.025em; }
 .compression-chart p { line-height: 1.5; }
-.compression-chart figcaption { margin-bottom: 18px; }
+.compression-chart figcaption { grid-column: 1; grid-row: 1; }
 .chart-radio { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.chart-controls { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--chart-border); border-radius: 9px; width: fit-content; max-width: 100%; }
+.chart-controls { grid-column: 2; grid-row: 1; justify-self: end; display: flex; gap: 4px; padding: 4px; border: 1px solid var(--chart-border); border-radius: 9px; width: fit-content; max-width: 100%; }
 .chart-controls label { display: flex; align-items: center; justify-content: center; min-height: 40px; padding: 7px 13px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; text-align: center; }
 #chart-mac:checked ~ .chart-controls label[for="chart-mac"],
 #chart-linux:checked ~ .chart-controls label[for="chart-linux"] { background: var(--heading-color); color: var(--body-bg-color); }
 #chart-mac:focus-visible ~ .chart-controls label[for="chart-mac"],
 #chart-linux:focus-visible ~ .chart-controls label[for="chart-linux"] { outline: 3px solid var(--link-color); outline-offset: 3px; }
-.chart-panel { display: none; }
+.chart-panel { display: none; grid-column: 1 / -1; }
 #chart-mac:checked ~ .chart-panel-mac, #chart-linux:checked ~ .chart-panel-linux { display: block; }
 .chart-panel { margin-top: 22px; }
 .chart-axis-title { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin: 0 0 12px; }
@@ -75,7 +79,8 @@
     .compression-chart { --chart-surface: #1e1c23; --chart-border: #49434f; --chart-grid: #39353e; --chart-muted: #bbb4c7; --roc-low: #cfb5f5; --roc-high: #8245ce; --c-low: #c4c4ce; --c-high: #696974; }
 }
 @media (max-width: 540px) {
-    .compression-chart { --chart-height: 280px; --chart-axis-width: 31px; padding: 18px 12px 14px; border-radius: 10px; }
+    .compression-chart { --chart-height: 280px; --chart-axis-width: 31px; display: block; padding: 18px 12px 14px; border-radius: 10px; }
+    .compression-chart figcaption { margin-bottom: 18px; }
     .chart-controls { width: 100%; }
     .chart-controls label { flex: 1; padding: 7px 6px; font-size: 12px; }
     .chart-groups { column-gap: 4px; padding: 0 2px; }
