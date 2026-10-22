@@ -128,10 +128,10 @@ for my $d (@datasets) {
     }
     $html .= qq{        </div>
         <div class="chart-legend" style="height:$legend_height%" aria-label="Chart legend">
-          <span>libdeflate · slowest<i class="legend-c-low" aria-hidden="true"></i></span>
-          <span>libdeflate · up to fastest<i class="legend-c-high" aria-hidden="true"></i></span>
-          <span>Roc · slowest<i class="legend-roc-low" aria-hidden="true"></i></span>
-          <span>Roc · up to fastest<i class="legend-roc-high" aria-hidden="true"></i></span>
+          <span>slowest libdeflate run<i class="legend-c-low" aria-hidden="true"></i></span>
+          <span>gap with fastest libdeflate run<i class="legend-c-high" aria-hidden="true"></i></span>
+          <span>slowest Roc run<i class="legend-roc-low" aria-hidden="true"></i></span>
+          <span>gap with fastest Roc run<i class="legend-roc-high" aria-hidden="true"></i></span>
         </div>
       </div>
     </div>
