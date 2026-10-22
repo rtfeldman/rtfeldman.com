@@ -4,7 +4,7 @@ use warnings;
 use utf8;
 use FindBin;
 use File::Spec;
-use POSIX qw(ceil);
+use POSIX qw(ceil floor);
 binmode STDOUT, ':encoding(UTF-8)';
 
 # No non-core modules. Edit the rendered article directly from now on:
@@ -112,6 +112,18 @@ for my $d (@datasets) {
             $html .= sprintf qq{                <div class="chart-bar chart-bar-%s" style="bottom:%.6f%%;height:%.6f%%" tabindex="0" role="img" aria-label="%s" title="%s"></div>\n},
                 $class, 100 * $min->{speed} / $axis_max,
                 100 * ($max->{speed} - $min->{speed}) / $axis_max, $tooltip, $tooltip;
+            if ($level == 1 && $engine eq 'libdeflate') {
+                my $fast_label = 50 + 100 * ceil(($max->{speed} - 50) / 100);
+                my $slow_label = 50 + 100 * floor(($min->{speed} - 50) / 100);
+                for my $callout (
+                    ['max', $max->{speed}, $fast_label - $max->{speed}, 'fastest run'],
+                    ['min', $slow_label, $min->{speed} - $slow_label, 'slowest run'],
+                ) {
+                    my ($end, $bottom, $height, $text) = @$callout;
+                    $html .= sprintf qq{                <span class="chart-endpoint chart-endpoint-%s" style="bottom:%.6f%%;height:%.6f%%" aria-hidden="true"><span class="chart-endpoint-arrow"></span><span class="chart-endpoint-text">%s</span></span>\n},
+                        $end, 100 * $bottom / $axis_max, 100 * $height / $axis_max, $text;
+                }
+            }
             $html .= qq{              </div>\n};
         }
         $html .= qq{            </div>
@@ -199,6 +211,17 @@ my $css = <<'CSS';
 .chart-bar:hover, .chart-bar:focus-visible { outline: 2px solid var(--heading-color); outline-offset: -2px; }
 .chart-bar-roc, .legend-roc { --bar-color: var(--roc-color); background: var(--bar-color); }
 .chart-bar-libdeflate, .legend-c { --bar-color: var(--c-color); background: var(--bar-color); }
+.chart-endpoint { position: absolute; left: calc(50% - 5px); width: 10px; color: var(--chart-muted); font-size: var(--chart-label-font-size); line-height: 1.3; pointer-events: none; }
+.chart-endpoint-text { position: absolute; left: 14px; width: max-content; background: var(--chart-surface); padding: 0 2px; }
+.chart-endpoint-max .chart-endpoint-text { top: 0; transform: translateY(-50%); }
+.chart-endpoint-min .chart-endpoint-text { bottom: 0; transform: translateY(50%); }
+.chart-endpoint-arrow { position: absolute; left: 0; width: 10px; }
+.chart-endpoint-max .chart-endpoint-arrow { top: 0; bottom: 4px; }
+.chart-endpoint-min .chart-endpoint-arrow { top: 4px; bottom: 0; }
+.chart-endpoint-arrow::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; border-left: 1px solid currentColor; }
+.chart-endpoint-arrow::after { content: ""; position: absolute; left: 2px; width: 7px; height: 7px; border-right: 1px solid currentColor; border-bottom: 1px solid currentColor; }
+.chart-endpoint-max .chart-endpoint-arrow::after { bottom: 1px; transform: rotate(45deg); }
+.chart-endpoint-min .chart-endpoint-arrow::after { top: 1px; transform: rotate(225deg); }
 .chart-level-label { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--chart-muted); }
 .compression-chart .chart-x-axis { margin: 52px 0 8px var(--chart-axis-width); text-align: center; font-size: var(--chart-label-font-size); font-weight: 400; }
 .chart-legend { position: absolute; top: 0; right: 0; display: grid; grid-template-rows: repeat(2, 1fr); justify-items: end; align-items: center; font-size: var(--chart-label-font-size); }
