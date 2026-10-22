@@ -34,7 +34,7 @@ Obviously we can't extrapolate from this one result about how close Roc can get 
 
 ## What the Performance Gap Buys
 
-An obvious question is "Why settle for *any* amount slower?" If you *could* get C levels of performance, why not just use libdeflate itself and close that remaining gap?
+An obvious question is "Why settle for *any* amount slower?" If you *could* get C levels of performance, why not use libdeflate itself and close that remaining gap?
 
 A pure-Roc implementation has several advantages over a pure-C implementation:
 
