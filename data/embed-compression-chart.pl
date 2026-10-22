@@ -218,7 +218,7 @@ my $css = <<'CSS';
     .chart-controls label { flex: 1; padding: 7px 6px; font-size: 12px; }
     .chart-groups { column-gap: 4px; padding: 0 2px; }
     .chart-pair { gap: 2px; }
-    .chart-level-label { font-size: 10px; }
+    .chart-level-label { font-size: clamp(9px, 2.5vw, 10px); }
     .chart-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media print {
