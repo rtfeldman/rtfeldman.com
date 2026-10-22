@@ -129,11 +129,10 @@ for my $d (@datasets) {
                 100 * ($max->{speed} - $min->{speed}) / $axis_max, $bar_id, $accessible_name, $details_id;
             $readouts .= sprintf qq{        <div class="chart-tooltip" id="%s" role="tooltip" aria-label="%s">
           <strong class="chart-tooltip-heading" aria-hidden="true">%s, L%d</strong>
-          <p aria-hidden="true">Slowest: <strong>%s</strong><br>%.2f MB/s</p>
-          <p aria-hidden="true">Fastest: <strong>%s</strong><br>%.2f MB/s</p>
-          <p class="chart-tooltip-method" aria-hidden="true">Per-file medians of %d runs.</p>
+          <p aria-hidden="true"><strong>Slowest file:</strong> (median of %d runs)<br>%.2f MB/s compressing %s</p>
+          <p aria-hidden="true"><strong>Fastest file:</strong> (median of %d runs)<br>%.2f MB/s compressing %s</p>
         </div>
-}, $details_id, $tooltip, $engine, $level, $min->{corpus}, $min->{speed}, $max->{corpus}, $max->{speed}, $repetitions;
+}, $details_id, $tooltip, $engine, $level, $repetitions, $min->{speed}, $min->{corpus}, $repetitions, $max->{speed}, $max->{corpus};
             $hover_css .= qq{.chart-panel:has(#$bar_id:hover) #$details_id,
 .chart-panel:not(:has(.chart-bar:hover)):has(#$bar_id:focus) #$details_id,
 #$details_id:hover { visibility: visible; transition-delay: 0s; }
@@ -255,10 +254,9 @@ my $css = <<'CSS';
 .chart-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
 /* Readouts occupy unused graph space, never covering measurements or labels.
  * A brief hide delay lets the pointer travel from a bar onto its readout. */
-.chart-tooltip { position: absolute; top: 0; right: 20%; width: 40%; padding: 10px 12px; border: 1px solid var(--chart-border); border-radius: 6px; background: var(--chart-surface); color: var(--text-color); font-size: var(--chart-label-font-size); line-height: 1.5; visibility: hidden; transition: visibility 0s .6s; z-index: 2; }
+.chart-tooltip { position: absolute; top: 12px; right: 20%; width: 40%; padding: 10px 12px; border: 1px solid var(--chart-border); border-radius: 6px; background: var(--chart-surface); color: var(--text-color); font-size: var(--chart-label-font-size); line-height: 1.5; visibility: hidden; transition: visibility 0s .6s; z-index: 2; }
 .chart-tooltip-heading { display: block; font-weight: 600; }
 .compression-chart .chart-tooltip p { margin: 6px 0 0; }
-.chart-tooltip-method { color: var(--chart-muted); }
 /* Switching bars hides the preceding readout immediately. */
 .chart-panel:has(.chart-bar:hover) .chart-tooltip,
 .chart-panel:has(.chart-bar:focus) .chart-tooltip { visibility: hidden; transition: none; }
@@ -280,6 +278,9 @@ my $css = <<'CSS';
     .compression-chart .chart-x-axis { margin-top: 44px; }
     .chart-legend { max-width: 50%; }
     .chart-legend > span { max-width: 100%; white-space: normal; line-height: 1.1; }
+}
+@media (max-width: 360px) {
+    .compression-chart { --chart-height: 640px; }
 }
 @media print {
     .compression-chart { break-inside: avoid; print-color-adjust: exact; }
