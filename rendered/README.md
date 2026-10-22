@@ -23,7 +23,7 @@ The inputs are the latest published measurements, not investigation runs:
   12 files × 15 repetitions = 180 observations per bar.
 - Linux: `data/x64-2026-10-22-final/compression-medians.csv`.
   Minimum and maximum of the 12 file medians per engine and level. The archive
-  does not contain individual samples; the chart explicitly labels this.
+  does not contain individual samples; the hover titles identify case medians.
 
 There are 12 levels and 12 corpus files. For each engine/level, the entire bar
 has height `maximum / axis ceiling`; the light bottom occupies `minimum / maximum`
@@ -31,9 +31,9 @@ of that bar, and the dark top occupies `(maximum - minimum) / maximum`.
 Consequently the boundary is at the minimum and the top is at the maximum.
 The corpus files providing those endpoints need not be the same.
 
-The machine controls use native radios and CSS. Native `title` tooltips give
-the endpoints and corpus names; native `<details>` provides exact values for
-touch and keyboard users. The article contains no JavaScript.
+The machine controls use native radios and CSS. Native `title` tooltips and
+accessible bar labels give the endpoints and corpus names. libdeflate is on
+the left and Roc is on the right at each level. The article contains no JavaScript.
 
 Preview the whole rendered site, including shared CSS, fonts and assets:
 

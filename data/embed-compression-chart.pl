@@ -14,14 +14,12 @@ my $root = File::Spec->catdir($FindBin::Bin, '..');
 my $article = shift // "$root/rendered/how-close-can-pure-fp-get-to-c.html";
 die "Usage: $0 [rendered-article.html]\n" if @ARGV;
 my @datasets = (
-    { id => 'mac', label => 'macOS · M1 Pro', file => 'macos-optimization-2026-10-22/roc-deflate-compression-timings.csv',
-      field => 'mb_per_s', samples => 15,
-      note => 'Range of individual runs across 12 Silesia files; 15 measurements per file, engine, and level.' },
-    { id => 'linux', label => 'Linux · Ryzen 3900X', file => 'x64-2026-10-22-final/compression-medians.csv',
-      field => 'median_mb_per_s', samples => 1,
-      note => 'Range of per-file medians across 12 Silesia files; 7 runs per median. Individual Linux timings were not included in the archive.' },
+    { id => 'mac', label => 'M1 MacBook Pro', file => 'macos-optimization-2026-10-22/roc-deflate-compression-timings.csv',
+      field => 'mb_per_s', samples => 15 },
+    { id => 'linux', label => 'Ryzen 3900X Ubuntu', file => 'x64-2026-10-22-final/compression-medians.csv',
+      field => 'median_mb_per_s', samples => 1 },
 );
-my @engines = ('roc-deflate', 'libdeflate');
+my @engines = ('libdeflate', 'roc-deflate');
 my @corpora = qw(dickens mozilla mr nci ooffice osdb reymont samba sao webster x-ray xml);
 my %known_corpus = map { $_ => 1 } @corpora;
 my $maximum = 0;
@@ -67,25 +65,23 @@ for my $d (@datasets) {
 my $axis_max = ceil($maximum / 100) * 100;
 my $html = <<'HTML';
 <!-- BEGIN COMPRESSION CHART -->
-<figure class="compression-chart" aria-labelledby="compression-chart-title" aria-describedby="compression-chart-description">
+<figure class="compression-chart" aria-labelledby="compression-chart-title">
   <figcaption>
-    <h3 id="compression-chart-title">Compression throughput</h3>
-    <p id="compression-chart-description">Slowest to fastest across the Silesia corpus. Higher is faster.</p>
+    <h3 id="compression-chart-title">Compression throughput on Silesia corpus</h3>
   </figcaption>
   <input class="chart-radio" type="radio" name="compression-machine" id="chart-mac" checked />
   <input class="chart-radio" type="radio" name="compression-machine" id="chart-linux" />
   <div class="chart-controls" role="group" aria-label="Benchmark machine">
-    <label for="chart-mac">macOS · M1 Pro</label>
-    <label for="chart-linux">Linux · Ryzen 3900X</label>
+    <label for="chart-mac">M1 MacBook Pro</label>
+    <label for="chart-linux">Ryzen 3900X Ubuntu</label>
   </div>
 HTML
 for my $d (@datasets) {
     my ($id, $label) = @{$d}{'id', 'label'};
     my $qualifier = $id eq 'mac' ? 'run' : 'case median';
     $html .= qq{  <section class="chart-panel chart-panel-$id" aria-label="$label throughput">
-    <p class="chart-note" id="chart-note-$id">$d->{note}</p>
     <div class="chart-axis-title">MB/s <span>↑ faster</span></div>
-    <div class="chart-frame" aria-describedby="chart-note-$id">
+    <div class="chart-frame">
       <div class="chart-y-axis" aria-hidden="true">
 };
     for (my $tick = $axis_max; $tick >= 0; $tick -= 100) {
@@ -125,7 +121,7 @@ for my $d (@datasets) {
                 100 * ($max->{speed} - $min->{speed}) / $max->{speed}, $high_tip;
         }
         $html .= qq{            </div>
-            <span class="chart-level-label">$level</span>
+            <span class="chart-level-label">L$level</span>
           </div>
 };
     }
@@ -133,34 +129,16 @@ for my $d (@datasets) {
       </div>
     </div>
     <p class="chart-x-axis">Compression level</p>
-    <details class="chart-values">
-      <summary>Exact values <span>MB/s · slowest → fastest</span></summary>
-      <div class="chart-value-list">
-};
-    # A touch-friendly, keyboard-accessible alternative to native hover titles.
-    for my $level (1 .. 12) {
-        $html .= qq{        <div class="chart-value-row"><strong>Level $level</strong>};
-        for my $engine (@engines) {
-            my $r = $d->{ranges}{$level}{$engine};
-            my $name = $engine eq 'roc-deflate' ? 'Roc' : 'libdeflate';
-            $html .= sprintf '<span>%s: <b>%.2f → %.2f</b></span>', $name, $r->{min}{speed}, $r->{max}{speed};
-        }
-        $html .= "</div>\n";
-    }
-    $html .= qq{      </div>
-    </details>
   </section>
 };
 }
 $html .= <<'HTML';
   <div class="chart-legend" aria-label="Chart legend">
-    <span><i class="legend-roc-low" aria-hidden="true"></i>Roc · slowest</span>
-    <span><i class="legend-roc-high" aria-hidden="true"></i>Roc · up to fastest</span>
     <span><i class="legend-c-low" aria-hidden="true"></i>libdeflate · slowest</span>
     <span><i class="legend-c-high" aria-hidden="true"></i>libdeflate · up to fastest</span>
+    <span><i class="legend-roc-low" aria-hidden="true"></i>Roc · slowest</span>
+    <span><i class="legend-roc-high" aria-hidden="true"></i>Roc · up to fastest</span>
   </div>
-  <p class="chart-footnote">Light segments reach the slowest measurement; dark segments extend to the fastest. The endpoints can come from different files. Hover over a segment for its throughput and corpus file, or open “Exact values.”</p>
-  <p class="chart-footnote">The machines used different harnesses and library revisions; this is not a controlled comparison of CPU architectures.</p>
 </figure>
 <!-- END COMPRESSION CHART -->
 HTML
@@ -195,7 +173,7 @@ my $css = <<'CSS';
 .compression-chart *, .compression-chart *::before, .compression-chart *::after { box-sizing: border-box; }
 .compression-chart h3 { margin: 0; font: 700 21px/1.3 var(--font-sans); letter-spacing: -.025em; }
 .compression-chart p { line-height: 1.5; }
-.compression-chart figcaption p { margin: 6px 0 18px; color: var(--chart-muted); }
+.compression-chart figcaption { margin-bottom: 18px; }
 .chart-radio { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .chart-controls { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--chart-border); border-radius: 9px; width: fit-content; max-width: 100%; }
 .chart-controls label { display: flex; align-items: center; justify-content: center; min-height: 40px; padding: 7px 13px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; text-align: center; }
@@ -205,7 +183,7 @@ my $css = <<'CSS';
 #chart-linux:focus-visible ~ .chart-controls label[for="chart-linux"] { outline: 3px solid var(--link-color); outline-offset: 3px; }
 .chart-panel { display: none; }
 #chart-mac:checked ~ .chart-panel-mac, #chart-linux:checked ~ .chart-panel-linux { display: block; }
-.compression-chart .chart-note { min-height: 3em; margin: 14px 0 18px; font-size: 12px; color: var(--chart-muted); }
+.chart-panel { margin-top: 22px; }
 .chart-axis-title { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin: 0 0 12px; }
 .chart-axis-title span { color: var(--chart-muted); font-weight: 400; }
 .chart-frame { display: grid; grid-template-columns: var(--chart-axis-width) minmax(0, 1fr); height: var(--chart-height); }
@@ -221,24 +199,16 @@ my $css = <<'CSS';
 .chart-bar { width: 50%; max-width: 18px; display: flex; flex-direction: column-reverse; border-radius: 3px 3px 0 0; position: relative; }
 .chart-bar > span { display: block; width: 100%; flex: 0 0 auto; }
 .chart-bar > .chart-high { border-radius: 3px 3px 0 0; }
-.chart-bar:hover, .chart-bar:focus-visible { outline: 2px solid var(--heading-color); outline-offset: 2px; }
+.chart-bar:hover, .chart-bar:focus-visible { outline: 2px solid var(--heading-color); outline-offset: -2px; }
 .chart-bar-roc .chart-low, .legend-roc-low { background: var(--roc-low); }
 .chart-bar-roc .chart-high, .legend-roc-high { background: var(--roc-high); }
 .chart-bar-libdeflate .chart-low, .legend-c-low { background: var(--c-low); }
 .chart-bar-libdeflate .chart-high, .legend-c-high { background: var(--c-high); }
 .chart-level-label { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--chart-muted); }
 .compression-chart .chart-x-axis { margin: 32px 0 18px var(--chart-axis-width); text-align: center; font-size: 12px; font-weight: 600; }
-.chart-values { border-top: 1px solid var(--chart-border); padding: 11px 0 0; font-size: 12px; }
-.chart-values summary { cursor: pointer; padding: 3px 0; font-weight: 600; min-height: 32px; }
-.chart-values summary span { color: var(--chart-muted); font-weight: 400; margin-left: 8px; }
-.chart-value-list { margin: 8px 0; }
-.chart-value-row { display: grid; grid-template-columns: .65fr 1fr 1fr; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--chart-grid); }
-.chart-value-row span { color: var(--chart-muted); }
-.chart-value-row b { color: var(--text-color); font-weight: 500; white-space: nowrap; }
 .chart-legend { display: grid; grid-template-columns: repeat(4, auto); gap: 9px 12px; border-top: 1px solid var(--chart-border); margin-top: 10px; padding-top: 16px; font-size: 11px; }
 .chart-legend > span { display: flex; gap: 6px; align-items: center; }
 .chart-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
-.compression-chart .chart-footnote { font-size: 11px; color: var(--chart-muted); margin: 12px 0 0; }
 @media (prefers-color-scheme: dark) {
     .compression-chart { --chart-surface: #1e1c23; --chart-border: #49434f; --chart-grid: #39353e; --chart-muted: #bbb4c7; --roc-low: #cfb5f5; --roc-high: #8245ce; --c-low: #c4c4ce; --c-high: #696974; }
 }
@@ -250,18 +220,14 @@ my $css = <<'CSS';
     .chart-pair { gap: 2px; }
     .chart-level-label { font-size: 10px; }
     .chart-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .chart-value-row { grid-template-columns: 1fr 1fr; }
-    .chart-value-row strong { grid-column: 1 / -1; }
-    .chart-value-row b { display: block; }
-    .chart-values summary span { display: block; margin: 3px 0 0 14px; }
 }
 @media print {
     .compression-chart { break-inside: avoid; print-color-adjust: exact; }
-    .chart-controls, .chart-radio, .chart-values { display: none; }
+    .chart-controls, .chart-radio { display: none; }
     .chart-panel { display: block; }
     .chart-panel::before { display: block; font-weight: bold; margin-top: 16px; }
-    .chart-panel-mac::before { content: "macOS · M1 Pro"; }
-    .chart-panel-linux::before { content: "Linux · Ryzen 3900X"; }
+    .chart-panel-mac::before { content: "M1 MacBook Pro"; }
+    .chart-panel-linux::before { content: "Ryzen 3900X Ubuntu"; }
 }
 </style>
 <!-- END COMPRESSION CHART STYLE -->
