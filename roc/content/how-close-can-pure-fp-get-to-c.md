@@ -22,7 +22,7 @@ Here's where the benchmarks stand today, running on the 2021 M1 MacBook Pro wher
 
 [graph goes here]
 
-roc-deflate ran these 144 benchmarks slower on average than libdeflate, in the median case 8.9% slower on the Ryzen 3900X, and 2.6% on the M1 Pro MacBook.
+roc-deflate ran these 144 benchmarks slower on average than libdeflate, in the median case **8.9%** slower on the Ryzen 3900X, and **2.6%** on the M1 Pro MacBook.
 
 So while we didn't outperform the champ on average, a median slowdown percentage in the single digits compared to such a carefully-tuned SIMD-powered C library is _wild._ It's frankly not a result I knew was achievable going in, since Roc is a functional language with automatic memory management racing against code that doesn't have to do bounds checks. (Those do have a runtime cost, but then again, the last time a skipped bounds check in C compression code led to a major Remote Code Execution vulnerability [was yesterday](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases#nodejs-brotli-decoder-out-of-bounds-write-permits-remote-code-execution-cve-2026-111497---high).)
 
