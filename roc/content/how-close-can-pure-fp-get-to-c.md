@@ -59,7 +59,7 @@ Roc's most critical optimization is _opportunistic mutation_ (which [Koka](https
 
 ### Hoist Bounds Checks
 
-You can't opt out of bounds checks (e.g. getting a value out of a dynamically-sized collection) in Roc like you can in C, Zig, and Rust, but Roc's compiler can optimize them away if it knows they'd be guaranteed to pass. Bounds checks are most costly inside loops, so you can get a lot of mileage out of adding something like `if collection.len() <= highest_index_used_in_loop { return 0 }` before the loop starts. This adds an additional check that looks redundant, but it can allow the optimizer to safely delete costlier checks inside the loop, once it can tell that failures would not be reachable after that early return.
+You can't opt out of bounds checks (e.g. getting a value out of a dynamically-sized collection) in Roc like you can in C, Zig, and Rust, but Roc's compiler can optimize them away if it knows they'd be guaranteed to pass. Bounds checks are most costly inside loops, so you can get a lot of mileage out of adding something like `if collection.len() <= highest_index_used { return 0 }` before the loop starts. This adds an additional check that looks redundant, but it can allow the optimizer to safely delete costlier checks inside the loop, once it can tell that failures would not be reachable after that early return.
 
 ### Build Lookup Tables at Compile Time
 
