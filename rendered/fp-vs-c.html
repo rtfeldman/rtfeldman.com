@@ -65,10 +65,10 @@
 .chart-pair { height: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 0; }
 .chart-engine { width: 50%; max-width: 22px; height: 100%; position: relative; }
 /* Each solid bar floats between the slowest and fastest measurements. */
-.chart-bar { position: absolute; left: 0; width: 100%; border-radius: 0; }
+.chart-bar { position: absolute; left: 0; width: 100%; border-radius: 0; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bar-color) 85%, black); }
 .chart-bar:hover, .chart-bar:focus-visible { outline: 2px solid var(--heading-color); outline-offset: -2px; }
-.chart-bar-roc, .legend-roc { background: var(--roc-color); }
-.chart-bar-libdeflate, .legend-c { background: var(--c-color); }
+.chart-bar-roc, .legend-roc { --bar-color: var(--roc-color); background: var(--bar-color); }
+.chart-bar-libdeflate, .legend-c { --bar-color: var(--c-color); background: var(--bar-color); }
 .chart-level-label { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--chart-muted); }
 .compression-chart .chart-x-axis { margin: 52px 0 8px var(--chart-axis-width); text-align: center; font-size: var(--chart-label-font-size); font-weight: 400; }
 .chart-legend { position: absolute; top: 0; right: 0; display: grid; grid-template-rows: repeat(2, 1fr); justify-items: end; align-items: center; font-size: var(--chart-label-font-size); }
