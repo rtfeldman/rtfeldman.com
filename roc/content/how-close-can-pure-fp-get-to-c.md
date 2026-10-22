@@ -67,7 +67,7 @@ You can't opt out of bounds checks (e.g. getting a value out of a dynamically-si
 
 ### Consider Wrapping Arithmetic
 
-In Roc, `a + b` desugars to `a.plus(b)`. For an integer like [`U64`](https://www.roc-lang.org/docs/main/Num/#U64), [`U64.plus`](https://www.roc-lang.org/docs/main/Num/#U64.plus) includes an overflow check, whereas [`plus_wrap`](https://www.roc-lang.org/docs/main/Num/#U64.plus_wrap) does not. Although `plus` is the safer default, [overflow checks have a runtime cost](https://danluu.com/integer-overflow), as CPUs can do wrapping integer arithmetic in one instruction. When Roc's compiler can prove that overflow won't occur, both `plus` and `plus_wrap` will optimize to the same instructions, but when it can't, you can get a speedup by explicitly choosing `plus_wrap`.
+In Roc, `a + b` desugars to `a.plus(b)`. For an integer like [`U64`](https://www.roc-lang.org/docs/main/Num/#U64), [`U64.plus`](https://www.roc-lang.org/docs/main/Num/#U64.plus) includes an overflow check, whereas [`plus_wrap`](https://www.roc-lang.org/docs/main/Num/#U64.plus_wrap) does not. Although `plus` is the safer default, [overflow checks have a runtime cost](https://danluu.com/integer-overflow), as CPUs can do wrapping integer arithmetic in one instruction. When Roc's compiler can prove that overflow won't occur, both `plus` and `plus_wrap` will optimize to the same instructions, but when it can't, you can get a speedup by choosing `plus_wrap`.
 
 ## Room for Improvement
 
