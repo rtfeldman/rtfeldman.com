@@ -80,7 +80,7 @@ for my $d (@datasets) {
     my ($id, $label) = @{$d}{'id', 'label'};
     my $qualifier = $id eq 'mac' ? 'run' : 'median result';
     $html .= qq{  <section class="chart-panel chart-panel-$id" aria-label="$label throughput">
-    <div class="chart-axis-title">MB/s <span class="chart-faster"><span class="chart-up-arrow" aria-hidden="true">↑</span> faster</span></div>
+    <div class="chart-axis-title">MB/s</div>
     <div class="chart-frame">
       <div class="chart-y-axis" aria-hidden="true">
 };
@@ -192,9 +192,6 @@ my $css = <<'CSS';
 .chart-panel { display: none; grid-column: 1 / -1; margin-top: 22px; }
 #chart-mac:checked ~ .chart-panel-mac, #chart-linux:checked ~ .chart-panel-linux { display: block; }
 .chart-axis-title { display: flex; justify-content: space-between; font-size: var(--chart-label-font-size); font-weight: 400; margin: 0 0 12px; }
-.chart-axis-title span { color: var(--chart-muted); font-weight: 400; }
-.chart-faster { display: inline-flex; align-items: center; gap: .25em; }
-.chart-up-arrow { display: inline-block; line-height: 1; transform: translateY(-.12em); }
 .chart-frame { display: grid; grid-template-columns: var(--chart-axis-width) minmax(0, 1fr); height: var(--chart-height); }
 .chart-y-axis { position: relative; color: var(--chart-muted); font-size: 11px; }
 .chart-y-axis span { position: absolute; right: 9px; transform: translateY(50%); }
