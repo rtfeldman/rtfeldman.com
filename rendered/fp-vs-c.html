@@ -87,7 +87,7 @@
  * A brief hide delay lets the pointer travel from a bar onto its readout. */
 .chart-tooltip { position: absolute; top: 12px; right: 20%; width: 40%; padding: 10px 12px; border: 1px solid var(--chart-border); border-radius: 6px; background: var(--chart-surface); color: var(--text-color); font-size: var(--chart-label-font-size); line-height: 1.5; visibility: hidden; transition: visibility 0s .6s; z-index: 2; }
 .chart-tooltip-heading { display: block; font-weight: normal; }
-.compression-chart .chart-tooltip p { margin: 6px 0 0; }
+.compression-chart .chart-tooltip p { margin: 8px 0 0; line-height: 1.65; }
 /* Switching bars hides the preceding readout immediately. */
 .chart-panel:has(.chart-bar:hover) .chart-tooltip,
 .chart-panel:has(.chart-bar:focus) .chart-tooltip { visibility: hidden; transition: none; }
@@ -110,8 +110,11 @@
     .chart-legend { max-width: 50%; }
     .chart-legend > span { max-width: 100%; white-space: normal; line-height: 1.1; }
 }
-@media (max-width: 360px) {
+@media (max-width: 400px) {
     .compression-chart { --chart-height: 640px; }
+}
+@media (max-width: 360px) {
+    .compression-chart { --chart-height: 720px; }
 }
 @media print {
     .compression-chart { break-inside: avoid; print-color-adjust: exact; }
