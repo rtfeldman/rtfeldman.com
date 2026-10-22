@@ -1,0 +1,52 @@
+{
+  "recorded_at": "2026-10-21T21:05:14.852093-04:00",
+  "cpu": "Apple M1 Pro",
+  "os": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83",
+  "c_compiler": "Apple clang version 17.0.0 (clang-1700.6.4.2)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin",
+  "zig": "0.17.0",
+  "sources": {
+    "roc": "5e62c0e13ae779c28f7904dcdd2849ba13240beb",
+    "roc-deflate": "2dbe9a2628d204b1b4955e5cad66cce8038f5fa6",
+    "libdeflate": "b122c8be1d78b19f6d0a6efc5bb79bfcbb30dd51",
+    "mimalloc": "8c532c32c3c96e5ba1f2283e032f69ead8add00f"
+  },
+  "roc_compiler_sha256": "afab77bd51e9262ac59c1306cca14bee8a9f5aeef28be67e866bd3af31c8b4cb",
+  "compiler_note": "Exact compiler executable reused from the reference run; no compiler source changes.",
+  "baseline_directory": "data/macos-aarch64-2026-10-21",
+  "source_worktree": "/Users/rtfeldman/code/worktrees/roc-deflate/macos-deflate-gap/roc-deflate",
+  "source_branch": "macos-deflate-gap",
+  "procedure": "https://gist.github.com/rtfeldman/7b6830809149867b79761ffb8e0456c3",
+  "run_command": "PATH=\"/usr/bin:$PATH\" ROC_REPO=/private/tmp/roc-deflate-macos-2026-10-21/roc ROC_DEFLATE_REPO=/Users/rtfeldman/code/worktrees/roc-deflate/macos-deflate-gap/roc-deflate ROC_DEFLATE_REF=2dbe9a2628d204b1b4955e5cad66cce8038f5fa6 bash data/macos-optimization-2026-10-21/repro-deflate-mimalloc.sh /private/tmp/roc-deflate-macos-optimized-2026-10-21",
+  "corpus_sha256": {
+    "dickens": "b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a",
+    "mozilla": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b",
+    "mr": "68637ed52e3e4860174ed2dc0840ac77d5f1a60abbcb13770d5754e3774d53e6",
+    "nci": "fc63a31770947b8c2062d3b19ca94c00485a232bb91b502021948fee983e1635",
+    "ooffice": "e7ee013880d34dd5208283d0d3d91b07f442e067454276095ded14f322a656eb",
+    "osdb": "60f027179302ca3ad87c58ac90b6be72ec23588aaa7a3b7fe8ecc0f11def3fa3",
+    "reymont": "0eac0114a3dfe6e2ee1f345a0f79d653cb26c3bc9f0ed79238af4933422b7578",
+    "samba": "93ba07bc44d8267789c1d911992f40b089ffa2140b4a160fac11ccae9a40e7b2",
+    "sao": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc",
+    "webster": "6a68f69b26daf09f9dd84f7470368553194a0b294fcfa80f1604efb11143a383",
+    "x-ray": "7de9fce1405dc44ae5e6813ed21cd5751e761bd4265655a005d39b9685d1c9ad",
+    "xml": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c"
+  },
+  "validation": {
+    "unit_tests": 17,
+    "edge_inputs_per_level": 410,
+    "levels_tested": 13,
+    "interop": "passed",
+    "ratio_gates": "passed"
+  },
+  "environment_note": "Active user desktop; fixed C-then-Roc ordering; no CPU affinity or frequency controls.",
+  "change_note": "Greedy levels use the length-4-heads-first layout; lazy levels retain their original chain-first layout. Level 1 collapses redundant repeated-byte bucket insertions.",
+  "completed_at": "2026-10-21T21:39:59.213472-04:00",
+  "exit_status": 0,
+  "allocator_verification": "Post-run dyld diagnostics verified mimalloc malloc/free interposition in both actual executables; diagnostic repetitions are not included in the CSV.",
+  "artifacts_sha256": {
+    "raw.tsv": "4cc4b35059bf4e20d26ff1580c9aa9aa776784a2d6ef2866a0b84bf07ccb14b0",
+    "roc-deflate-compression-timings.csv": "b1d3f0f72e923992168de4de00721eecc7e4ec6b441c96a7cf12ad3f36c2ab89",
+    "roc-deflate.patch": "74cab4ffc43bec1c3ab95c6765626b4f95561bfd61a7b9e253e52833b8ce31d4",
+    "roc-deflate.bundle": "ce8807356a7873f2ffb62765df30510e5b5453aa8b7f1d1c1e60d52deddc855a"
+  }
+}

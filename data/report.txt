@@ -33,7 +33,8 @@ by the CSV. Within-run cmp checks provide the byte-identity evidence.
 METHOD AND LIMITS
 Compression only; reads, warmup/round-trip verification, output writes, and
 per-repetition logging are outside the measured interval. C reuses a compressor
-and output buffer; Roc measures Deflate.compress including its allocation/cleanup.
+and output buffer; Roc measures Deflate.compress_into with a reused output buffer
+and includes allocation/cleanup of its internal compression work structures.
 C is built with cc -O3, Roc compiler with ReleaseFast, Roc app with --opt=speed.
 Both engines use mimalloc 2.1.7: Linux preloads C and statically links Roc;
 macOS preloads both. Engines run in fixed C-then-Roc order within each round.

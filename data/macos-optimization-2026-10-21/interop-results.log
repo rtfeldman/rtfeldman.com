@@ -1,0 +1,64 @@
+corpus: 1000001 bytes
+== forward: real gzip decodes our streams
+  level 1: gzip decoded our stream byte-identically
+  level 6: gzip decoded our stream byte-identically
+  level 9: gzip decoded our stream byte-identically
+  level 12: gzip decoded our stream byte-identically
+== reverse: we inflate real gzip's streams
+  gzip -1: we inflated gzip's stream byte-identically
+  gzip -6: we inflated gzip's stream byte-identically
+  gzip -9: we inflated gzip's stream byte-identically
+== round-trip through our own decompressor, every level
+  level 0: round-tripped 1000081 bytes
+  level 1: round-tripped 224033 bytes
+  level 2: round-tripped 222989 bytes
+  level 3: round-tripped 215683 bytes
+  level 4: round-tripped 210776 bytes
+  level 5: round-tripped 209842 bytes
+  level 6: round-tripped 193274 bytes
+  level 7: round-tripped 171941 bytes
+  level 8: round-tripped 171376 bytes
+  level 9: round-tripped 171391 bytes
+  level 10: round-tripped 160024 bytes
+  level 11: round-tripped 159685 bytes
+  level 12: round-tripped 159684 bytes
+== libdeflate: our streams are the same bytes as libdeflate's
+  level 1: identical, 224033 bytes
+  level 2: identical, 222989 bytes
+  level 3: identical, 215683 bytes
+  level 4: identical, 210776 bytes
+  level 5: identical, 209842 bytes
+  level 6: identical, 193274 bytes
+  level 7: identical, 171941 bytes
+  level 8: identical, 171376 bytes
+  level 9: identical, 171391 bytes
+  level 10: identical, 160024 bytes
+  level 11: identical, 159685 bytes
+  level 12: identical, 159684 bytes
+== edge lengths: every level round-trips, stays in bound, and matches libdeflate
+  level 0: 410 inputs
+  level 1: 410 inputs
+  level 2: 410 inputs
+  level 3: 410 inputs
+  level 4: 410 inputs
+  level 5: 410 inputs
+  level 6: 410 inputs
+  level 7: 410 inputs
+  level 8: 410 inputs
+  level 9: 410 inputs
+  level 10: 410 inputs
+  level 11: 410 inputs
+  level 12: 410 inputs
+== decoder errors
+  level 0: all 4101 truncations report UnexpectedEnd
+  level 1: all 1067 truncations report UnexpectedEnd
+  level 6: all 1049 truncations report UnexpectedEnd
+  level 12: all 984 truncations report UnexpectedEnd
+  gzip -6: all 1050 truncations report UnexpectedEnd
+  level 0: every bit flipped once: 32774 decode, 33 CorruptData, 1 UnexpectedEnd
+  level 1: every bit flipped once: 7297 decode, 1217 CorruptData, 22 UnexpectedEnd
+  level 6: every bit flipped once: 6140 decode, 2208 CorruptData, 44 UnexpectedEnd
+  level 12: every bit flipped once: 6162 decode, 1683 CorruptData, 27 UnexpectedEnd
+  gzip -6: every bit flipped once: 5664 decode, 2695 CorruptData, 41 UnexpectedEnd
+  decompress_into appends after what out holds
+All interop checks passed
