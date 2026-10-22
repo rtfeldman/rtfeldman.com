@@ -70,13 +70,15 @@
 .chart-bar-roc, .legend-roc { --bar-color: var(--roc-color); background: var(--bar-color); }
 .chart-bar-libdeflate, .legend-c { --bar-color: var(--c-color); background: var(--bar-color); }
 .chart-endpoint { position: absolute; left: calc(50% - 5px); width: 10px; color: var(--chart-muted); font-size: var(--chart-label-font-size); line-height: 1.3; pointer-events: none; }
-.chart-endpoint-text { position: absolute; left: 14px; width: max-content; background: var(--chart-surface); padding: 0 2px; }
+.chart-endpoint-text { position: absolute; left: 22px; width: max-content; background: var(--chart-surface); padding: 0 2px; }
 .chart-endpoint-max .chart-endpoint-text { top: 0; transform: translateY(-50%); }
 .chart-endpoint-min .chart-endpoint-text { bottom: 0; transform: translateY(50%); }
 .chart-endpoint-arrow { position: absolute; left: 0; width: 10px; }
 .chart-endpoint-max .chart-endpoint-arrow { top: 0; bottom: 4px; }
 .chart-endpoint-min .chart-endpoint-arrow { top: 4px; bottom: 0; }
-.chart-endpoint-arrow::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; border-left: 1px solid currentColor; }
+.chart-endpoint-arrow::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 10px; border-left: 1px solid currentColor; }
+.chart-endpoint-max .chart-endpoint-arrow::before { border-top: 1px solid currentColor; }
+.chart-endpoint-min .chart-endpoint-arrow::before { border-bottom: 1px solid currentColor; }
 .chart-endpoint-arrow::after { content: ""; position: absolute; left: 2px; width: 7px; height: 7px; border-right: 1px solid currentColor; border-bottom: 1px solid currentColor; }
 .chart-endpoint-max .chart-endpoint-arrow::after { bottom: 1px; transform: rotate(45deg); }
 .chart-endpoint-min .chart-endpoint-arrow::after { top: 1px; transform: rotate(225deg); }
