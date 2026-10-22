@@ -1,0 +1,27 @@
+zig: /Users/rtfeldman/bin/zig (0.17.0)
+
+== fetching sources
+
+== building mimalloc v2.1.7
+mimalloc: /private/tmp/roc-deflate-macos-optimized-2026-10-21/mimalloc/build/libmimalloc.dylib
+Roc compiler version release-fast-5e62c0e1
+
+== building harnesses
+── ● kept temporary directory ──────────────────────────────────────────────────
+
+Kept temporary directory:
+../roc-cache/compat-36cab430d5036f2186107d35c29e8e96c3b821fe10b1f8e43df2121eca9c
+25d0/tmp/c4ZGN5R6C8hMP4hcIIeJ2WX1lbP75QAa.
+
+0 errors and 0 warnings found in 7.3s while successfully building:
+
+    ../bin/ctime_raw
+
+== fetching the Silesia corpus
+corpus ready in /private/tmp/roc-deflate-macos-optimized-2026-10-21/corpus
+
+== timing (started 22:34)
+level 1 done 22:35
+level 2 done 22:35
+level 3 done 22:36
+level 4 done 22:37

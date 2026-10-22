@@ -1,0 +1,4 @@
+L7 reymont: baseline vs C 5.51% | control-reference-a vs C 5.34%; vs baseline -0.16% | control-reference-b vs C 5.46%; vs baseline -0.04% | control-fast-only vs C 5.78%; vs baseline 0.26% | control-first-opt vs C 6.54%; vs baseline 0.98%
+L6 dickens: baseline vs C 3.26% | control-reference-a vs C 3.24%; vs baseline -0.02% | control-reference-b vs C 2.94%; vs baseline -0.31% | control-fast-only vs C 4.54%; vs baseline 1.23% | control-first-opt vs C 4.76%; vs baseline 1.45%
+L5 mozilla: baseline vs C 5.98% | control-reference-a vs C 6.03%; vs baseline 0.04% | control-reference-b vs C 5.97%; vs baseline -0.01% | control-fast-only vs C 6.96%; vs baseline 0.92% | control-first-opt vs C 6.56%; vs baseline 0.54%
+/private/tmp/roc-deflate-macos-gap/control-reference-a-control-reference-b-control-fast-only-control-first-opt-comparison.csv

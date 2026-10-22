@@ -1,4 +1,8 @@
-Roc versus libdeflate compression timings — revised 2026-10-21 runs
+Roc versus libdeflate compression timings — matched-version reference, 2026-10-21
+
+Latest macOS optimizations: macos-optimization-2026-10-21/report.txt.
+This report preserves the same-source Linux/Mac comparison; subsequent optimized
+macOS sources have not been benchmarked on Linux. See README.md for dataset roles.
 
 Sources: roc 5e62c0e13ae779c28f7904dcdd2849ba13240beb (PR #12501);
 roc-deflate 16578ed0f16f83a1eb7491568c983446f622fd4a (PR #6);

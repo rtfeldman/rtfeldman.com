@@ -31,7 +31,7 @@ ROC_REPO=${ROC_REPO:-https://github.com/roc-lang/roc.git}
 ROC_COMMIT=${ROC_COMMIT:-5e62c0e13a}          # roc-lang/roc#12501
 LIBDEFLATE_COMMIT=b122c8b
 ROC_DEFLATE_REPO=${ROC_DEFLATE_REPO:-https://github.com/rtfeldman/roc-deflate.git}
-ROC_DEFLATE_REF=${ROC_DEFLATE_REF:-16578ed}   # niclas-ahden/roc-deflate#6
+ROC_DEFLATE_REF=${ROC_DEFLATE_REF:-ac26054fa4bb32e1452dbaa73b8a0e5eb2e300ad} # macOS optimization
 MIMALLOC_TAG=v2.1.7
 ZIG_VERSION=0.17.0
 

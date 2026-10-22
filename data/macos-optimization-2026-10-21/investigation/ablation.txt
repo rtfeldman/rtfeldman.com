@@ -1,0 +1,7 @@
+L7 reymont: baseline vs C 5.62% | greedy-layout-b vs C 6.72%; vs baseline 1.05% | fast-only vs C 6.04%; vs baseline 0.40% | greedy-only vs C 5.53%; vs baseline -0.09%
+L6 dickens: baseline vs C 2.69% | greedy-layout-b vs C 4.45%; vs baseline 1.72% | fast-only vs C 4.10%; vs baseline 1.38% | greedy-only vs C 2.73%; vs baseline 0.04%
+L6 xml: baseline vs C 0.03% | greedy-layout-b vs C 0.30%; vs baseline 0.27% | fast-only vs C 0.27%; vs baseline 0.24% | greedy-only vs C 1.85%; vs baseline 1.82%
+L5 mozilla: baseline vs C 5.83% | greedy-layout-b vs C 6.70%; vs baseline 0.82% | fast-only vs C 6.76%; vs baseline 0.87% | greedy-only vs C 5.61%; vs baseline -0.21%
+L2 mr: baseline vs C 15.42% | greedy-layout-b vs C 14.43%; vs baseline -0.86% | fast-only vs C 15.70%; vs baseline 0.24% | greedy-only vs C 14.52%; vs baseline -0.78%
+L2 nci: baseline vs C 19.37% | greedy-layout-b vs C 12.78%; vs baseline -5.52% | fast-only vs C 19.41%; vs baseline 0.03% | greedy-only vs C 13.08%; vs baseline -5.27%
+/private/tmp/roc-deflate-macos-gap/greedy-layout-b-fast-only-greedy-only-comparison.csv

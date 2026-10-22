@@ -36,19 +36,19 @@ corpus: 1000001 bytes
   level 11: identical, 159685 bytes
   level 12: identical, 159684 bytes
 == edge lengths: every level round-trips, stays in bound, and matches libdeflate
-  level 0: 410 inputs
-  level 1: 410 inputs
-  level 2: 410 inputs
-  level 3: 410 inputs
-  level 4: 410 inputs
-  level 5: 410 inputs
-  level 6: 410 inputs
-  level 7: 410 inputs
-  level 8: 410 inputs
-  level 9: 410 inputs
-  level 10: 410 inputs
-  level 11: 410 inputs
-  level 12: 410 inputs
+  level 0: 630 inputs
+  level 1: 630 inputs
+  level 2: 630 inputs
+  level 3: 630 inputs
+  level 4: 630 inputs
+  level 5: 630 inputs
+  level 6: 630 inputs
+  level 7: 630 inputs
+  level 8: 630 inputs
+  level 9: 630 inputs
+  level 10: 630 inputs
+  level 11: 630 inputs
+  level 12: 630 inputs
 == decoder errors
   level 0: all 4101 truncations report UnexpectedEnd
   level 1: all 1067 truncations report UnexpectedEnd
