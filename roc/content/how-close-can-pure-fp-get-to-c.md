@@ -63,7 +63,7 @@ You can't opt out of bounds checks (e.g. getting a value out of a dynamically-si
 
 ### Build Lookup Tables at Compile Time
 
-[Roc's compile-time evaluation](https://www.roc-lang.org/docs/main/langref/compile-time/) can be used to assemble lookup tables at compile time as long as nothing depends on runtime inputs. Even better, since their lengths are known at compile time, you can do things like `Ok(entry) = lookup_table.get(5)` to do an [exhaustive pattern match](https://www.roc-lang.org/docs/main/langref/pattern-matching/#exhaustiveness) that Roc's compiler will know is valid thanks to compile-time evaluation. This skips the runtime bounds check that non-constant tables would otherwise need to pay for.
+[Roc's compile-time evaluation](https://www.roc-lang.org/docs/main/langref/compile-time/) can be used to assemble lookup tables at compile time as long as nothing depends on runtime inputs. Even better, since their lengths are known at compile time, you can do things like `Ok(entry) = lookup_table.get(5)` to do an [exhaustive pattern match](https://www.roc-lang.org/docs/main/langref/pattern-matching/#exhaustiveness) that Roc's compiler will know is valid thanks to compile-time evaluation. This avoids runtime bounds checks that non-constant tables might have to pay for.
 
 ### Consider Wrapping Arithmetic
 
