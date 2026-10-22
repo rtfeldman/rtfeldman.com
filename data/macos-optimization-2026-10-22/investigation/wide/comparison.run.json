@@ -1,0 +1,14 @@
+{
+  "started": "2026-10-22T01:52:43-0400",
+  "rounds": 4,
+  "builds": {
+    "guard-batch": "ea7854b5585050243387d6c817479bd0817cdefdd3dbcbb4b66a36f31158b5e7",
+    "hcwide": "767a42c5b399ec5664754b0866bebeae3f8372e2bae6426714df20df860383e0",
+    "allwide": "05ab652b37ff7fa1ca4503f9730f6340c22d345f5b92a59cfdb350f206855a03"
+  },
+  "order": "Rotate [C, baseline, candidate, ...] left by round-1",
+  "script_sha256": "a3b4888877c3b2a457b376a080840a203fcc4c64c709f723fcf3e48413d60bfd",
+  "finished": "2026-10-22T02:00:03-0400",
+  "samples": 2400,
+  "csv_sha256": "23fbde6e834fd93e57c073fc8e6cf2c67347b53f5c6afa46a7ca6964a5eda53e"
+}

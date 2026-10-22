@@ -1,0 +1,50 @@
+.build/mimalloc.tar.gz: OK
+Built targets/arm64mac with mimalloc 8c532c32c3c96e5ba1f2283e032f69ead8add00f
+0 errors and 0 warnings found in 11.6s while successfully building:
+
+    ../../../../../../../private/tmp/roc-gap-2026-10-22/final-before/dickens/rocbench
+built dickens
+0 errors and 0 warnings found in 58.5s while successfully building:
+
+    ../../../../../../../private/tmp/roc-gap-2026-10-22/final-before/mozilla/rocbench
+built mozilla
+0 errors and 0 warnings found in 10.4s while successfully building:
+
+    ../../../../../../../private/tmp/roc-gap-2026-10-22/final-before/mr/rocbench
+built mr
+0 errors and 0 warnings found in 11.2s while successfully building:
+
+    ../../../../../../../private/tmp/roc-gap-2026-10-22/final-before/nci/rocbench
+built nci
+0 errors and 0 warnings found in 9.8s while successfully building:
+
+    ../../../../../../../private/tmp/roc-gap-2026-10-22/final-before/ooffice/rocbench
+built ooffice
+0 errors and 0 warnings found in 10.5s while successfully building:
+
+    ../../../../../../../private/tmp/roc-gap-2026-10-22/final-before/osdb/rocbench
+built osdb
+0 errors and 0 warnings found in 8.9s while successfully building:
+
+    ../../../../../../../private/tmp/roc-gap-2026-10-22/final-before/reymont/rocbench
+built reymont
+0 errors and 0 warnings found in 12.9s while successfully building:
+
+    ../../../../../../../private/tmp/roc-gap-2026-10-22/final-before/samba/rocbench
+built samba
+0 errors and 0 warnings found in 12.3s while successfully building:
+
+    ../../../../../../../private/tmp/roc-gap-2026-10-22/final-before/sao/rocbench
+built sao
+0 errors and 0 warnings found in 32.3s while successfully building:
+
+    ../../../../../../../private/tmp/roc-gap-2026-10-22/final-before/webster/rocbench
+built webster
+0 errors and 0 warnings found in 12.0s while successfully building:
+
+    ../../../../../../../private/tmp/roc-gap-2026-10-22/final-before/x-ray/rocbench
+built x-ray
+0 errors and 0 warnings found in 7.4s while successfully building:
+
+    ../../../../../../../private/tmp/roc-gap-2026-10-22/final-before/xml/rocbench
+built xml

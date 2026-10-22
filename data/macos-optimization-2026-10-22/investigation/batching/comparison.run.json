@@ -1,0 +1,20 @@
+{
+  "started": "2026-10-22T02:28:49-0400",
+  "rounds": 3,
+  "builds": {
+    "guard-batch": "ea7854b5585050243387d6c817479bd0817cdefdd3dbcbb4b66a36f31158b5e7",
+    "guard-d99": "e61bf99b683fecf7a97b6415494a62210948fb705b511f3b395a9d301ebdbfee",
+    "smallbias": "cfad8d3dbea547c4e1240cb71114571065af2012ce4b0bce44ae0af9bf43934f",
+    "batch2": "2b0cefb642cc599ebdd336fb5698b6978da6fee1b4486e5bcd8e198453934578",
+    "batch4": "c037238b391edbde75e94f3a3f7c76875f2e26a022c8a7cb41b389d09cb040da",
+    "vector4": "59a990ad2fa9ce6ae7c58f54692d5fc2b935e3a70a8b89f8b01903555340a66c",
+    "linear": "d0b4e5ffbeaddaf8e01e7e3697f93ac38bf80ac0aaafb528c5c7ccc15a6e2dc1",
+    "earlyload": "793f47d22b4833faee11c00adfad1c7566366633c19cc20e75a95393d1f8093a",
+    "vector2": "7f47328343e77236ba06c72ad9e6732d1493e6c0d364335d5d259bc255a451c7"
+  },
+  "order": "Rotate [C, baseline, candidate, ...] left by round-1",
+  "script_sha256": "a3b4888877c3b2a457b376a080840a203fcc4c64c709f723fcf3e48413d60bfd",
+  "finished": "2026-10-22T02:42:17-0400",
+  "samples": 4500,
+  "csv_sha256": "327a1abc2ef0f6872e620a0afbc75be5f396311843b80b569e394f56c1c55701"
+}

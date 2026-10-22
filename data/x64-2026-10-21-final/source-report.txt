@@ -1,0 +1,23 @@
+roc-deflate vs libdeflate compression timings, 2026-10-21
+AMD Ryzen 9 3900X, Linux x86_64. Both engines allocate through mimalloc v2.1.7
+(preloaded into libdeflate's harness; linked into the static Roc harness).
+roc: roc-lang/roc 5e62c0e13a (PR #12501); roc-deflate: rtfeldman/roc-deflate 16578ed (PR #6).
+Reproduce with repro-deflate-mimalloc.sh. All outputs byte-identical to libdeflate's.
+
+ L   libdeflate MB/s   roc-deflate MB/s   median gap (libdeflate faster by)
+ 1            233.0              214.5       +9.2%
+ 2            161.9              150.9      +10.1%
+ 3            138.9              130.9      +12.5%
+ 4            127.5              121.2       +8.0%
+ 5            108.5               99.4      +12.0%
+ 6             95.8               87.1      +11.1%
+ 7             74.7               65.8       +9.2%
+ 8             50.0               46.4       +8.2%
+ 9             44.4               42.0       +7.1%
+10             14.9               13.7       +9.5%
+11              9.3                9.1       +3.9%
+12              6.7                7.1       +3.5%
+
+Median gap over all 144 level/file cases: +8.4%
+Largest libdeflate advantage: +31.9% (10, 'x-ray'); smallest: -21.7% (1, 'nci')
+Cases where roc-deflate is faster: 15 of 144

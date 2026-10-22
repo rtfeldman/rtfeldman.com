@@ -1,0 +1,63 @@
+{
+  "recorded_at": "2026-10-22T02:45:16.260962+00:00",
+  "cpu": "Apple M1 Pro",
+  "os": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83",
+  "c_compiler": "Apple clang version 17.0.0 (clang-1700.6.4.2)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin",
+  "zig": "0.17.0",
+  "sources": {
+    "roc": "5e62c0e13ae779c28f7904dcdd2849ba13240beb",
+    "roc-deflate": "ac26054fa4bb32e1452dbaa73b8a0e5eb2e300ad",
+    "libdeflate": "b122c8be1d78b19f6d0a6efc5bb79bfcbb30dd51",
+    "mimalloc": "8c532c32c3c96e5ba1f2283e032f69ead8add00f"
+  },
+  "roc_compiler_sha256": "afab77bd51e9262ac59c1306cca14bee8a9f5aeef28be67e866bd3af31c8b4cb",
+  "compiler_note": "Exact compiler executable reused from the reference run; no compiler source changes.",
+  "baseline_directory": "data/macos-aarch64-2026-10-21",
+  "source_worktree": "/Users/rtfeldman/code/worktrees/roc-deflate/macos-deflate-gap/roc-deflate",
+  "source_branch": "macos-deflate-gap",
+  "procedure": "https://gist.github.com/rtfeldman/7b6830809149867b79761ffb8e0456c3",
+  "run_command": "PATH=\"/usr/bin:$PATH\" ROC_REPO=/private/tmp/roc-deflate-macos-2026-10-21/roc ROC_DEFLATE_REPO=/Users/rtfeldman/code/worktrees/roc-deflate/macos-deflate-gap/roc-deflate ROC_DEFLATE_REF=ac26054fa4bb32e1452dbaa73b8a0e5eb2e300ad bash data/macos-optimization-2026-10-21/repro-deflate-mimalloc.sh /private/tmp/roc-deflate-macos-optimized-2026-10-21",
+  "corpus_sha256": {
+    "dickens": "b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a",
+    "mozilla": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b",
+    "mr": "68637ed52e3e4860174ed2dc0840ac77d5f1a60abbcb13770d5754e3774d53e6",
+    "nci": "fc63a31770947b8c2062d3b19ca94c00485a232bb91b502021948fee983e1635",
+    "ooffice": "e7ee013880d34dd5208283d0d3d91b07f442e067454276095ded14f322a656eb",
+    "osdb": "60f027179302ca3ad87c58ac90b6be72ec23588aaa7a3b7fe8ecc0f11def3fa3",
+    "reymont": "0eac0114a3dfe6e2ee1f345a0f79d653cb26c3bc9f0ed79238af4933422b7578",
+    "samba": "93ba07bc44d8267789c1d911992f40b089ffa2140b4a160fac11ccae9a40e7b2",
+    "sao": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc",
+    "webster": "6a68f69b26daf09f9dd84f7470368553194a0b294fcfa80f1604efb11143a383",
+    "x-ray": "7de9fce1405dc44ae5e6813ed21cd5751e761bd4265655a005d39b9685d1c9ad",
+    "xml": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c"
+  },
+  "validation": {
+    "unit_tests": 18,
+    "unit_backend": "dev",
+    "edge_inputs_per_level": 630,
+    "levels_tested": 13,
+    "interop": "passed with standalone LLVM speed executable",
+    "ratio_gates": "passed",
+    "speed_unit_limitation": "Pinned compiler in-process loader reports undefined symbol memset_pattern16 for the independent fixed-code equivalence test. Native tests and standalone LLVM integration/ratio executables pass.",
+    "exact_source_recheck_at": "2026-10-22T03:21:12.060980+00:00"
+  },
+  "environment_note": "Active user desktop; fixed C-then-Roc ordering; no CPU affinity or frequency controls.",
+  "change_note": "Retains parser-specific layouts and level-1 repeated-byte shortcut; adds greedy repeated-byte chain filling with unchanged links and direct fixed Huffman construction.",
+  "initial_optimization_directory": "data/macos-optimization-initial-2026-10-21",
+  "executable_sha256": {
+    "ctime_raw": "f05db0264cd6cf5743493645bcba0f213b1e65d56d03ec14ccefbbb15bde45a4",
+    "cbench_raw": "396ec671625865d8ff99b3b27c129b92fd1474ffdabd3fa260d97de89c6fe37b"
+  },
+  "source_url": "https://github.com/rtfeldman/roc-deflate/tree/ac26054fa4bb32e1452dbaa73b8a0e5eb2e300ad",
+  "completed_at": "2026-10-22T03:19:04.351957+00:00",
+  "exit_status": 0,
+  "allocator_verification": "Post-run dyld diagnostics verified mimalloc malloc/free interposition in both measured executables; diagnostics excluded from the CSV.",
+  "artifacts_sha256": {
+    "raw.tsv": "662c851dc85734ccb8f01289e1e7d203a1f595c25db510ef3569c24ed71f7b16",
+    "roc-deflate-compression-timings.csv": "05a3a2ddd82ce9ce8234aa68812aa77859f69183a7ab7587636a914042f363ca",
+    "roc-deflate.patch": "a04356d470ca83e09bc17f526e3a4b167ef678688662a40f080a9ff0e6916ea3",
+    "roc-deflate.bundle": "51f29d311fda53cc1b9685af6dacf64b204879cc52811d61bf38048ed896e1fe",
+    "repro-deflate-mimalloc.sh": "43bbb1988410aa6102bb1cfa10ea108a0f3b0df089fc10b0d3357511acd44538"
+  },
+  "procedure_note": "The retained optimized procedure now defaults to the measured source revision; timing/build logic is unchanged. The actual run explicitly selected this source through ROC_DEFLATE_REF."
+}

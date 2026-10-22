@@ -1,0 +1,17 @@
+{
+  "driver_protocol": "per-case-process-v1",
+  "started": "2026-10-22T03:16:46-0400",
+  "rounds": 6,
+  "builds": {
+    "case-29bd": "12dc706da86533ebc8eaf9629d85b613e1e6e4909cbc4c1a145f3b2a49abc964",
+    "case-d99": "1fe8bcd69a9e019fc3515ffa4fc64847368b55bbd057cbb3b8985c54195e24a6",
+    "case-split": "604b0b7d8533f3d35b3366a44828d9169a5d2e21b9be750b1b128ac07f9b95a3",
+    "case-pair": "a4ab0a5c4cea3166022a1228977c7c881b5e414c21bf3088db217ffe10bfff1b",
+    "case-both": "6ee80198d3eb0f0f880e58d8a66ab397f9ecee303234852167bdfee0fa61263d"
+  },
+  "order": "Rotate [C, baseline, candidate, ...] left by round-1",
+  "script_sha256": "5282bddb0fcfb0bdc71dfd9392aeda1c354f165fa0690f3b8e77aaf2d43babd2",
+  "finished": "2026-10-22T03:29:23-0400",
+  "samples": 3240,
+  "csv_sha256": "ecf8bc518147f5f2aba9f68ab1d0325b78e7c556f8a90839a78f72406cabc131"
+}

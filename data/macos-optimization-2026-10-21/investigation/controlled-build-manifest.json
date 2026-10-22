@@ -1,0 +1,66 @@
+[
+  {
+    "candidate": "control-reference-a",
+    "source_reference": "16578ed",
+    "only_level1_delta": false,
+    "command": [
+      "/private/tmp/roc-deflate-macos-2026-10-21/roc-install/bin/roc",
+      "build",
+      "--no-cache",
+      "--keep-temp",
+      "--opt=speed",
+      "benchmark/ctime_raw.roc",
+      "--output=/private/tmp/roc-deflate-macos-gap/control-reference-a"
+    ],
+    "source_directory": "/private/tmp/roc-deflate-macos-investigate/controlled-src",
+    "executable_sha256": "fd7da98c76a959ea3bef09d46da00f0deebb95cea7581aafb193b037336db717"
+  },
+  {
+    "candidate": "control-reference-b",
+    "source_reference": "16578ed",
+    "only_level1_delta": false,
+    "command": [
+      "/private/tmp/roc-deflate-macos-2026-10-21/roc-install/bin/roc",
+      "build",
+      "--no-cache",
+      "--keep-temp",
+      "--opt=speed",
+      "benchmark/ctime_raw.roc",
+      "--output=/private/tmp/roc-deflate-macos-gap/control-reference-b"
+    ],
+    "source_directory": "/private/tmp/roc-deflate-macos-investigate/controlled-src",
+    "executable_sha256": "fd7da98c76a959ea3bef09d46da00f0deebb95cea7581aafb193b037336db717"
+  },
+  {
+    "candidate": "control-fast-only",
+    "source_reference": "16578ed",
+    "only_level1_delta": true,
+    "command": [
+      "/private/tmp/roc-deflate-macos-2026-10-21/roc-install/bin/roc",
+      "build",
+      "--no-cache",
+      "--keep-temp",
+      "--opt=speed",
+      "benchmark/ctime_raw.roc",
+      "--output=/private/tmp/roc-deflate-macos-gap/control-fast-only"
+    ],
+    "source_directory": "/private/tmp/roc-deflate-macos-investigate/controlled-src",
+    "executable_sha256": "c6262d14054494a82a1f53a26737d6025e97bdc09e6b99d26d37a452bf3f338e"
+  },
+  {
+    "candidate": "control-first-opt",
+    "source_reference": "2dbe9a2",
+    "only_level1_delta": false,
+    "command": [
+      "/private/tmp/roc-deflate-macos-2026-10-21/roc-install/bin/roc",
+      "build",
+      "--no-cache",
+      "--keep-temp",
+      "--opt=speed",
+      "benchmark/ctime_raw.roc",
+      "--output=/private/tmp/roc-deflate-macos-gap/control-first-opt"
+    ],
+    "source_directory": "/private/tmp/roc-deflate-macos-investigate/controlled-src",
+    "executable_sha256": "de7fa93b9d5922b2a445710a408150e51a1c7c2a3388e79df81c43209bf1d24b"
+  }
+]

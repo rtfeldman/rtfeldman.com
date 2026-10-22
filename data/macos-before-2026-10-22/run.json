@@ -1,0 +1,14 @@
+{
+  "driver_protocol": "per-case-process-v1",
+  "started": "2026-10-22T06:15:11-0400",
+  "rounds": 3,
+  "builds": {
+    "final-before": "bc43aee8f41be7862831b6f45175e848e3303ff744f90091fc40730619c62ed3",
+    "final-after": "b1c805b4ca9827ed1c53f2844c6fc12ab6ab2a0934e6230db7811c84089898ef"
+  },
+  "order": "Rotate [C, baseline, candidate, ...] left by round-1",
+  "script_sha256": "5282bddb0fcfb0bdc71dfd9392aeda1c354f165fa0690f3b8e77aaf2d43babd2",
+  "finished": "2026-10-22T07:45:49-0400",
+  "samples": 6480,
+  "csv_sha256": "74fac89c49a9d4d6bddfb3e77ad9f17ee3508a510f18e420646448321a4e902a"
+}

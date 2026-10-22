@@ -1,0 +1,24 @@
+{
+  "archive": "deflate-final.tzr.gz",
+  "requested_archive_name": "deflate-final.tar.gz",
+  "sha256": "88c3b186990340f29bc04ad984e61f2bc6be153ae51106c62c131509d5179774",
+  "sources": {
+    "roc": "d99c7b838f",
+    "roc-deflate": "04cb55f",
+    "libdeflate": "b122c8b",
+    "mimalloc": "v2.1.7"
+  },
+  "source_note": "Versions as reported in the supplied README and reproduction script; no timed binary or build manifest is supplied.",
+  "measurement": "144 file/level cases; 7 repetitions per engine, pinned to core 6; median elapsed ns converted to MB/s and rounded to one decimal place by scripts/abp.sh.",
+  "data_available": "Only rounded median throughputs and gaps. Raw repetitions, measured output files, and validation logs are not included.",
+  "validation_note": "README reports byte-identical compressed output. The archive supplies scripts/check.sh but no execution log; this import validates data consistency, not execution of that check.",
+  "files_sha256": {
+    "README.txt": "d73d0f0dd6f9446d5a2076627ac28c052b4b46d359c57a89732769c1ffa0a25e",
+    "medians.txt": "6702975734549fbd96b81876e539c182739144efb24cc89e5370f6b723f7f994",
+    "gaps.txt": "48cd786dd083fe099c51a25a53dc1ed62bbe78d5523a89cda5e5f690a7b1859e",
+    "repro-deflate-mimalloc.sh": "aa75f072a4df806146c884db52e2afeab68cb317718ef662d5ade652a3514a1d",
+    "scripts/build.sh": "ad976bfa04c28f49bab5e6156b7501ac7d8d99e43ff6d323287983045e4a4ede",
+    "scripts/check.sh": "6423e8b8141b4a82e3988386827db020888181b9dfbd63d3bcfb9cb29c6219a5",
+    "scripts/abp.sh": "bd82a2f4f7736b832dc2769effbf2192258807efcfd4010a7cb1f9353f7e7cd5"
+  }
+}

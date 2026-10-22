@@ -1,0 +1,6 @@
+cbench_raw:
+dyld[74453]: libmimalloc.2.1.dylib has interposed '_malloc' to replacing binds to 0x188E75CE8 with 0x100944F88
+dyld[74453]: libmimalloc.2.1.dylib has interposed '_free' to replacing binds to 0x188E766B8 with 0x1009557F4
+ctime_raw:
+dyld[74454]: libmimalloc.2.1.dylib has interposed '_malloc' to replacing binds to 0x188E75CE8 with 0x104AA4F88
+dyld[74454]: libmimalloc.2.1.dylib has interposed '_free' to replacing binds to 0x188E766B8 with 0x104AB57F4

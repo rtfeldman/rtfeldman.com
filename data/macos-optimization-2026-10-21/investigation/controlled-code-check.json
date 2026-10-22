@@ -1,0 +1,18 @@
+[
+  {
+    "candidate": "control-reference-a",
+    "text_dump_sha256": "6c9557768b32c36d9c4f51b8b6d5e3ee555f232aa3279f1e83be8f7b67ab74bc"
+  },
+  {
+    "candidate": "control-reference-b",
+    "text_dump_sha256": "6c9557768b32c36d9c4f51b8b6d5e3ee555f232aa3279f1e83be8f7b67ab74bc"
+  },
+  {
+    "candidate": "control-fast-only",
+    "text_dump_sha256": "6ad0bca15512fb306c770460284c718486aadd98a143673734e990950cb6eeed"
+  },
+  {
+    "candidate": "control-first-opt",
+    "text_dump_sha256": "0e3c1f764bc2abad0b29f445f326aa181540614f732389d9534af5fa25821df7"
+  }
+]

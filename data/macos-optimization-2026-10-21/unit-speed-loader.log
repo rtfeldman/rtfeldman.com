@@ -1,0 +1,231 @@
+relocatable loader: undefined symbol memset_pattern16
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:240:1
+
+expect Deflate.decompress([0x03, 0x00]) == Ok([])
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:243:1
+
+expect Deflate.decompress([0x01, 0x05, 0x00, 0xFA, 0xFF, 0x48, 0x65, 0x6C, 0x6C, 0x6F]) == Ok("Hello".to_utf8())
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:246:1
+
+expect Deflate.decompress([0x01, 0x05, 0x00, 0xFB, 0xFF, 0x48, 0x65, 0x6C, 0x6C, 0x6F]) == Err(CorruptData)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:249:1
+
+expect Deflate.decompress([0x07]) == Err(CorruptData)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:254:1
+
+expect Deflate.decompress([]) == Err(UnexpectedEnd)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:256:1
+
+expect Deflate.decompress([0x03]) == Err(UnexpectedEnd)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:258:1
+
+expect Deflate.decompress([0x01, 0x05, 0x00, 0xFA, 0xFF, 0x48, 0x65]) == Err(UnexpectedEnd)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:260:1
+
+expect {
+    stream = Deflate.compress("abcdefghijklmnopqrstuvwxyz, abcdefghijklmnopqrstuvwxyz, and the alphabet again".to_utf8(), 6)
+    Deflate.decompress(List.sublist(stream, { start: 0, len: 3 })) == Err(UnexpectedEnd)
+}
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:267:1
+
+expect Deflate.decompress([0x03, 0x22, 0x00]) == Err(CorruptData)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:271:1
+
+expect Deflate.decompress_into([0x03, 0x22, 0x00], [1, 2, 3]) == Err(CorruptData)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:274:1
+
+expect Deflate.decompress_into([0x01, 0x05, 0x00, 0xFA, 0xFF, 0x48, 0x65, 0x6C, 0x6C, 0x6F], [1, 2]) == Ok([1, 2, 0x48, 0x65, 0x6C, 0x6C, 0x6F])
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:279:1
+
+expect {
+    text = "the cat, the cow, the crow, then the cricket saw the cow again and again".to_utf8()
+    var $ok = True
+    for level in Deflate.Level.all {
+        n = level.to_u64()
+        limit = if n == 0 { 64 } else { 55 - 4 * n }
+        for len in [0, 1, 2, 3, 4, 5, limit, limit + 1] {
+            original = List.sublist(text, { start: 0, len })
+            compressed = Deflate.compress(original, level)
+            if Deflate.decompress(compressed) != Ok(original) or List.len(compressed) > Deflate.compress_bound(len) {
+                $ok = False
+            } else {}
+        }
+    }
+    $ok
+}
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:297:1
+
+expect {
+    noise = List.repeat(0.U8, 3000).map_with_index(|_, i| {
+        a = i.times_wrap(0x9E3779B97F4A7C15)
+        b = a.bitwise_xor(a.shr_zf_wrap(29)).times_wrap(0xBF58476D1CE4E5B9)
+        b.bitwise_xor(b.shr_zf_wrap(32)).shr_zf_wrap(56).to_u8_wrap()
+    })
+    var $ok = True
+    for level in Deflate.Level.all {
+        compressed = Deflate.compress(noise, level)
+        if Deflate.decompress(compressed) != Ok(noise) or List.len(compressed) > Deflate.compress_bound(3000) {
+            $ok = False
+        } else {}
+    }
+    $ok
+}
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:316:1
+
+expect {
+    text = "the cat, the cow, the crow, then the cricket saw the cow again and again".to_utf8()
+    var $ok = True
+    for level in Deflate.Level.all {
+        alone = Deflate.compress(text, level)
+        appended = Deflate.compress_into(text, level, [7, 8])
+        reused = Deflate.compress_into(text, level, List.with_capacity(Deflate.compress_bound(List.len(text))))
+        if appended != List.concat([7, 8], alone) or reused != alone {
+            $ok = False
+        } else {}
+    }
+    $ok
+}
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:332:1
+
+expect Deflate.Level.from_u64(12).map_ok(|level| level.to_u64()) == Ok(12)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:334:1
+
+expect Deflate.Level.from_u64(13).is_err()
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ────────────────────────────────── package/Deflate.roc:336:1
+
+expect Deflate.Level.all.map(|level| level.to_u64()) == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+
+── ● compiler error ──────────────────────────── package/CompressLazy.roc:1714:1
+
+expect {
+    reference = {
+        var $freqs_litlen = List.repeat(0.U32, DeflateTables.num_litlen_syms)
+        var $i = 0.U64
+        while $i < DeflateTables.num_litlen_syms {
+            f =
+                if $i < 144 {
+                    2
+                } else if $i < 256 {
+                    1
+                } else if $i < 280 {
+                    4
+                } else {
+                    2
+                }
+            $freqs_litlen = match List.set($freqs_litlen, $i, f) {
+                Ok(next) => next
+                Err(_) => crash "CompressLazy.build_static_codes: freqs_litlen index out of bounds"
+            }
+            $i = $i + 1
+        }
+        litlen = HuffmanEncode.make_code(
+            DeflateTables.num_litlen_syms,
+            BlockOut.max_litlen_codeword_len,
+            $freqs_litlen,
+            List.repeat(0.U8, DeflateTables.num_litlen_syms),
+            List.repeat(0.U32, DeflateTables.num_litlen_syms),
+        )
+        offset = HuffmanEncode.make_code(
+            DeflateTables.num_offset_syms,
+            BlockOut.max_offset_codeword_len,
+            List.repeat(1.U32, DeflateTables.num_offset_syms),
+            List.repeat(0.U8, DeflateTables.num_offset_syms),
+            List.repeat(0.U32, DeflateTables.num_offset_syms),
+        )
+        {
+            litlen_lens: litlen.lens,
+            litlen_codewords: litlen.codewords,
+            offset_lens: offset.lens,
+            offset_codewords: offset.codewords,
+        }
+    }
+    CompressLazy.build_static_codes(0) == reference
+}
+
+LLVM speed test backend failed: LlvmBackendUnavailable
+
+Ran 18 tests in 7492.1 ms.:
+    0 passed
+    0 failed
+    18 compiler errors

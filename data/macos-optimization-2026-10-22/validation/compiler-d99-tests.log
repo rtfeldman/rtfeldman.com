@@ -1,0 +1,56 @@
+Build Summary: 41/41 steps succeeded; 60/60 tests passed
+run-test-zig-module-postcheck success
++- run test postcheck 9 pass (9 total) 748ms MaxRSS:14M
+   +- compile test postcheck debug native-native success 43s MaxRSS:4G
+      +- options cached
+      +- run exe compiler_identity (compiler_identity.zig) cached
+         +- compile exe compiler_identity fast native cached 67ms MaxRSS:31M
+         +- WriteFile src/backend/boxy_call_plan.zig cached
+         +- run exe compiler_identity (toolchain_identity.zig) cached
+            +- compile exe compiler_identity fast native (reused)
+            +- WriteFile lib cached
+run-test-zig-module-compile success
++- run test compile 51 pass (51 total) 12s MaxRSS:91M
+   +- compile test compile debug native-native success 2m MaxRSS:10G
+      +- WriteFile Builtin.bin cached
+      |  +- run exe builtin_compiler (Builtin.bin) cached
+      |  |  +- compile exe builtin_compiler debug native cached 79ms MaxRSS:31M
+      |  |     +- options (reused)
+      |  |     +- run exe compiler_identity (compiler_identity.zig) (+3 more reused dependencies)
+      |  +- run exe builtin_compiler (Builtin.bin) (+1 more reused dependencies)
+      |  +- run exe builtin_compiler (Builtin.bin) (+1 more reused dependencies)
+      +- options (reused)
+      +- WriteFile glue-platform/AbiFieldLayout.roc cached
+      +- WriteFile Builtin.bin (+3 more reused dependencies)
+      +- run exe compiler_identity (compiler_identity.zig) (+3 more reused dependencies)
+      +- WriteFile roc_boxy_runtime.o cached
+      |  +- compile obj roc_boxy_runtime_wasm32_eval fast wasm32-freestanding-none cached 58ms MaxRSS:31M
+      |     +- options (reused)
+      |     +- run exe compiler_identity (compiler_identity.zig) (+3 more reused dependencies)
+      +- WriteFile roc_builtins.o cached
+      |  +- run /Users/rtfeldman/zig/0.17.0/zig (roc_builtins.o) cached
+      |     +- compile obj roc_builtins_wasm32_eval debug wasm32-freestanding-none cached 54ms MaxRSS:31M
+      |     +- compile obj compiler_rt_wasm32_eval debug wasm32-freestanding-none cached 57ms MaxRSS:31M
+      +- WriteFile roc_boxy_runtime.o cached
+      |  +- compile obj roc_boxy_runtime_wasm32v1_eval fast wasm32-freestanding-none cached 59ms MaxRSS:31M
+      |     +- options (reused)
+      |     +- run exe compiler_identity (compiler_identity.zig) (+3 more reused dependencies)
+      +- WriteFile roc_builtins.o cached
+      |  +- run /Users/rtfeldman/zig/0.17.0/zig (roc_builtins.o) cached
+      |     +- compile obj roc_builtins_wasm32v1_eval debug wasm32-freestanding-none cached 56ms MaxRSS:31M
+      |     +- compile obj compiler_rt_wasm32v1_eval debug wasm32-freestanding-none cached 58ms MaxRSS:31M
+      +- run exe builtin_compiler (Builtin.bin) (+1 more reused dependencies)
+      +- options cached
+      +- WriteFile builtins32.bc cached
+         +- compile obj roc_builtins32_bc fast wasm32-freestanding-none cached 65ms MaxRSS:31M
+         +- compile obj roc_builtins64_bc fast wasm64-freestanding-none cached 65ms MaxRSS:31M
+         +- compile obj roc_builtins32_core_bc fast wasm32-freestanding-none cached 58ms MaxRSS:31M
+         +- compile obj roc_builtins64_core_bc fast wasm64-freestanding-none cached 60ms MaxRSS:31M
+         +- compile obj roc_builtins32_extern_bc fast wasm32-freestanding-none cached 64ms MaxRSS:31M
+         +- compile obj roc_builtins64_extern_bc fast wasm64-freestanding-none cached 60ms MaxRSS:31M
+         +- compile obj roc_builtins32_core_extern_bc fast wasm32-freestanding-none cached 59ms MaxRSS:31M
+         +- compile obj roc_builtins64_core_extern_bc fast wasm64-freestanding-none cached 64ms MaxRSS:31M
+         +- compile obj roc_sha256_portable_bc fast wasm64-freestanding-none cached 58ms MaxRSS:31M
+         +- compile obj roc_sha256_x86_sha_bc fast x86_64-freestanding-none cached 58ms MaxRSS:31M
+         +- compile obj roc_sha256_aarch64_sha2_bc fast aarch64-freestanding-none cached 59ms MaxRSS:31M
+

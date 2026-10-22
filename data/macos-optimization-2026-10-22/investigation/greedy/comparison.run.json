@@ -1,0 +1,17 @@
+{
+  "started": "2026-10-22T02:47:43-0400",
+  "rounds": 3,
+  "builds": {
+    "guard-d99": "e61bf99b683fecf7a97b6415494a62210948fb705b511f3b395a9d301ebdbfee",
+    "split-greedy": "e440c14c8d811552ec939de50b257a895179dc23b7c3c7731f7e0f3180a44b82",
+    "greedy-v0": "4e79c0f36ac4b9d8eecfe95e8f9a2aaa471c517bc266892ac0ca9a3c0dca5d12",
+    "greedy-v8": "0f01e4ef439ce2feb900f5c231c26bf7655245c05ee4a72c860807e0f77f08a3",
+    "greedy-v16": "f953a777918f73ffa5746b9aee5b521715e7611d2f593f8c98551d3016c78aad",
+    "greedy-fast-v": "418b03e650e8e6a7abc90fef2f80229f64045d33ec1dce2f3c6ca5c7aad43f75"
+  },
+  "order": "Rotate [C, baseline, candidate, ...] left by round-1",
+  "script_sha256": "a3b4888877c3b2a457b376a080840a203fcc4c64c709f723fcf3e48413d60bfd",
+  "finished": "2026-10-22T02:56:55-0400",
+  "samples": 3150,
+  "csv_sha256": "a515bc0fb89d6eafeaa8f0079e9dd26049444f98483758bc381b009ea9c75f45"
+}

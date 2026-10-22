@@ -1,0 +1,119 @@
+Investigation of the first optimization's median regression
+
+Reference source: 16578ed0f16f83a1eb7491568c983446f622fd4a.
+First optimization: 2dbe9a2628d204b1b4955e5cad66cce8038f5fa6.
+Compiler throughout: 5e62c0e13ae779c28f7904dcdd2849ba13240beb.
+
+The first full run raised the median case gap from 5.643% to 6.762%.
+The mean moved only from 5.335% to 5.383%. Large improvements were in the
+upper tail; several middle cases slowed slightly. For example reymont L7
+had 1.056% higher Roc time and essentially unchanged C time, moving the
+case gap from 5.644% to 6.768%. This is a measured regression, not merely a
+change in how medians were calculated.
+
+Ablation: compare.mjs alternates the order of Roc executables across rounds,
+keeps C as an output reference, preloads the same mimalloc into every engine,
+and verifies compressed output identity for every invocation. It records all
+samples. These are targeted exploratory runs, not substitutes for the complete
+144-case measurement. They include process warmup and verification outside
+the measured interval, just like the full harness. They run on an active desktop.
+
+ablation.csv: 4 rounds x 5 repetitions per engine per case.
+  baseline: original reference executable.
+  greedy-layout-b: first optimization executable.
+  fast-only: original source plus only the level-1 change from 2dbe9a2.
+  greedy-only: original source plus only HcMatchfinder/CompressLazy changes
+               from 2dbe9a2, leaving CompressFast exactly original.
+
+The level-1-only change slows reymont L7 by 0.40%, dickens L6 by 1.38%,
+and mozilla L5 by 0.87% in this interleaved comparison. Level 1 is not
+executed at levels 5-9. Thus the regression can occur without any change
+to the lazy parser's source or table layout. Assembly shows the compiler
+combines the parser paths in a large function (over 13,000 instructions),
+with register assignments and stack slots changing across these variants.
+This establishes cross-path generated-code sensitivity. It does not prove
+that one particular spill, instruction alignment, or CPU stall accounts
+for every measured percentage point.
+
+The initial hypothesis that the extra layout record caused a per-call cost
+was not supported: the insertion helper is inlined. Replacing it with two
+fixed-offset copies did not consistently recover performance. A layout thunk
+also produced the same large-function instruction count as the original
+record argument, so was not pursued. We did not keep duplicated helpers.
+
+Other experiments, each checked against libdeflate output:
+- bounded-search.csv: state input bounds explicitly and clamp already-valid
+  candidate positions to expose bounds-check elimination. Rejected: worse
+  main gaps despite improvement on some inputs.
+- repeat-linear.csv: repeated-byte shortcut, with either biased-node loop or
+  a linear chain-slot loop. Kept the linear formulation; all chain links are
+  retained, redundant head updates/hashes are removed, and boundary prefixes
+  still go through ordinary insertion. No corpus recognition or search tuning.
+- simd.csv: batch four next-position hashes with SIMD and insert in original
+  order. Rejected: improvement on nci accompanied by a large reymont regression.
+- match-tag.csv and match-sentinel.csv: reduce the level-1 scan's match flags
+  using one three-state tag, or zero matched-node sentinels. Both rejected:
+  they slowed important level-1 cases despite simpler source state.
+
+Except ablation.csv, the retained targeted comparisons use 3 rounds with
+4 or 5 repetitions per engine per case; the round/rep columns are authoritative.
+static-offsets.csv is exploratory and overlapped brief compilation work;
+it is not used to claim a final performance result. All final headline
+numbers must come from the complete latest run, not the best targeted trial.
+
+checkpoint-a0e12b4 contains an intentionally interrupted full-procedure run,
+not a complete dataset. Its source is a0e12b4. It was stopped after finding
+that xml L1, rather than mr L2, was the largest completed gap. Incomplete
+cases must be excluded when analyzing that checkpoint.
+
+Build caveat: the same source rebuilt in a fresh directory produced slightly
+different stack layout/instruction counts than a cached screening build,
+although procedure identities and source contents agreed. Therefore the
+final fresh-build executable is measured directly; screening results are
+never substituted for its timings. Further compiler investigation would be
+needed to distinguish cache-state or build-order effects precisely.
+
+fixed-codes.csv: construct the fixed Huffman codes directly from RFC 1951,
+replacing per-stream general Huffman tree construction for known frequencies.
+This removes sorting, tree construction, and temporary allocations. Targeted
+large-input gains are small and mixed; the change is also useful for short
+streams, where fixed setup costs matter more. A unit test independently
+compares every length/codeword with the original generic Huffman construction.
+
+Validation of direct fixed codes: all 18 native-backend unit tests pass,
+including independent complete code-table equivalence. The pinned compiler's
+in-process LLVM test loader cannot resolve memset_pattern16 for that test's
+compiled code. Standalone LLVM-linked integration and ratio executables pass;
+the integration sweep covers 630 inputs per level, all 13 levels, and output
+identity with libdeflate at levels 1-12. No compiler changes were made.
+
+Distribution check on the first complete before/after runs: 62 case gaps
+improved and 82 worsened. The median paired absolute Roc time change was
++0.024%, while C's was -0.128%. Small C timing drift contributed to the
+ratios too. Large gains in a few upper-tail cases cannot compensate a
+median for many smaller shifts around its middle rank; the median is not
+a measure of the total compression time saved.
+
+Controlled rebuild confirmation (after the final full run):
+controlled-builds.py exports the same base into one fixed source directory,
+then builds with --no-cache and a fresh per-build cache. The two unchanged
+reference builds have identical complete __TEXT,__text dumps (SHA-256 in
+controlled-code-check.json). Source/compiler/build commands and executable
+hashes are retained in controlled-build-manifest.json.
+
+controlled-ablation.csv uses 6 rounds x 5 repetitions per engine per case,
+with the same alternating-order, output-verifying harness. Relative to the
+first clean reference build, changing only level 1 raises median Roc time
+by approximately 0.42% for reymont L7, 1.26% for dickens L6, and 0.87% for
+mozilla L5. The independent identical-code reference build measures within
+0.30% of the first on these cases. The full first optimization is also
+slower than the clean reference on all three. This reproduces the effect
+with directory and clean-build state controlled; it is not solely an old
+binary versus fresh-build comparison.
+
+The large combined parser function changes machine code even on paths whose
+source is unchanged. Inlining/code generation is therefore the right place
+to investigate isolation of these paths further. No compiler changes or
+source tricks to force a particular code address were used for the final
+optimization. A specific register spill versus instruction-cache/alignment
+explanation still requires lower-level profiling, and is not asserted here.

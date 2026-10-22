@@ -1,0 +1,6 @@
+corpus: 2810784 bytes (Canterbury)
+  level 1: 791919 bytes (ceiling 791919)
+  level 6: 721981 bytes (ceiling 721981)
+  level 9: 694996 bytes (ceiling 694996)
+  level 12: 673464 bytes (ceiling 673464)
+All ratio gates passed

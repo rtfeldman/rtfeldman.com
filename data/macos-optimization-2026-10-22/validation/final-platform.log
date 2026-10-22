@@ -1,0 +1,17 @@
+.build/mimalloc.tar.gz: OK
+Built targets/arm64mac with mimalloc 8c532c32c3c96e5ba1f2283e032f69ead8add00f
+PASS allocation, echo ownership, monotonic clock
+0 errors and 0 warnings found in 619ms while successfully building:
+
+    .build/example-dev
+6054 bytes -> 2780 bytes in 8952000 ns
+0 errors and 0 warnings found in 31ms while successfully building:
+
+    .build/argument-dev
+0 errors and 0 warnings found in 6.6s while successfully building:
+
+    .build/example-speed
+6054 bytes -> 2780 bytes in 180000 ns
+0 errors and 0 warnings found in 46ms while successfully building:
+
+    .build/argument-speed

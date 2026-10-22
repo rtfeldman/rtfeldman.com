@@ -1,0 +1,153 @@
+macOS compression optimization — Apple M1 Pro, 2026-10-21
+
+Reference roc-deflate: 16578ed0f16f83a1eb7491568c983446f622fd4a.
+Optimized roc-deflate: ac26054fa4bb32e1452dbaa73b8a0e5eb2e300ad, branch macos-deflate-gap.
+Source: https://github.com/rtfeldman/roc-deflate/tree/ac26054fa4bb32e1452dbaa73b8a0e5eb2e300ad
+Both use Roc 5e62c0e13ae779c28f7904dcdd2849ba13240beb, libdeflate b122c8b,
+mimalloc v2.1.7, Zig 0.17.0, and the same Silesia corpus and timing procedure.
+The compiler binary was reused exactly; no compiler source changes were made.
+The first optimization is retained separately in macos-optimization-initial-2026-10-21.
+This is a new complete Mac run, separate from the matched-version Linux/Mac reference data.
+
+MEASUREMENT
+Gap = (median Roc elapsed ns / median C elapsed ns - 1) * 100 for each file/level.
+Positive means Roc takes more time; negative means Roc takes less time.
+Every case has 15 samples per engine at levels 1–9 and 6 at levels 10–12.
+Maximum refers to the largest per-case median gap, not to individual repetition outliers.
+C runs before Roc within each round, following the original procedure.
+Both reuse output buffers; C also reuses its compressor, while Roc allocates internal work structures.
+One full before run and one full after run, on an active desktop. Fixed run order,
+system load, frequency changes, and normal noise limit precision. No confidence interval is claimed.
+
+RESULTS
+Reference maximum gap: +18.63% (L2 nci).
+Optimized maximum gap: +14.00% (L1 dickens).
+First optimization maximum gap: +14.45% (L2 mr).
+Conservative whole-percent upper bound for this run: 14% extra time.
+Conservative one-decimal upper bound: 14.0%.
+Reference median gap: +5.64%.
+Optimized median gap: +6.27%.
+First optimization median gap: +6.76%.
+Reference / first optimization / latest mean gaps: +5.34% / +5.38% / +5.18%.
+Optimized geometric mean gap: +4.97%.
+Gap percentiles: p10 -2.03%; p25 +3.39%; p75 +9.03%; p90 +11.55%.
+Optimized best gap: -19.46% (L12 reymont).
+Roc wins 21 / 144 cases, versus 21 before.
+Cases within +/-10%: 111; +/-15%: 140; +/-20%: 144.
+Cases taking no more than 5% / 10% / 15% extra time (including all Roc wins): 54 / 118 / 144 of 144.
+Whole workload, summing per-case median times: C 98.97 s, Roc 97.02 s, gap -1.98%.
+Median within-case timing IQR/median: C 0.48%, Roc 0.55%.
+Cases with a smaller gap than the first optimization: 94 / 144.
+Median paired absolute Roc time change versus the first optimization: -0.26%.
+Median paired absolute C time change versus the first optimization: -0.03%.
+
+PER-LEVEL MEDIAN GAPS: level | reference | first optimization | latest
+1 | +10.83% | +10.34% | +10.47%
+2 | +10.95% | +10.17% | +10.30%
+3 | +9.12% | +8.79% | +9.19%
+4 | +9.36% | +9.17% | +8.98%
+5 | +6.00% | +6.53% | +6.14%
+6 | +3.28% | +4.38% | +3.67%
+7 | +4.57% | +5.58% | +4.95%
+8 | +5.60% | +6.63% | +6.27%
+9 | +5.99% | +6.93% | +6.47%
+10 | +2.90% | +2.57% | +2.28%
+11 | -1.77% | -1.73% | -1.94%
+12 | -1.54% | -2.09% | -2.24%
+
+TWELVE LARGEST REMAINING GAPS: level | file | before | after
+1 | dickens | +15.09% | +14.00%
+1 | reymont | +14.68% | +13.92%
+2 | xml | +15.22% | +13.70%
+1 | mr | +16.61% | +13.66%
+1 | xml | +13.98% | +13.32%
+2 | nci | +18.63% | +13.26%
+3 | xml | +14.80% | +12.52%
+2 | reymont | +13.78% | +12.36%
+2 | mr | +15.33% | +12.14%
+4 | xml | +15.08% | +12.13%
+3 | reymont | +13.13% | +12.12%
+1 | webster | +12.71% | +12.02%
+
+ORIGINAL TWELVE WORST CASES: level | file | before | after
+2 | nci | +18.63% | +13.26%
+3 | nci | +18.49% | +11.90%
+4 | nci | +16.74% | +11.78%
+1 | mr | +16.61% | +13.66%
+2 | mr | +15.33% | +12.14%
+2 | xml | +15.22% | +13.70%
+1 | dickens | +15.09% | +14.00%
+4 | xml | +15.08% | +12.13%
+3 | xml | +14.80% | +12.52%
+1 | reymont | +14.68% | +13.92%
+1 | xml | +13.98% | +13.32%
+2 | reymont | +13.78% | +12.36%
+
+TWELVE BEST ROC CASES: level | file | reference | latest
+12 | reymont | -19.10% | -19.46%
+12 | webster | -18.47% | -18.60%
+11 | webster | -16.41% | -16.58%
+11 | reymont | -15.82% | -16.35%
+12 | dickens | -13.53% | -13.77%
+11 | dickens | -10.43% | -11.04%
+10 | reymont | -9.90% | -10.56%
+10 | webster | -8.84% | -9.66%
+12 | osdb | -4.63% | -5.76%
+10 | dickens | -4.42% | -4.99%
+11 | osdb | -2.58% | -4.31%
+12 | ooffice | -2.99% | -3.36%
+
+CHANGES
+The greedy parser places the frequently accessed length-4 heads at offset zero.
+This removes region-offset address calculations in the insertion loop; all chain indices
+now explicitly include the chain region base. Compression search parameters are unchanged.
+The lazy parser retains its original chain-first layout, since its deeper searches benefit
+from cheap chain traversal. The general insertion helper takes the selected table layout.
+Level 1 installs the last two hash-bucket positions of an offset-one run directly, then
+inserts the three four-byte sequences crossing the run end normally. Earlier updates
+to that bucket cannot survive because it retains only two positions. Window-crossing
+runs and input-end cases still use the existing general insertion routine.
+The greedy parser now also recognizes offset-one matches. It preserves every chain
+link, filling consecutive positions directly, but publishes the identical hash heads
+once per run and avoids rehashing the same four bytes. The last three prefixes still
+take the ordinary insertion path. No search parameters or corpus-specific choices change.
+Fixed Huffman lengths and words are constructed directly from their prescribed values,
+avoiding a general Huffman tree build and its temporary allocations for each stream.
+
+MEDIAN REGRESSION INVESTIGATION
+The original rise from 5.64% to 6.76% was real: several middle-ranked cases slowed
+slightly while the largest gains were concentrated in the upper tail.
+In interleaved ablations, applying only the level-1 source change also slowed some
+lazy levels, where that path is never executed. Assembly combines multiple parser
+paths in one large function; changes alter register allocation and stack layout.
+The shared insertion helper is inlined, so an extra runtime call argument was not
+the simple explanation. Fixed-offset helper copies did not consistently recover speed.
+These results establish cross-path generated-code sensitivity, not a complete causal
+attribution of every percentage point to a particular CPU stall. See investigation/.
+A same-directory, no-cache rebuild check reproduces this effect. Two unchanged reference
+builds have identical machine code; changing only level 1 slows reymont L7 by 0.42%,
+dickens L6 by 1.26%, and mozilla L5 by 0.87% relative to the clean reference build.
+SIMD hash batching, extra search bounds, and alternative scanner states were rejected
+when they made important worst cases slower. No benchmark-specific dispatch was added.
+
+VALIDATION
+18 unit tests passed with --opt=dev, including independent complete fixed-code equivalence.
+The pinned in-process LLVM test loader reports undefined symbol memset_pattern16 for
+the new comparison test. Standalone LLVM speed executables link and run successfully.
+Expanded LLVM speed integration tests passed: gzip interop,
+630 edge inputs at each of 13 levels, libdeflate byte identity at levels 1–12,
+round trips, compress_bound checks, truncation/bit-flip checks, and compression-ratio gates.
+The expanded cases include 32767/32768/32769-byte window boundaries and two-byte repeats.
+They also cover changing repeated-byte runs, lengths around 258, and more window boundaries.
+The new full timing run has all 3,672 expected unique samples; its CSV and raw TSV agree.
+All 396 round-pair output comparisons passed, and all corresponding input and compressed
+sizes agree with the reference run. Output mismatch log is empty.
+
+REPRODUCING
+roc-deflate.patch contains the complete source change. roc-deflate.bundle retains the
+exact local commit, with 16578ed as its prerequisite. In a clone containing that base:
+  git fetch /absolute/path/to/roc-deflate.bundle macos-deflate-gap
+  git checkout --detach FETCH_HEAD
+Then run the retained procedure with ROC_DEFLATE_REPO set to that clone and
+ROC_DEFLATE_REF=ac26054fa4bb32e1452dbaa73b8a0e5eb2e300ad. Keep -j2 on Zig builds.
+Regenerate this analysis from the blog repository with node data/analyze-macos-optimization.mjs.
