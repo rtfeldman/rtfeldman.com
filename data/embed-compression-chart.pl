@@ -126,8 +126,8 @@ for my $d (@datasets) {
                 my $fast_label = 50 + 100 * ceil(($max->{speed} - 50) / 100);
                 my $slow_label = 50 + 100 * floor(($min->{speed} - 50) / 100);
                 for my $callout (
-                    ['max', $max->{speed}, $fast_label - $max->{speed}, 'fastest median'],
-                    ['min', $slow_label, $min->{speed} - $slow_label, 'slowest median'],
+                    ['max', $max->{speed}, $fast_label - $max->{speed}, 'fastest run'],
+                    ['min', $slow_label, $min->{speed} - $slow_label, 'slowest run'],
                 ) {
                     my ($end, $bottom, $height, $text) = @$callout;
                     $html .= sprintf qq{                <span class="chart-endpoint chart-endpoint-%s" style="bottom:%.6f%%;height:%.6f%%" aria-hidden="true"><span class="chart-endpoint-arrow"></span><span class="chart-endpoint-text">%s</span></span>\n},

@@ -27,8 +27,8 @@ The inputs are the latest published measurements, not investigation runs:
   supplies medians of 7 repetitions, rounded to 0.1 MB/s, without individual runs.
 
 Both charts show the same statistic: the range of per-file median throughputs.
-Hover text states each machine's repetition count. The callouts say “fastest
-median” and “slowest median” rather than describing individual runs.
+Hover text states each machine’s repetition count and identifies the values as
+per-file medians. The visible callouts use “fastest run” and “slowest run”.
 
 There are 12 levels and 12 corpus files. Each machine's range floats from
 `minimum / axis ceiling` to `maximum / axis ceiling`, with height
