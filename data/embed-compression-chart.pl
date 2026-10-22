@@ -11,7 +11,7 @@ binmode STDOUT, ':encoding(UTF-8)';
 # this script replaces ONLY its marked chart and CSS, never its prose.
 # Usage: perl data/embed-compression-chart.pl [rendered-article.html]
 my $root = File::Spec->catdir($FindBin::Bin, '..');
-my $article = shift // "$root/rendered/how-close-can-pure-fp-get-to-c.html";
+my $article = shift // "$root/rendered/fp-vs-c.html";
 die "Usage: $0 [rendered-article.html]\n" if @ARGV;
 my @datasets = (
     { id => 'mac', label => 'M1 MacBook Pro', file => 'macos-optimization-2026-10-22/roc-deflate-compression-timings.csv',

@@ -1,6 +1,6 @@
 # Editing the compression post
 
-`how-close-can-pure-fp-get-to-c.html` is now the editable source of truth for
+`fp-vs-c.html` is now the editable source of truth for
 the article. The Markdown is a snapshot of the text before rendering. Edit
 the HTML directly; do not render the Markdown over subsequent HTML edits.
 
@@ -41,6 +41,6 @@ Preview the whole rendered site, including shared CSS, fonts and assets:
 perl serve-site.pl 8080
 ```
 
-Open <http://localhost:8080/how-close-can-pure-fp-get-to-c.html>. The server
+Open <http://localhost:8080/fp-vs-c.html>. The server
 binds only to loopback and reads the files directly, so refreshing shows edits.
 The existing deployment build also copies this HTML from `rendered/`.
