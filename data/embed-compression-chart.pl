@@ -67,7 +67,7 @@ my $html = <<'HTML';
 <!-- BEGIN COMPRESSION CHART -->
 <figure class="compression-chart" aria-labelledby="compression-chart-title">
   <figcaption>
-    <h3 id="compression-chart-title">Compression on Silesia corpus</h3>
+    <h3 id="compression-chart-title"><a class="heading-link" href="#compression-chart-title">Compression on Silesia corpus</a></h3>
   </figcaption>
   <input class="chart-radio" type="radio" name="compression-machine" id="chart-mac" checked />
   <input class="chart-radio" type="radio" name="compression-machine" id="chart-linux" />
@@ -157,7 +157,7 @@ my $css = <<'CSS';
     --chart-axis-width: 38px;
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
     column-gap: 16px;
     align-items: center;
     margin: 1.75rem 0 2rem;
@@ -167,7 +167,7 @@ my $css = <<'CSS';
     background: var(--chart-surface);
     color: var(--text-color);
     font-family: inherit;
-    font-size: 14px;
+    font-size: inherit;
     font-variant-numeric: tabular-nums;
     line-height: 1.5;
 }
@@ -177,7 +177,7 @@ my $css = <<'CSS';
 .compression-chart figcaption { grid-column: 1; grid-row: 1; }
 .chart-radio { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .chart-controls { grid-column: 2; grid-row: 1; justify-self: end; display: flex; gap: 4px; padding: 4px; border: 1px solid var(--chart-border); border-radius: 9px; width: fit-content; max-width: 100%; }
-.chart-controls label { display: flex; align-items: center; justify-content: center; min-height: 40px; padding: 7px 13px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; text-align: center; }
+.chart-controls label { display: flex; flex: 1; min-width: 0; align-items: center; justify-content: center; min-height: 40px; padding: 7px 13px; border-radius: 6px; cursor: pointer; font-size: inherit; font-weight: 600; text-align: center; }
 #chart-mac:checked ~ .chart-controls label[for="chart-mac"],
 #chart-linux:checked ~ .chart-controls label[for="chart-linux"] { background: var(--heading-color); color: var(--body-bg-color); }
 #chart-mac:focus-visible ~ .chart-controls label[for="chart-mac"],
@@ -185,7 +185,7 @@ my $css = <<'CSS';
 .chart-panel { display: none; grid-column: 1 / -1; }
 #chart-mac:checked ~ .chart-panel-mac, #chart-linux:checked ~ .chart-panel-linux { display: block; }
 .chart-panel { margin-top: 22px; }
-.chart-axis-title { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin: 0 0 12px; }
+.chart-axis-title { display: flex; justify-content: space-between; font-size: 1em; font-weight: 600; margin: 0 0 12px; }
 .chart-axis-title span { color: var(--chart-muted); font-weight: 400; }
 .chart-faster { display: inline-flex; align-items: center; gap: .25em; }
 .chart-up-arrow { display: inline-block; line-height: 1; }
@@ -208,22 +208,23 @@ my $css = <<'CSS';
 .chart-bar-libdeflate .chart-low, .legend-c-low { background: var(--c-low); }
 .chart-bar-libdeflate .chart-high, .legend-c-high { background: var(--c-high); }
 .chart-level-label { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--chart-muted); }
-.compression-chart .chart-x-axis { margin: 32px 0 18px var(--chart-axis-width); text-align: center; font-size: 12px; font-weight: 600; }
-.chart-legend { position: absolute; top: 0; right: 0; display: grid; grid-template-rows: repeat(4, 1fr); justify-items: end; align-items: center; font-size: 11px; }
+.compression-chart .chart-x-axis { margin: 32px 0 18px var(--chart-axis-width); text-align: center; font-size: 1em; font-weight: 600; }
+.chart-legend { position: absolute; top: 0; right: 0; display: grid; grid-template-rows: repeat(4, 1fr); justify-items: end; align-items: center; font-size: inherit; }
 .chart-legend > span { display: flex; gap: 6px; align-items: center; justify-content: flex-end; text-align: right; white-space: nowrap; }
 .chart-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
 @media (prefers-color-scheme: dark) {
     .compression-chart { --chart-surface: #1e1c23; --chart-border: #49434f; --chart-grid: #39353e; --chart-muted: #bbb4c7; --roc-low: #cfb5f5; --roc-high: #8245ce; --c-low: #c4c4ce; --c-high: #696974; }
 }
 @media (max-width: 540px) {
-    .compression-chart { --chart-height: 280px; --chart-axis-width: 31px; display: block; padding: 18px 12px 14px; border-radius: 10px; }
+    .compression-chart { --chart-height: 560px; --chart-axis-width: 31px; display: block; padding: 18px 12px 14px; border-radius: 10px; }
     .compression-chart figcaption { margin-bottom: 18px; }
     .chart-controls { width: 100%; }
-    .chart-controls label { flex: 1; padding: 7px 6px; font-size: 12px; }
+    .chart-controls label { flex: 1; padding: 7px 6px; }
     .chart-groups { column-gap: 4px; padding: 0 2px; }
     .chart-pair { gap: 2px; }
     .chart-level-label { font-size: clamp(9px, 2.5vw, 10px); }
-    .chart-legend { font-size: 10px; }
+    .chart-legend { max-width: 50%; }
+    .chart-legend > span { max-width: 100%; white-space: normal; line-height: 1.1; }
 }
 @media print {
     .compression-chart { break-inside: avoid; print-color-adjust: exact; }
