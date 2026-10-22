@@ -31,15 +31,11 @@ There are 12 levels and 12 corpus files. Each machine's range floats from
 need not be the same. Bar length shows the spread; the top's position shows the
 fastest speed.
 
-Both machines appear together with exactly aligned bars: M1 uses a 65% opaque
-fill and Ryzen uses a 35% opaque fill of the same library color. Overlapping
-intervals combine to 77.25% opacity; a range belonging to only one machine uses
-that machine's opacity. The dark theme uses brighter base colors for contrast.
-Native `title` tooltips include both machines so a contained range's values
-remain available on hover. Accessible bar labels identify each machine,
-endpoints, corpus names, and sampling method. libdeflate
-is on the left and roc-deflate is on the right at each level. The article contains
-no JavaScript.
+CSS-only machine tabs switch between M1 MacBook Pro and Ryzen 3900X Ubuntu,
+using the same scale. Solid gray represents libdeflate on the left; solid purple
+represents roc-deflate on the right. Native `title` tooltips and accessible bar
+labels identify the machine, endpoints, corpus names, and sampling method.
+The article contains no JavaScript.
 
 Preview the whole rendered site, including shared CSS, fonts and assets:
 
