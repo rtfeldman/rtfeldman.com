@@ -167,7 +167,7 @@ for my $d (@datasets) {
 };
     }
     $html .= qq{        </div>
-        <div class="chart-legend" style="height:$legend_height%" aria-label="Chart legend">
+        <div class="chart-legend" style="height:$legend_height%" role="group" aria-label="Chart legend">
           <span>libdeflate<i class="legend-c" aria-hidden="true"></i></span>
           <span>roc-deflate<i class="legend-roc" aria-hidden="true"></i></span>
         </div>

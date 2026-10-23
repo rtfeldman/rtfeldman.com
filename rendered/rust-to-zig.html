@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -345,25 +345,25 @@
 <table>
 <thead>
 <tr>
-<th align="left">Type of bug in Roc's compiler</th>
-<th align="left">Rust</th>
-<th align="left">Zig</th>
+<th style="text-align: left">Type of bug in Roc's compiler</th>
+<th style="text-align: left">Rust</th>
+<th style="text-align: left">Zig</th>
 </tr>
 </thead>
 <tbody><tr>
-<td align="left">Bug where memory corruption occurred</td>
-<td align="left">21</td>
-<td align="left">10</td>
+<td style="text-align: left">Bug where memory corruption occurred</td>
+<td style="text-align: left">21</td>
+<td style="text-align: left">10</td>
 </tr>
 <tr>
-<td align="left">Bug where no memory corruption occurred</td>
-<td align="left">2,575</td>
-<td align="left">421</td>
+<td style="text-align: left">Bug where no memory corruption occurred</td>
+<td style="text-align: left">2,575</td>
+<td style="text-align: left">421</td>
 </tr>
 <tr>
-<td align="left">Total</td>
-<td align="left">2,596</td>
-<td align="left">431</td>
+<td style="text-align: left">Total</td>
+<td style="text-align: left">2,596</td>
+<td style="text-align: left">431</td>
 </tr></tbody></table>
 <p>You might be wondering how the Rust-based compiler had any memory corruption bugs at all, let alone more than double the total count of the Zig-based one. Is it because of that pesky Unsafe Rust again?</p>
 <p>Actually, no. None of those 21 memory corruption bugs occurred in the compiler's logic itself, which is a testament to Rust's borrow-checker working as intended. The reason we had memory corruption bugs in our Rust-based compiler is that <em>it's a compiler.</em></p>
@@ -373,21 +373,21 @@
 <table>
 <thead>
 <tr>
-<th align="left">Tooling Choice</th>
-<th align="left">Memory-safety impact in practice</th>
+<th style="text-align: left">Tooling Choice</th>
+<th style="text-align: left">Memory-safety impact in practice</th>
 </tr>
 </thead>
 <tbody><tr>
-<td align="left">Zig<code>ReleaseFast</code></td>
-<td align="left">2 bug reports: some errors fail to render filenames</td>
+<td style="text-align: left">Zig<code>ReleaseFast</code></td>
+<td style="text-align: left">2 bug reports: some errors fail to render filenames</td>
 </tr>
 <tr>
-<td align="left">Zig <code>ReleaseSafe</code></td>
-<td align="left">2 bug reports: some errors panic and don't render</td>
+<td style="text-align: left">Zig <code>ReleaseSafe</code></td>
+<td style="text-align: left">2 bug reports: some errors panic and don't render</td>
 </tr>
 <tr>
-<td align="left">Rust's borrow checker</td>
-<td align="left">neither of these bug reports</td>
+<td style="text-align: left">Rust's borrow checker</td>
+<td style="text-align: left">neither of these bug reports</td>
 </tr></tbody></table>
 <p>After 18 months of development, hundreds of total bug reports, and hundreds of thousands of lines of code, my main takeaway from retrospecting on this table is that picking a different row would have made no appreciable difference to the project. So far our choice has gotten us the outcome we'd hoped for.</p>
 <p>As I noted earlier, every project has different needs. When Bun rewrote in the opposite direction—from Zig to Rust—<a href="https://bun.com/blog/bun-in-rust#just-be-really-smart-and-don-t-make-mistakes">their accompanying post</a> noted:</p>
@@ -404,35 +404,35 @@
 <table>
 <thead>
 <tr>
-<th align="left">Roc Compiler Version</th>
-<th align="left">LoC</th>
-<th align="left">Cold Build</th>
-<th align="left">Incremental</th>
+<th style="text-align: left">Roc Compiler Version</th>
+<th style="text-align: left">LoC</th>
+<th style="text-align: left">Cold Build</th>
+<th style="text-align: left">Incremental</th>
 </tr>
 </thead>
 <tbody><tr>
-<td align="left">Original on Rust 1.85.0</td>
-<td align="left">354K</td>
-<td align="left">32.4s</td>
-<td align="left">10.0s</td>
+<td style="text-align: left">Original on Rust 1.85.0</td>
+<td style="text-align: left">354K</td>
+<td style="text-align: left">32.4s</td>
+<td style="text-align: left">10.0s</td>
 </tr>
 <tr>
-<td align="left">Original on Rust 1.97.0</td>
-<td align="left">354K</td>
-<td align="left">25.4s</td>
-<td align="left">3.4s</td>
+<td style="text-align: left">Original on Rust 1.97.0</td>
+<td style="text-align: left">354K</td>
+<td style="text-align: left">25.4s</td>
+<td style="text-align: left">3.4s</td>
 </tr>
 <tr>
-<td align="left">Rewrite at feature parity on Zig 0.16.0</td>
-<td align="left">320K</td>
-<td align="left">39.6s</td>
-<td align="left">8.6s</td>
+<td style="text-align: left">Rewrite at feature parity on Zig 0.16.0</td>
+<td style="text-align: left">320K</td>
+<td style="text-align: left">39.6s</td>
+<td style="text-align: left">8.6s</td>
 </tr>
 <tr>
-<td align="left">Rewrite today on Zig 0.17.0</td>
-<td align="left">464K</td>
-<td align="left">32.1s</td>
-<td align="left">0.035s</td>
+<td style="text-align: left">Rewrite today on Zig 0.17.0</td>
+<td style="text-align: left">464K</td>
+<td style="text-align: left">32.1s</td>
+<td style="text-align: left">0.035s</td>
 </tr></tbody></table>
 <blockquote>
 <p>Note that our Zig build configuration as of the feature-parity commit was rebuilding rarely-changing artifacts on every build that we later decided to rebuild only on demand. That's why today's cold builds are faster than they were back at 300K LoC, even though our lines of code have increased by ~50% since then.</p>

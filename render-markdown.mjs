@@ -14,7 +14,7 @@ const body = addHeadingLinks(renderMarkdown(markdown));
 
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, `<!doctype html>
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -227,7 +227,7 @@ function splitTableRow(row) {
 }
 
 function renderTable(rows, alignments) {
-    const align = (index) => alignments[index] ? ` align="${alignments[index]}"` : "";
+    const align = (index) => alignments[index] ? ` style="text-align: ${alignments[index]}"` : "";
     const headers = rows[0].map((cell, index) => `<th${align(index)}>${renderInline(cell)}</th>`).join("\n");
     const bodyRows = rows.slice(1).map((row) => {
         const cells = row.map((cell, index) => `<td${align(index)}>${renderInline(cell)}</td>`).join("\n");
@@ -342,6 +342,7 @@ function addHeadingLinks(body) {
     const headingIds = new Map();
 
     return body.replace(/<h([1-6])>([\s\S]*?)<\/h\1>/g, (_, level, headingHtml) => {
+        if (level === "1") return `<h1>${headingHtml}</h1>`;
         const id = slugify(headingHtml, headingIds);
         return `<h${level} id="${id}"><a class="heading-link" href="#${id}">${headingHtml}</a></h${level}>`;
     });
