@@ -65,6 +65,22 @@ aside.timestamp {
     margin-bottom: 1rem;
 }
 
+.post-list {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0;
+}
+
+.post-list li {
+    margin-bottom: 1.5rem;
+}
+
+.post-list time {
+    display: block;
+    color: var(--faded-color);
+    font-size: 0.875em;
+}
+
 p,
 li,
 aside,

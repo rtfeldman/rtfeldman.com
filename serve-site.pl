@@ -44,19 +44,7 @@ sub serve_request {
         if ($path =~ /\0|\\/ || grep { $_ eq '..' } split '/', $path) {
             reply($client, '403 Forbidden', 'text/plain', 'Forbidden', $head); return;
         }
-        if ($path eq '/') {
-            opendir my $dir, "$root/rendered" or die "$!\n";
-            my @pages = sort grep { /\.html\z/ } readdir $dir;
-            closedir $dir;
-            my $body = '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Local site preview</title><link rel="stylesheet" href="/site.css"><main><h1>Local site preview</h1><ul>';
-            for my $page (@pages) {
-                my $name = $page;
-                $name =~ s/\.html$//; $name =~ s/-/ /g;
-                $body .= qq{<li><a href="/$page">$name</a></li>};
-            }
-            $body .= '</ul></main></html>';
-            reply($client, '200 OK', $mime{html}, $body, $head); return;
-        }
+        $path = '/index.html' if $path eq '/';
         my $candidate = $path =~ m{\A/(?:assets/|fonts/|[^/]+\.css\z)}
             ? "$root$path" : "$root/rendered$path";
         $candidate .= '.html' if !-f $candidate && -f "$candidate.html";
