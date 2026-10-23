@@ -27,7 +27,7 @@ The inputs are the latest published measurements, not investigation runs:
 
 Both charts show the same statistic: per-file median throughputs.
 Hover text states each machine’s repetition count and identifies the values as
-per-file medians. The visible callouts use “fastest run” and “slowest run”.
+per-file medians. The visible callouts use “file that ran fastest” and “file that ran slowest”.
 
 There are 12 levels and 12 corpus files. Each engine has 12 dots per level,
 with each dot centered at `median / axis ceiling`. Dots share an x position
