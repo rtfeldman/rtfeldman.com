@@ -143,6 +143,7 @@ for my $d (@datasets) {
                     $d->{ranges}{$level}{$a}{min}{speed} <=> $d->{ranges}{$level}{$b}{min}{speed}
                 } @engines;
                 my $fast_label = 50 + 100 * ceil(($max->{speed} - 50) / 100);
+                $fast_label += 100 if $id eq 'linux';
                 my $slow_label = 50 + 100 * floor(($min->{speed} - 50) / 100);
                 for my $callout (
                     ['max', $max->{speed}, $fast_label - $max->{speed}, 'file that ran fastest'],
