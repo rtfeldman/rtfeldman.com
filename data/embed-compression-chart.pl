@@ -206,6 +206,7 @@ my $css = <<'CSS';
     color: var(--text-color);
     font-family: inherit;
     font-size: inherit;
+    font-variant-numeric: tabular-nums;
     line-height: 1.5;
 }
 .compression-chart *, .compression-chart *::before, .compression-chart *::after { box-sizing: border-box; }
@@ -260,7 +261,7 @@ my $css = <<'CSS';
 .chart-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 /* Readouts occupy unused graph space, never covering measurements or labels.
  * A brief hide delay lets the pointer travel from a dot onto its readout. */
-.chart-tooltip { position: absolute; top: 12px; right: 20%; width: 40%; padding: 10px 12px; border: 1px solid var(--chart-border); border-radius: 6px; background: var(--chart-surface); color: var(--text-color); font-size: var(--chart-label-font-size); line-height: 1.5; visibility: hidden; transition: visibility 0s .6s; z-index: 2; }
+.chart-tooltip { position: absolute; top: 12px; right: 20%; width: 40%; padding: 10px 12px; border: 1px solid var(--chart-border); border-radius: 6px; background: var(--chart-surface); color: var(--text-color); font-size: var(--chart-label-font-size); font-variant-numeric: normal; line-height: 1.5; visibility: hidden; transition: visibility 0s .6s; z-index: 2; }
 .chart-tooltip-heading { display: block; font-weight: normal; }
 .compression-chart .chart-tooltip p { margin: 8px 0 0; line-height: 1.65; }
 /* Switching dots hides the preceding readout immediately. */
