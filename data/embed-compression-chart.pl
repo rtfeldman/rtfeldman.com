@@ -232,7 +232,7 @@ my $css = <<'CSS';
 .chart-groups { position: relative; height: 100%; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 8px; padding: 0 5px; }
 .chart-level { height: 100%; min-width: 0; position: relative; }
 .chart-pair { height: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 0; }
-.chart-engine { width: 50%; max-width: 10px; height: 100%; position: relative; }
+.chart-engine { width: 50%; max-width: 11px; height: 100%; position: relative; }
 /* Each dot's center is the median throughput for one file. */
 .chart-point { position: absolute; left: 50%; bottom: 0; width: 10px; height: 10px; transform: translate(-50%, 50%); border-radius: 50%; background: color-mix(in srgb, var(--bar-color) 80%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bar-color) 85%, black); }
 .chart-point:hover, .chart-point:focus-visible { outline: 2px solid var(--heading-color); outline-offset: 1px; z-index: 1; }
