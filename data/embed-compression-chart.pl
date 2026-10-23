@@ -138,7 +138,10 @@ for my $d (@datasets) {
 #$details_id:hover { visibility: visible; transition-delay: 0s; }
 };
             }
-            if ($level == 1 && $engine eq 'libdeflate') {
+            if ($level == 1) {
+                my ($slowest_engine) = sort {
+                    $d->{ranges}{$level}{$a}{min}{speed} <=> $d->{ranges}{$level}{$b}{min}{speed}
+                } @engines;
                 my $fast_label = 50 + 100 * ceil(($max->{speed} - 50) / 100);
                 my $slow_label = 50 + 100 * floor(($min->{speed} - 50) / 100);
                 for my $callout (
@@ -146,6 +149,7 @@ for my $d (@datasets) {
                     ['min', $slow_label, $min->{speed} - $slow_label, 'file that ran slowest'],
                 ) {
                     my ($end, $bottom, $height, $text) = @$callout;
+                    next unless $engine eq ($end eq 'min' ? $slowest_engine : 'libdeflate');
                     $html .= sprintf qq{                <span class="chart-endpoint chart-endpoint-%s" style="bottom:%.6f%%;height:%.6f%%" aria-hidden="true"><span class="chart-endpoint-arrow"></span><span class="chart-endpoint-text">%s</span></span>\n},
                         $end, 100 * $bottom / $axis_max, 100 * $height / $axis_max, $text;
                 }
