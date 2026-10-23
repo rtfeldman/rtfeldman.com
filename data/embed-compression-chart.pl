@@ -119,7 +119,7 @@ for my $d (@datasets) {
             my ($min, $max) = @{$range}{'min', 'max'};
             for my $corpus (@corpora) {
                 my $speed = $d->{medians}{$level}{$engine}{$corpus};
-                my $description = sprintf q{On the %s, %s at L%d compression achieved %.2f MB/s compressing %s, the median of %d runs.},
+                my $description = sprintf q{On the %s, %s at L%d compression achieved %.2f MB/s compressing %s, the median across %d runs.},
                     $label, $engine, $level, $speed, $corpus, $repetitions;
                 my $tooltip = escape_html($description);
                 my $class = $engine eq 'roc-deflate' ? 'roc' : 'libdeflate';
@@ -130,9 +130,10 @@ for my $d (@datasets) {
                     $class, 100 * $speed / $axis_max, $point_id, $accessible_name, $details_id;
                 $readouts .= sprintf qq{        <div class="chart-tooltip" id="%s" role="tooltip" aria-label="%s">
           <span class="chart-tooltip-heading" aria-hidden="true">%s at L%d compression</span>
-          <p aria-hidden="true"><strong>%s</strong> (median of %d runs)<br>%.2f MB/s compressing %s</p>
+          <p aria-hidden="true">%.2f MB/s compressing %s</p>
+          <p class="chart-tooltip-method" aria-hidden="true">(median across %d runs)</p>
         </div>
-}, $details_id, $tooltip, $engine, $level, $corpus, $repetitions, $speed, $corpus;
+}, $details_id, $tooltip, $engine, $level, $speed, $corpus, $repetitions;
                 $hover_css .= qq{.chart-panel:has(#$point_id:hover) #$details_id,
 .chart-panel:not(:has(.chart-point:hover)):has(#$point_id:focus) #$details_id,
 #$details_id:hover { visibility: visible; transition-delay: 0s; }
@@ -264,6 +265,7 @@ my $css = <<'CSS';
 .chart-tooltip { position: absolute; top: 12px; right: 20%; width: 40%; padding: 10px 12px; border: 1px solid var(--chart-border); border-radius: 6px; background: var(--chart-surface); color: var(--text-color); font-size: var(--chart-label-font-size); font-variant-numeric: normal; line-height: 1.5; visibility: hidden; transition: visibility 0s .6s; z-index: 2; }
 .chart-tooltip-heading { display: block; font-weight: normal; }
 .compression-chart .chart-tooltip p { margin: 8px 0 0; line-height: 1.65; }
+.chart-tooltip-method { color: var(--chart-muted); }
 /* Switching dots hides the preceding readout immediately. */
 .chart-panel:has(.chart-point:hover) .chart-tooltip,
 .chart-panel:has(.chart-point:focus) .chart-tooltip { visibility: hidden; transition: none; }
