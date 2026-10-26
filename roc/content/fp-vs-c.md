@@ -2,7 +2,7 @@
 
 *October 22, 2026*
 
-In [Why Lean is Faster Than Rust](https://kim-em.github.io/blog/2026-7-24-why-lean-is-faster-than-rust/), the author shares an impressive result: a [DEFLATE compression](https://en.wikipedia.org/wiki/Deflate) library written in [Lean 4](https://github.com/leanprover/lean4), a functional programming language and proof assistant, outperforming an equivalent Rust package that [crates.io says](https://crates.io/search?q=miniz_oxide) has been downloaded _over a billion times._ From the article:
+In [Why Lean is Faster Than Rust](https://kim-em.github.io/blog/2026-7-24-why-lean-is-faster-than-rust/), the author shares an impressive result: a [DEFLATE compression](https://en.wikipedia.org/wiki/Deflate) library written in [Lean 4](https://lean-lang.org), a functional programming language and proof assistant, outperforming an equivalent Rust package that [crates.io says](https://crates.io/search?q=miniz_oxide) has been downloaded _over a billion times._ From the article:
 
 > `lean-zip` beats every single compression level `miniz_oxide` provides, i.e. we're capable of providing the same compression at higher throughput. At its fastest setting we're 15% quicker and the output is 8.8% smaller.
 
